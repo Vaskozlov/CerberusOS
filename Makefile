@@ -25,6 +25,7 @@ install_font:
 
 install: mount
 	sudo cp build/BOOTX64.EFI /mnt/os/EFI/BOOT
+	sudo cp build/kernel.elf /mnt/os
 	make umount
 
 run:

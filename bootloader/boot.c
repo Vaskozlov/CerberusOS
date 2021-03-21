@@ -1,12 +1,12 @@
 #include <elf.h>
-#include <efi.h>
-#include <efilib.h>
 #include <string.h>
+
+#include "GOP.h"
 #include "efiFiles.h"
-#include "defines.h"
 
 EFI_FILE_HANDLE RootVolume;
 EFI_FILE_HANDLE FontVolume;
+kernel_services_t KernelServices;
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     InitializeLib(ImageHandle, SystemTable);
@@ -46,7 +46,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     }
 
     if (
-        str2u32(eHeader.e_ident, EI_MAG0) != str2u32(ELFMAG, EI_MAG0) ||
+        *((u32*) eHeader.e_ident) != *((u32*) ELFMAG) ||
         eHeader.e_ident[EI_CLASS] != ELFCLASS64 ||
 		eHeader.e_ident[EI_DATA] != ELFDATA2LSB ||
 		eHeader.e_type != ET_EXEC ||
@@ -130,9 +130,67 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
             break;
         }
     }
+    
+    if (InitializeGOP() != EXIT_SUCCESS){
+        Print(L"Error in GOP initialization\n\r");
+        return EFI_LOAD_ERROR;
+    }
 
-    int (*KernelStart)() = ((__attribute__((sysv_abi)) int (*)()) eHeader.e_entry);
-    Print(L"Success %d\n\r", KernelStart());
+    if (LoadPSF(FontVolume, L"zap-light24.psf") != EXIT_SUCCESS){
+        Print(L"Unable to open font file\n\r");
+        return EFI_LOAD_ERROR;
+    }
+
+    EFI_MEMORY_DESCRIPTOR *Map = NULL;
+    UINTN MapSize, MapKey;
+    UINTN DescriptorSize;
+
+    UINT32 DescriptorVersion;
+    {
+        uefi_call_wrapper(
+            BS->GetMemoryMap,
+            5,
+            &MapSize,
+            Map,
+            &MapKey,
+            &DescriptorSize,
+            &DescriptorVersion
+        );
+
+        uefi_call_wrapper(
+            BS->AllocatePool,
+            3,
+            EfiLoaderData,
+            MapSize,
+            (void**) &Map
+        );
+
+        uefi_call_wrapper(
+            BS->GetMemoryMap,
+            5,
+            &MapSize,
+            Map,
+            &MapKey,
+            &DescriptorSize,
+            &DescriptorVersion
+        );
+    }
+
+    KernelServices.mMap = (MemoryDescriptor_t*)Map;
+    KernelServices.mMapSize = MapSize;
+    KernelServices.mMapDescriptorSize = DescriptorSize;
+
+    uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, MapKey);
+
+    int (*KernelStart)() = ((__attribute__((sysv_abi)) int (*)(kernel_services_t *services)) eHeader.e_entry);
+    
+    Print(L"Success %d\n\r", KernelStart(&KernelServices));
+
+    while (1){
+        __asm__ __volatile__ (
+            "hlt\n"
+        );
+    }
 
     return EFI_SUCCESS;
 }

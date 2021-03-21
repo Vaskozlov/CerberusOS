@@ -3,6 +3,7 @@ SRCDIR := .
 MUSL := ../musl
 BUILD_DIR := ../build
 GNU_EFI_DIR := ../gnu-efi
+KERNEL_DIR := ../kernel
 
 include $(GNU_EFI_DIR)/Make.defaults
 
@@ -11,7 +12,7 @@ override TOPDIR := $(GNU_EFI_DIR)
 
 HEADERS := /usr/src/sys/build/include
 
-CFLAGS += -Wall -Wextra -std=c11 -I $(HEADERS) -D__KERNEL__
+CFLAGS += -Wall -Wextra -std=c11 -I $(HEADERS) -D__KERNEL__ -I $(KERNEL_DIR)
 override CPPFLAGS := $(filter-out $(CPPFLAGS), -maccumulate-outgoing-args)
 
 ifeq ($(ARCH), x86_64)

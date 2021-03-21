@@ -1,17 +1,16 @@
-#ifndef defines_h
-#define defines_h
+#ifndef kernelTypes_h
+#define kernelTypes_h
 
+#include <stddef.h>
 #include <inttypes.h>
 
-typedef int8_t i8;
-typedef int16_t i16;
-typedef int32_t i32;
-typedef int64_t i64;
-
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
+#if defined(__cplusplus) && !defined(__BEGIN_DECL)
+#  define __BEGIN_DECL extern "C" {
+#  define __END_DECL }
+#elif !defined(__BEGIN_DECL)
+#  define __BEGIN_DECL
+#  define __END_DECL
+#endif /* __cplusplus */
 
 /**
  * str2u16 - converts array of char to u16
@@ -57,4 +56,19 @@ typedef uint64_t u64;
         | ((u64)str[offstr_offsetset])\
         )
 
-#endif /* defines_h */
+#ifndef MAX
+#  define MAX(a, b) (a > b ? a : b)
+#  define MIN(a, b) (a < b ? a : b)
+#endif /* MAX */
+
+typedef int8_t      i8;
+typedef int16_t     i16;
+typedef int32_t     i32;
+typedef int64_t     i64;
+
+typedef uint8_t     u8;
+typedef uint16_t    u16;
+typedef uint32_t    u32;
+typedef uint64_t    u64;
+
+#endif /* kernelTypes_h */

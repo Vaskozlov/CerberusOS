@@ -10,6 +10,10 @@ compile:
 setup:
 	./install.sh
 
+clean:
+	rm -fr build
+	mkdir -p build
+
 mount:
 	sudo mount $(LOOP_DEVICE) /mnt/os
 
@@ -29,4 +33,4 @@ install: mount
 	make umount
 
 run:
-	qemu-system-x86_64 -smp 1 -cpu qemu64 -drive file=$(IMAGE) -m 512M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none
+	qemu-system-x86_64 --enable-kvm -smp 1 --drive file=$(IMAGE) -m 512M -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none

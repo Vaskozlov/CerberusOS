@@ -24,7 +24,6 @@ CFLAGS := 	-O0 -g \
 			-c \
 			-fno-stack-protector \
 			-ffreestanding \
-			-fshort-wchar \
 			-Wall -Wextra \
 			-I $(LINUX_HEADERS)/include \
 			-I . \
@@ -34,7 +33,6 @@ CXXFLAGS :=	-O0 -g \
 			-c \
 			-fno-stack-protector \
 			-ffreestanding \
-			-fshort-wchar \
 			-Wall -Wextra \
 			-I $(LINUX_HEADERS)/include \
 			-I . \
@@ -53,6 +51,10 @@ LOADLIBES := 	$(MUSL_DIR)/lib/libc.a \
 C_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.c, %.o, $(notdir $(wildcard *.c))))
 CPP_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.cpp, %.o, $(notdir $(wildcard *.cpp))))
 ASM_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.s, %.o, $(notdir $(wildcard *.s))))
+
+include render/Makefile
+include memory/Makefile
+include structures/Makefile
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

@@ -181,7 +181,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     KernelServices.mMapDescriptorSize = DescriptorSize;
 
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, MapKey);
-
+    
     int (*KernelStart)() = ((__attribute__((sysv_abi)) int (*)(kernel_services_t *services)) eHeader.e_entry);
     
     Print(L"Success %d\n\r", KernelStart(&KernelServices));

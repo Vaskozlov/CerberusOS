@@ -38,7 +38,9 @@ CXXFLAGS :=	-O0 -g \
 			-I . \
 			-std=c++17
 
-ASMFLAGS := -S -O2 -g
+ASMFLAGS := -O2\
+			-Wall -Wextra \
+			-m64 -c
 
 LDFLAGS :=	-static \
 			-Bsymbolic \
@@ -55,6 +57,8 @@ ASM_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.s, %.o, $(notdir $(w
 include render/Makefile
 include memory/Makefile
 include structures/Makefile
+include gdt/Makefile
+include interrupts/Makefile
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

@@ -10,7 +10,7 @@ kernel_services_t KernelServices;
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     InitializeLib(ImageHandle, SystemTable);
-    
+
     RootVolume = GetVolume(ImageHandle);
     FontVolume = OpenFile(RootVolume, L"font");
     EFI_FILE_HANDLE KernelFile = OpenFile(RootVolume, L"kernel.elf");
@@ -20,6 +20,18 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
         return EFI_LOAD_ERROR;
     }
 
+    void *rspd = NULL;
+    EFI_GUID Acpi2TableGuid = ACPI_20_TABLE_GUID;
+    EFI_CONFIGURATION_TABLE *configTable = SystemTable->ConfigurationTable;
+
+    for (UINTN index = 0; index < SystemTable->NumberOfTableEntries; index++, configTable++){
+        if (CompareGuid(&configTable[index].VendorGuid, &Acpi2TableGuid)){
+            if (strncmp("RSD PTR ", configTable->VendorTable, 8) == 0){
+                rspd = (void*) configTable->VendorTable;
+            }
+        }
+    }
+    
     Elf64_Ehdr eHeader;
     {
         EFI_FILE_INFO *elfFileInfo;
@@ -179,18 +191,14 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     KernelServices.mMap = (MemoryDescriptor_t*)Map;
     KernelServices.mMapSize = MapSize;
     KernelServices.mMapDescriptorSize = DescriptorSize;
+    KernelServices.rsdp = rspd;
+
 
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, MapKey);
-    
+
     int (*KernelStart)() = ((__attribute__((sysv_abi)) int (*)(kernel_services_t *services)) eHeader.e_entry);
     
     Print(L"Success %d\n\r", KernelStart(&KernelServices));
-
-    while (1){
-        __asm__ __volatile__ (
-            "hlt\n"
-        );
-    }
-
+    
     return EFI_SUCCESS;
 }

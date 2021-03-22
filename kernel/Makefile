@@ -15,12 +15,12 @@ TARGET 			:= kernel.elf
 LINUX_HEADERS 	:= /usr/src/sys/build
 
 ifeq (FreeBSD, $(OS))
-LDSCRIPT := $(GNU_EFI_DIR)/gnuefi/elf_$(ARCH)_fbsd_efi.lds
+LDSCRIPT := linkers/elf_$(ARCH)_fbsd_efi.lds
 else
-LDSCRIPT := $(GNU_EFI_DIR)/gnuefi/elf_$(ARCH)_efi.lds
+LDSCRIPT := linkers/elf_$(ARCH)_efi.lds
 endif
 
-CFLAGS := 	-O0 -g \
+CFLAGS :=   -O3 -g \
 			-c \
 			-fno-stack-protector \
 			-ffreestanding \
@@ -29,7 +29,7 @@ CFLAGS := 	-O0 -g \
 			-I . \
 			-std=c11
 
-CXXFLAGS :=	-O0 -g \
+CXXFLAGS := -O3 -g \
 			-c \
 			-fno-stack-protector \
 			-ffreestanding \
@@ -38,7 +38,7 @@ CXXFLAGS :=	-O0 -g \
 			-I . \
 			-std=c++17
 
-ASMFLAGS := -O2\
+ASMFLAGS := -O3\
 			-Wall -Wextra \
 			-m64 -c
 
@@ -59,6 +59,7 @@ include memory/Makefile
 include structures/Makefile
 include gdt/Makefile
 include interrupts/Makefile
+include harware/Makefile
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

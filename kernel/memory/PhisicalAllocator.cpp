@@ -2,7 +2,8 @@
 #include <PhisicalAllocator.hpp>
 #include <printf/Printf.h>
 
-extern u64 _edata;
+extern u64 _kernelStart;
+extern u64 _KernelEnd;
 extern kernel_services_t *KS;
 
 u64         PhisicalAllocator::LastAccess;
@@ -11,8 +12,8 @@ u64         PhisicalAllocator::AvailableMemory;
 u64         PhisicalAllocator::UsedMemory;
 u64         PhisicalAllocator::ReservedMemory;
 u64         PhisicalAllocator::mMapEnteries;
-u64         *PhisicalAllocator::KernelStart     = NULL;
-u64         *PhisicalAllocator::KernelEnd       = &_edata;
+u64         *PhisicalAllocator::KernelStart     = &_kernelStart;
+u64         *PhisicalAllocator::KernelEnd       = (u64*)((u8*)&_KernelEnd + 1);
 BitMap<u64> PhisicalAllocator::PageBitMap;
 
 const char  *PhisicalAllocator::EFI_MEMORY_TYPE_STRING[] = {
@@ -177,9 +178,9 @@ void PhisicalAllocator::Init(){
     TotalMemory = numberOfPages * 0x1000;
 
     PageBitMap = BitMap<u64>((u64*) largestMemory, numberOfPages);
-    memset(largestMemory, 0, numberOfPages / 8);
+    memset(largestMemory, 0, numberOfPages / 0x08);
 
-    Lock(largestMemory, numberOfPages / 8 / 0x1000);
+    Lock(largestMemory, numberOfPages / 0x1000 / 0x08);
 
     for (size_t i = 0; i < mMapEnteries; i++){
         MemoryDescriptor_t *descriptor = (MemoryDescriptor_t *)((u64)KS->mMap + i * KS->mMapDescriptorSize);
@@ -188,6 +189,6 @@ void PhisicalAllocator::Init(){
             Reserve(descriptor->physicalStart, descriptor->numberOfPages);
     }
 
-    Lock(KernelStart, ((u64)KernelEnd - (u64)KernelStart) / 0x1000 + 1);
+    Lock(KernelStart, ((u64)KernelEnd - (u64)KernelStart) / 0x1000);
     Lock(KS->frameBuffer.base_address, KS->frameBuffer.buffer_size / 0x1000 + 1);
 }

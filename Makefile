@@ -1,4 +1,4 @@
-IMAGE := cerberusOS.img
+OSNAME := cerberusOS
 LOOP_DEVICE := /dev/loop20
 OVMFDIR = /usr/bin/OVMFbin
 
@@ -21,7 +21,7 @@ umount:
 	sudo umount $(LOOP_DEVICE)
 
 los:
-	losetup --offset 1048576 --sizelimit 46934528 $(LOOP_DEVICE) $(IMAGE)
+	losetup --offset 1048576 --sizelimit 46934528 $(LOOP_DEVICE) $(OSNAME).img
 
 install_font:
 	sudo cp ./font/* /mnt/os/font
@@ -33,4 +33,5 @@ install: mount
 	make umount
 
 run:
-	qemu-system-x86_64 --enable-kvm -smp 1 --drive file=$(IMAGE) -m 512M -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none
+	qemu-system-x86_64 -enable-kvm -cpu host -M q35 -drive file=$(OSNAME).img,if=virtio -m 512M -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none
+# -d guest_errors

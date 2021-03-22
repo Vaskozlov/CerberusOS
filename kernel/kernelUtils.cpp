@@ -1,9 +1,10 @@
 #include <kernelUtils.hpp>
+#include <pci.hpp>
 
 IDTR KernelInfo::idtr;
 GDTDescriptor KernelInfo::gdt;
 PageTable *KernelInfo::PML4;
-VMManager KernelInfo::KernelVMM;
+VMManager KernelVMM;
 extern kernel_services_t *KS;
 
 void KernelInfo::InitVMM(){
@@ -99,9 +100,21 @@ void KernelInfo::InitIDT(){
 
 }
 
+void KernelInfo::InitACPI(){
+
+    ACPI::SDTHeader *xsdt = (ACPI::SDTHeader *) (((ACPI::RSDP2*)KS->rsdp)->XSDTAddress);
+    ACPI::MCFGHeader *mcfg = (ACPI::MCFGHeader*) ACPI::FindTable(xsdt, (char*) "MCFG");
+    
+    PCI::EnumeratePCI(mcfg);
+}
+
 void KernelInfo::Init(){
+    Printf("Wait for VMM initialization\n");
     PhisicalAllocator::Init();
+    Printf("PhisicalAllocator initialized\n");
     InitVMM();
     InitGDT();
     InitIDT();
+    InitACPI();
+  
 }

@@ -8,19 +8,20 @@
 #include <interrupts/Interrupts.h>
 #include <memory/VMManager.hpp>
 #include <basicFrameManager.hpp>
+#include <harware/acpi.hpp>
+
+extern VMManager KernelVMM;
 
 class KernelInfo{
     static IDTR idtr;
     static PageTable *PML4;
     static GDTDescriptor gdt;
 
-public:
-    static VMManager KernelVMM;
-
 private:
     static void InitVMM();
     static void InitGDT();
     static void InitIDT();
+    static void InitACPI();
 
 public:
     static inline const PageTable *GetPageTableAddr() { return PML4; }

@@ -10,8 +10,7 @@ extern "C" int _start(kernel_services_t *services){
     Putchar = BasicRender::PutChar;
 
     BasicRender::SetFrameBuffer(&KS->frameBuffer);
-    KernelInfo::Init();
-    
+    KernelInfo::Init();    
     
     while (1){
         __asm__ __volatile__ (

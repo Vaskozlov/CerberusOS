@@ -1,5 +1,6 @@
 #include <string.h>
 #include <PhisicalAllocator.hpp>
+#include <printf/Printf.h>
 
 extern u64 _edata;
 extern kernel_services_t *KS;
@@ -142,7 +143,7 @@ void PhisicalAllocator::Release(void *address, size_t numberOFpages){
 void *PhisicalAllocator::Get(){
     size_t index = PageBitMap.findFree(LastAccess);
 
-    if (index == -1) return NULL;
+    if (index == UINTMAX_MAX) return NULL;
 
     PageBitMap.set(index, 1);
     Lock((void*)(index * 0x1000));
@@ -176,7 +177,9 @@ void PhisicalAllocator::Init(){
     TotalMemory = numberOfPages * 0x1000;
 
     PageBitMap = BitMap<u64>((u64*) largestMemory, numberOfPages);
-    memset(largestMemory, 0, numberOfPages);
+    memset(largestMemory, 0, numberOfPages / 8);
+
+    Lock(largestMemory, numberOfPages / 8 / 0x1000);
 
     for (size_t i = 0; i < mMapEnteries; i++){
         MemoryDescriptor_t *descriptor = (MemoryDescriptor_t *)((u64)KS->mMap + i * KS->mMapDescriptorSize);
@@ -184,7 +187,6 @@ void PhisicalAllocator::Init(){
         if (descriptor->type != EFI_MEMORY_TYPES::EfiConventionalMemory)
             Reserve(descriptor->physicalStart, descriptor->numberOfPages);
     }
-
 
     Lock(KernelStart, ((u64)KernelEnd - (u64)KernelStart) / 0x1000 + 1);
     Lock(KS->frameBuffer.base_address, KS->frameBuffer.buffer_size / 0x1000 + 1);

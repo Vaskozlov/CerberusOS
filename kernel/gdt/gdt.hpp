@@ -25,7 +25,7 @@ struct GDT{
     GDTEntry UserCode;
     GDTEntry UserDara;
 } __attribute__((packed))
-__attribute__((aligned(0x1000)));
+__attribute__((aligned(0x10)));
 
 extern GDT DefaultGDT;
 

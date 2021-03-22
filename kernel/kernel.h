@@ -32,6 +32,8 @@ typedef struct {
     Psf2Font_t          psf2;
 } kernel_services_t;
 
+void *memset (void *__s, int __c, size_t __n) __THROW __nonnull ((1));
+
 __END_DECLS
 
 #endif /* kernel_h */

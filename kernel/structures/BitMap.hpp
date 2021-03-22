@@ -5,6 +5,9 @@
 
 #define bitsizeof(x) (sizeof(x) * 8)
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreorder-ctor"
+
 template<typename T>
 class BitMap{
     size_t  _size;
@@ -51,7 +54,7 @@ public:
             }
         }
 
-        return -1;
+        return UINTMAX_MAX;
     }
 
 public:
@@ -59,34 +62,6 @@ public:
     inline BitMap(T *buffer, size_t size) : _buffer(buffer), _size(size) {}
 };
 
-template<class T>
-class BITMap{
-    size_t  size_;
-    T       *buffer_;
-
-public:
-    inline size_t size() const { return size_; }
-    
-    void set(size_t index, u8 value){
-        size_t byteIndex = index / sizeof(T);
-        buffer_[byteIndex] = ~(1UL << (index % (sizeof(T) * 8)));
-        
-        this->buffer_[byteIndex] |= value == 1 ? (1 << (index % (sizeof(T) * 8))) : 0;
-    }
-
-public:
-    u8 operator[](size_t index){
-        T byte = this->buffer_[index / (sizeof(T) * 8)];
-        return (byte & (1 << (index % (sizeof(T) * 8)))) > 0;
-    }
-
-    size_t getFree(size_t start){
-        start -= start % sizeof(T);
-    }
-
-public:
-    BITMap() = default;
-    inline BITMap(T *buffer, size_t size) : buffer_(buffer), size_(size) {}
-};
+#pragma clang diagnostic pop
 
 #endif /* BitMap_hpp */

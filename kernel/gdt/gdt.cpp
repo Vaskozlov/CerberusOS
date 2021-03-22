@@ -1,6 +1,6 @@
 #include <gdt.hpp>
 
-__attribute__((aligned(0x1000)))
+__attribute__((aligned(0x10)))
 GDT DefaultGDT = {
     {0, 0, 0, 0x00, 0x00, 0}, // null
     {0, 0, 0, 0x9a, 0xa0, 0}, // kernel code segment

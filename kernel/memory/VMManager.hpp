@@ -62,6 +62,7 @@ class VMManager{
 public:
     void MapMemory(void *virtualMemory, void *PhysicalAddress);
     inline VMManager(PageTable *PML4Address) : PML4(PML4Address) {}
+    VMManager() = default;
 };
 
 #endif /* VMManager_hpp */

@@ -30,7 +30,6 @@ void KernelInfo::InitVMM(){
     );
 
     BasicRender::ClearScreen();
-    Printf("KernelVMM ready. Used memeory: %llu KB\n", PhisicalAllocator::GetUsedMemory() / 1024);
 }
 
 void KernelInfo::InitGDT(){
@@ -101,7 +100,6 @@ void KernelInfo::InitIDT(){
 }
 
 void KernelInfo::InitACPI(){
-
     ACPI::SDTHeader *xsdt = (ACPI::SDTHeader *) (((ACPI::RSDP2*)KS->rsdp)->XSDTAddress);
     ACPI::MCFGHeader *mcfg = (ACPI::MCFGHeader*) ACPI::FindTable(xsdt, (char*) "MCFG");
     
@@ -111,10 +109,12 @@ void KernelInfo::InitACPI(){
 void KernelInfo::Init(){
     Printf("Wait for VMM initialization\n");
     PhisicalAllocator::Init();
+    u64 baseMemory = PhisicalAllocator::GetAvailableMemory();
     Printf("PhisicalAllocator initialized\n");
     InitVMM();
-    InitGDT();
+    Printf("Before VMM memeory %u\n", baseMemory >> 20);
     InitIDT();
     InitACPI();
-  
+
+    Printf("KernelInfo ready. Available memeory: %llu MB\n", PhisicalAllocator::GetAvailableMemory() / 1024 / 1024);
 }

@@ -29,8 +29,10 @@ class PhisicalAllocator{
     static u64          UsedMemory;
     static u64          ReservedMemory;
     static u64          mMapEnteries;
+    static u64          PagesForBitMap;
     static u64          *KernelStart;
     static u64          *KernelEnd;
+    static void         *MainMemorySegment;
     static BitMap<u64>  PageBitMap;
     static const char   *EFI_MEMORY_TYPE_STRING[];
 
@@ -40,8 +42,10 @@ public:
     inline static u64 GetUsedMemory()       {   return UsedMemory;        }
     inline static u64 GetReservedMemory()   {   return ReservedMemory;    }
     inline static u64 GetmMapEnteries()     {   return mMapEnteries;      }
+    inline static u64 GetPagesForBitMap()   {   return PagesForBitMap;    }
     inline static u64 *GetKernelStart()     {   return KernelStart;       }
     inline static u64 *GetKernelEnd()       {   return KernelEnd;         }
+    inline static void *GetMainMemorySegment() { return MainMemorySegment; }
     
     inline static const char *GetEfiTypeString(u16 type) {  
         return type < (u16) EfiUknownMemory ? EFI_MEMORY_TYPE_STRING[type] : EFI_MEMORY_TYPE_STRING[EfiUknownMemory];

@@ -18,7 +18,10 @@ namespace PCI{
         if (pciDeviceHeader->DeviceID == 0) return;
         if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
 
-        Printf("%x %x\n", pciDeviceHeader->VendorId, pciDeviceHeader->DeviceID);
+        Printf("%s %s\n",
+            GetVendorName(pciDeviceHeader->VendorId),
+            GetDeviceName(pciDeviceHeader->VendorId, pciDeviceHeader->DeviceID)
+        );
     }
 
     void EnumerateDevice(u64 busAddress, u64 device){

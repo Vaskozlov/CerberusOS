@@ -21,6 +21,11 @@ namespace PCI{
         u8      BIST;
     };
 
+    extern const char *DeviceClasses[];
+    const char *GetVendorName(u16 vendorID);
+    const char *GetDeviceName(u16 vendorID, u16 deviceID);
+    const char *GetSubclassName(u8 classCode, u8 subclassCode);
+
     void EnumeratePCI(ACPI::MCFGHeader *mcfg);
 }
 

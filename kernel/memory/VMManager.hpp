@@ -2,6 +2,7 @@
 #define VMManager_hpp
 
 #include <kernel.h>
+#include <printf/Printf.h>
 #include <PhisicalAllocator.hpp>
 
 enum PageDirectoryFlags{
@@ -58,10 +59,21 @@ struct PageTable{
 
 class VMManager{
     PageTable *PML4;
+    size_t MappedPages;
 
 public:
     void MapMemory(void *virtualMemory, void *PhysicalAddress);
-    inline VMManager(PageTable *PML4Address) : PML4(PML4Address) {}
+    
+    inline size_t GetMappedPages() { return MappedPages; }
+
+    inline void *AllocateAndMap(){
+        void *page = PhisicalAllocator::Get();
+        MapMemory(page, page);
+        Printf("%p\n", page);
+        return page;
+    }
+
+    inline VMManager(PageTable *PML4Address) : PML4(PML4Address), MappedPages(0) {}
     VMManager() = default;
 };
 

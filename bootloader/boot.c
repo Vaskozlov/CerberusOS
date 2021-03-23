@@ -121,6 +121,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
                     &segment
                 );
 
+                memset((void*) segment, 0, pages * 0x1000);
+
                 uefi_call_wrapper(
                     KernelFile->SetPosition,
                     2,

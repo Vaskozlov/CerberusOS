@@ -12,6 +12,8 @@ u64         PhisicalAllocator::AvailableMemory;
 u64         PhisicalAllocator::UsedMemory;
 u64         PhisicalAllocator::ReservedMemory;
 u64         PhisicalAllocator::mMapEnteries;
+u64         PhisicalAllocator::PagesForBitMap;
+void        *PhisicalAllocator::MainMemorySegment;
 u64         *PhisicalAllocator::KernelStart     = &_kernelStart;
 u64         *PhisicalAllocator::KernelEnd       = (u64*)((u8*)&_KernelEnd + 1);
 BitMap<u64> PhisicalAllocator::PageBitMap;
@@ -176,11 +178,13 @@ void PhisicalAllocator::Init(){
 
     AvailableMemory = largesrSegment * 0x1000;
     TotalMemory = numberOfPages * 0x1000;
+    MainMemorySegment = largestMemory;
+    PagesForBitMap = numberOfPages / 0x1000 / 0x08;
 
     PageBitMap = BitMap<u64>((u64*) largestMemory, numberOfPages);
     memset(largestMemory, 0, numberOfPages / 0x08);
 
-    Lock(largestMemory, numberOfPages / 0x1000 / 0x08);
+    Lock(largestMemory, PagesForBitMap);
 
     for (size_t i = 0; i < mMapEnteries; i++){
         MemoryDescriptor_t *descriptor = (MemoryDescriptor_t *)((u64)KS->mMap + i * KS->mMapDescriptorSize);

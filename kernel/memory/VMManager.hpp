@@ -69,8 +69,13 @@ public:
     inline void *AllocateAndMap(){
         void *page = PhisicalAllocator::Get();
         MapMemory(page, page);
-        Printf("%p\n", page);
         return page;
+    }
+
+    inline void *AllocateAndMap(void *virtualAddress){
+        void *page = PhisicalAllocator::Get();
+        MapMemory(virtualAddress, page);
+        return virtualAddress;
     }
 
     inline VMManager(PageTable *PML4Address) : PML4(PML4Address), MappedPages(0) {}

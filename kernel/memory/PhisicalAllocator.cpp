@@ -15,7 +15,7 @@ u64         PhisicalAllocator::mMapEnteries;
 u64         PhisicalAllocator::PagesForBitMap;
 void        *PhisicalAllocator::MainMemorySegment;
 u64         *PhisicalAllocator::KernelStart     = &_kernelStart;
-u64         *PhisicalAllocator::KernelEnd       = (u64*)((u8*)&_KernelEnd + 1);
+u64         *PhisicalAllocator::KernelEnd       = &_KernelEnd;
 BitMap<u64> PhisicalAllocator::PageBitMap;
 
 const char  *PhisicalAllocator::EFI_MEMORY_TYPE_STRING[] = {
@@ -89,7 +89,7 @@ void PhisicalAllocator::Lock(void *address, size_t numberOFpages){
         AvailableMemory -= 0x1000;
     }
 
-    LastAccess = index + 1;
+    LastAccess = index + numberOFpages;
 }
 
 void PhisicalAllocator::Reserve(void *address){
@@ -115,7 +115,7 @@ void PhisicalAllocator::Reserve(void *address, size_t numberOFpages){
         ReservedMemory += 0x1000;
     }
 
-    LastAccess = index + 1;
+    LastAccess = index + numberOFpages;
 }
 
 void PhisicalAllocator::Release(void *address){
@@ -148,9 +148,7 @@ void *PhisicalAllocator::Get(){
 
     if (index == UINTMAX_MAX) return NULL;
 
-    PageBitMap.set(index, 1);
-    Lock((void*)(index * 0x1000));
-    
+    Lock((void*)(index * 0x1000));    
     return (void*)(index * 0x1000);
 }
 
@@ -165,7 +163,7 @@ void PhisicalAllocator::Init(){
 
     for (size_t i = 0; i < mMapEnteries; i++){
         MemoryDescriptor_t *descriptor = (MemoryDescriptor_t *)((u64)KS->mMap + i * KS->mMapDescriptorSize);
-
+       
         if (
             descriptor->type == EFI_MEMORY_TYPES::EfiConventionalMemory &&
             descriptor->numberOfPages > largesrSegment
@@ -192,7 +190,7 @@ void PhisicalAllocator::Init(){
         if (descriptor->type != EFI_MEMORY_TYPES::EfiConventionalMemory)
             Reserve(descriptor->physicalStart, descriptor->numberOfPages);
     }
-
+    
     Lock(KernelStart, ((u64)KernelEnd - (u64)KernelStart) / 0x1000);
     Lock(KS->frameBuffer.base_address, KS->frameBuffer.buffer_size / 0x1000 + 1);
 }

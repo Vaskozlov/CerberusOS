@@ -23,6 +23,7 @@ endif
 CFLAGS :=   -O3 -g \
 			-c \
 			-fno-stack-protector \
+			-fno-exceptions \
 			-ffreestanding \
 			-Wall -Wextra \
 			-I $(LINUX_HEADERS)/include \
@@ -32,6 +33,7 @@ CFLAGS :=   -O3 -g \
 CXXFLAGS := -O3 -g \
 			-c \
 			-fno-stack-protector \
+			-fno-exceptions \
 			-ffreestanding \
 			-Wall -Wextra \
 			-I $(LINUX_HEADERS)/include \

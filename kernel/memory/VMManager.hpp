@@ -53,6 +53,25 @@ struct PageMapIndexer{
     PageMapIndexer(u64 VirtualAddress);
 };
 
+struct PageMapIndexerLVL3{
+    u64 PDP_i;
+    u64 PD_i;
+    u64 PT_i;
+    u64 P_i;
+
+    inline PageMapIndexerLVL3(u64 VirtualAddress){
+        VirtualAddress >>= 21;
+
+        PT_i = VirtualAddress & 0x1FF;
+        VirtualAddress >>= 9;
+
+        PD_i = VirtualAddress & 0x1FF;
+        VirtualAddress >>= 9;
+
+        PDP_i = VirtualAddress & 0x1FF;
+    }
+};
+
 struct PageTable{
     PageDirectoryEntry entries[512];
 } __attribute__((aligned(0x1000)));

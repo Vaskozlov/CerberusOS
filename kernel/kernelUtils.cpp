@@ -7,27 +7,31 @@ PageTable *KernelInfo::PML4;
 VMManager KernelVMM;
 extern kernel_services_t *KS;
 
+__attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
+
 void KernelInfo::InitVMM(){
     PML4 = (PageTable*) PhisicalAllocator::Get();
     memset(PML4, 0, sizeof(PageTable));
 
     KernelVMM = VMManager(PML4);
     u64 fbBase = (u64)KS->frameBuffer.base_address;
-    u64 fbSize = (u64)KS->frameBuffer.buffer_size + 0x1000;
-
-    for (size_t i = fbBase; i < fbBase + fbSize; i += 0x1000){
+    u64 fbSize = (u64)KS->frameBuffer.buffer_size + (2 << 20);
+    
+    
+    for (size_t i = fbBase; i < fbBase + fbSize; i += (2 << 20)){
         KernelVMM.MapMemory((void*)i, (void*)i);
     }
 
-    for (size_t i = 0; i < PhisicalAllocator::GetTotalMemory() + 1; i += 0x1000){
+    for (size_t i = 0; i < PhisicalAllocator::GetTotalMemory() + (2<<20); i += (2 << 20)){
         KernelVMM.MapMemory((void*)i, (void*)i);
     }
-
+    
     __asm__ __volatile__ (
         "mov %0, %%cr3\n"
         :
         : "r" (PML4)
     );
+    
 
     BasicRender::ClearScreen();
 }
@@ -37,13 +41,13 @@ void KernelInfo::InitGDT(){
     gdt.address = (u64) &DefaultGDT;
     LoadGDT(&gdt);
 
-    Printf("GDT ready\n");  
+    Printf("GDT ready %p\n", &DefaultGDT);  
 }
 
 void KernelInfo::InitIDT(){
     idtr.limit = 0x0FFF;
-    idtr.offset = (u64) PhisicalAllocator::Get();
-
+    idtr.offset = (u64) IDTBuffer;
+    
     IDTDescriptorEntry *int_DevideByZero = (IDTDescriptorEntry*) (idtr.offset + 0x00 * sizeof(IDTDescriptorEntry));
     int_DevideByZero->setOffset((u64)DevideByZero_Handler);
     int_DevideByZero->selector = 0x08;
@@ -84,19 +88,24 @@ void KernelInfo::InitIDT(){
     int_DoubleFault->selector = 0x08;
     int_DoubleFault->type_attr = IDT_TA_InterruptGate;
 
+    IDTDescriptorEntry *int_SegmentNotPresent = (IDTDescriptorEntry *) (idtr.offset + 0x0B * sizeof(IDTDescriptorEntry));
+    int_SegmentNotPresent->setOffset((u64)SegmentNotPresent_Handler);
+    int_SegmentNotPresent->selector = 0x08;
+    int_SegmentNotPresent->type_attr = IDT_TA_InterruptGate;
+
+    IDTDescriptorEntry *int_GeneralProtection = (IDTDescriptorEntry *) (idtr.offset + 0x0D * sizeof(IDTDescriptorEntry));
+    int_GeneralProtection->setOffset((u64)GeneralProtection_Handler);
+    int_GeneralProtection->selector = 0x08;
+    int_GeneralProtection->type_attr = IDT_TA_InterruptGate;
+
     IDTDescriptorEntry *int_PageFault = (IDTDescriptorEntry *) (idtr.offset + 0x0E * sizeof(IDTDescriptorEntry));
     int_PageFault->setOffset((u64)PageFault_Handler);
     int_PageFault->selector = 0x08;
     int_PageFault->type_attr = IDT_TA_InterruptGate;
 
-    __asm__ __volatile__ (
-        "lidt %0\n"
-        :
-        : "m" (idtr)
-    );
+    __asm__ __volatile__ ("lidt %0" : : "m" (idtr));
 
     Printf("IDT ready\n");
-
 }
 
 void KernelInfo::InitACPI(){
@@ -107,13 +116,13 @@ void KernelInfo::InitACPI(){
 }
 
 void KernelInfo::Init(){
+    InitGDT();
+    InitIDT();
+
     Printf("Wait for VMM initialization\n");
     PhisicalAllocator::Init();
-    u64 baseMemory = PhisicalAllocator::GetAvailableMemory();
-    Printf("PhisicalAllocator initialized\n");
+
     InitVMM();
-    Printf("Before VMM memeory %u\n", baseMemory >> 20);
-    InitIDT();
     InitACPI();
 
     Printf("KernelInfo ready. Available memeory: %llu MB\n", PhisicalAllocator::GetAvailableMemory() / 1024 / 1024);

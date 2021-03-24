@@ -12,7 +12,6 @@ namespace PCI{
         u64 functionAddress = deviceAddress + offset;
 
         KernelVMM.MapMemory((void*)functionAddress, (void*)functionAddress);
-
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)functionAddress;
         
         if (pciDeviceHeader->DeviceID == 0) return;
@@ -20,7 +19,7 @@ namespace PCI{
 
         Printf("%s %s\n",
             GetVendorName(pciDeviceHeader->VendorId),
-            GetDeviceName(pciDeviceHeader->VendorId, pciDeviceHeader->DeviceID)
+            GetSubclassName(pciDeviceHeader->Class, pciDeviceHeader->SubClass)
         );
     }
 

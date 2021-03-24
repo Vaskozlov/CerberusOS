@@ -19,7 +19,7 @@ struct IDTDescriptorEntry {
 public:
     void setOffset(u64 offset);
     u64 GetOffset();
-};
+} __attribute__((packed));
 
 struct IDTR{
     u16 limit;

@@ -4,6 +4,8 @@
 #include <kernel.h>
 #include <BitMap.hpp>
 
+inline constexpr u64 ToMB(u64 mb) { return mb * (1 << 20); }
+
 enum EFI_MEMORY_TYPES{
     EfiReservedMemory       = 0,
     EfiLoaderCode           = 1,

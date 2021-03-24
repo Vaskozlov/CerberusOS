@@ -25,7 +25,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     EFI_CONFIGURATION_TABLE *configTable = SystemTable->ConfigurationTable;
 
     for (UINTN index = 0; index < SystemTable->NumberOfTableEntries; index++, configTable++){
-        if (CompareGuid(&configTable[index].VendorGuid, &Acpi2TableGuid)){
+        if (uefi_call_wrapper(CompareGuid, 2, &configTable[index].VendorGuid, &Acpi2TableGuid)){
             if (strncmp("RSD PTR ", configTable->VendorTable, 8) == 0){
                 rspd = (void*) configTable->VendorTable;
             }
@@ -194,7 +194,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     KernelServices.mMapSize = MapSize;
     KernelServices.mMapDescriptorSize = DescriptorSize;
     KernelServices.rsdp = rspd;
-
 
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, MapKey);
 

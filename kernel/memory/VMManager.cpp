@@ -23,7 +23,7 @@ void VMManager::MapMemory(void *virtualMemory, void *PhysicalAddress){
     PageTable *PD;
     PageTable *PDP;
     PageDirectoryEntry PDE;
-    PageMapIndexer indexer((u64)virtualMemory);
+    PageMapIndexerLVL3 indexer((u64)virtualMemory);
     
     PDE = PML4->entries[indexer.PDP_i];
     
@@ -50,32 +50,20 @@ void VMManager::MapMemory(void *virtualMemory, void *PhysicalAddress){
         PDE.SetAddress(PD);
         PDE.SetFlag(PageDirectoryFlags::present);
         PDE.SetFlag(PageDirectoryFlags::readWrite);
-
         PDP->entries[indexer.PD_i] = PDE;
     }
     else{
         PD = (PageTable*) PDE.GetAddress();
     }
 
+   
     PDE = PD->entries[indexer.PT_i];
 
-    if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
-        PT = (PageTable*) PhisicalAllocator::Get();
-        memset(PT, 0, 0x1000);
+    if (PDE.IsFlagSet(PageDirectoryFlags::present) == true) return;
 
-        PDE.SetAddress(PT);
-        PDE.SetFlag(PageDirectoryFlags::present);
-        PDE.SetFlag(PageDirectoryFlags::readWrite);
-
-        PD->entries[indexer.PT_i] = PDE;
-    }
-    else{
-        PT = (PageTable*) PDE.GetAddress();
-    }
-
-    PDE = PT->entries[indexer.P_i];
     PDE.SetAddress(PhysicalAddress);
     PDE.SetFlag(PageDirectoryFlags::present);
     PDE.SetFlag(PageDirectoryFlags::readWrite);
-    PT->entries[indexer.P_i] = PDE;
+    PDE.SetFlag(PageDirectoryFlags::largePage);
+    PD->entries[indexer.PT_i] = PDE;
 }

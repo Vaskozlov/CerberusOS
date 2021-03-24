@@ -1,11 +1,9 @@
 #include <IDT.hpp>
 
 void IDTDescriptorEntry::setOffset(u64 offset){
-    this->offset0 = (u16)(offset & 0x000000000000FFFF);
-    offset >>= 16;
-    this->offset1 = (u16)(offset & 0x00000000FFFF0000);
-    offset >>= 16;
-    this->offset2 = (u32)(offset & 0xFFFFFFFF00000000);
+    this->offset0 = (u16)(offset & 0x000000000000ffff);
+    this->offset1 = (u16)((offset & 0x00000000ffff0000) >> 16);
+    this->offset2 = (u32)((offset & 0xffffffff00000000) >> 32);
 }
 
 u64 IDTDescriptorEntry::GetOffset(){

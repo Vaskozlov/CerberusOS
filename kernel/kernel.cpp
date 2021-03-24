@@ -11,11 +11,8 @@ extern "C" int _start(kernel_services_t *services){
 
     BasicRender::SetFrameBuffer(&KS->frameBuffer);
     KernelInfo::Init();    
+
+    while (1){ __asm__ __volatile__("hlt"); }
     
-    while (1){
-        __asm__ __volatile__ (
-            "hlt\n"
-        );
-    }
     return 0;
 }

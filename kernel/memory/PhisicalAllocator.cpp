@@ -36,6 +36,7 @@ const char  *PhisicalAllocator::EFI_MEMORY_TYPE_STRING[] = {
     "EfiUknownMemory"
 };
 
+
 void PhisicalAllocator::Free(void *address){
     size_t index = (size_t) address / 0x1000;
 
@@ -156,7 +157,7 @@ void PhisicalAllocator::Init(){
 
     if (mMapEnteries > 0) return;
 
-    void *largestMemory;
+    void *largestMemory = NULL;
     size_t largesrSegment = 0;
     u64 numberOfPages = 0;
     mMapEnteries = KS->mMapSize / KS->mMapDescriptorSize;

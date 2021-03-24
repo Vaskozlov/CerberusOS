@@ -4,9 +4,6 @@
 struct interrupt_frame;
 
 __attribute__((interrupt))
-void PageFault_Handler(struct interrupt_frame *frame);
-
-__attribute__((interrupt))
 void Debug_Handler(struct interrupt_frame *frame);
 
 __attribute__((interrupt))
@@ -29,5 +26,14 @@ void DoubleFault_Handler(struct interrupt_frame *frame);
 
 __attribute__((interrupt))
 void DevideByZero_Handler(struct interrupt_frame *frame);
+
+__attribute__((interrupt))
+void SegmentNotPresent_Handler(struct interrupt_frame *frame);
+
+__attribute__((interrupt))
+void GeneralProtection_Handler(struct interrupt_frame *frame);
+
+__attribute__((interrupt)) 
+void PageFault_Handler(struct interrupt_frame *frame);
 
 #endif /* Interrupts_hpp */

@@ -23,14 +23,14 @@ if [ ! -d cerberusOS.img ] ; then
     echo ""
     echo ""
     sudo gdisk cerberusOS.img;
-    sudo losetup --offset 1048576 --sizelimit 46934528 /dev/loop20 cerberusOS.img
-	sudo mkdosfs -F 32 /dev/loop20
+    sudo losetup --offset 1048576 --sizelimit 46934528 /dev/loop24 cerberusOS.img
+	sudo mkdosfs -F 32 /dev/loop24
 fi
 
-sudo mount /dev/loop20 /mnt/os
+sudo mount /dev/loop24 /mnt/os
 sudo mkdir /mnt/os/EFI
 sudo mkdir /mnt/os/EFI/BOOT
 sudo mkdir /mnt/os/font
 sudo cp ./font/* /mnt/os/font
 sudo cp ./startup.nsh /mnt/os
-sudo umount /dev/loop20
+sudo umount /dev/loop24

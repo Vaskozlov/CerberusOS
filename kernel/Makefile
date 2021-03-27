@@ -27,6 +27,7 @@ CFLAGS :=   -O3 -g \
 			-ffreestanding \
 			-Wall -Wextra \
 			-I $(LINUX_HEADERS)/include \
+			-I $(MUSL_DIR)/arch \
 			-I . \
 			-std=c11
 
@@ -37,6 +38,7 @@ CXXFLAGS := -O3 -g \
 			-ffreestanding \
 			-Wall -Wextra \
 			-I $(LINUX_HEADERS)/include \
+			-I $(MUSL_DIR)/arch \
 			-I . \
 			-std=c++17
 
@@ -61,7 +63,8 @@ include memory/Makefile
 include structures/Makefile
 include gdt/Makefile
 include interrupts/Makefile
-include harware/Makefile
+include hardware/Makefile
+include scheduling/Makefile
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

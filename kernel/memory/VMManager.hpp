@@ -2,8 +2,7 @@
 #define VMManager_hpp
 
 #include <kernel.h>
-#include <printf/Printf.h>
-#include <PhisicalAllocator.hpp>
+#include "PhisicalAllocator.hpp"
 
 enum PageDirectoryFlags{
     present         = 0b1,
@@ -44,26 +43,52 @@ public:
     PageDirectoryEntry() = default;
 };
 
-struct PageMapIndexer{
+struct PageMapIndexer4KBMPL4{
     u64 PDP_i;
     u64 PD_i;
     u64 PT_i;
     u64 P_i;
 
-    PageMapIndexer(u64 VirtualAddress);
+    inline PageMapIndexer4KBMPL4(u64 VirtualAddress){
+        VirtualAddress >>= 12;
+
+        P_i = VirtualAddress & 0x1FF;
+        VirtualAddress >>= 9;
+
+        PT_i = VirtualAddress & 0x1FF;
+        VirtualAddress >>= 9;
+
+        PD_i = VirtualAddress & 0x1FF;
+        VirtualAddress >>= 9;
+
+        PDP_i = VirtualAddress & 0x1FF;
+    }
 };
 
-struct PageMapIndexerLVL3{
+struct PageMapIndexer2MBPML4{
     u64 PDP_i;
     u64 PD_i;
     u64 PT_i;
-    u64 P_i;
 
-    inline PageMapIndexerLVL3(u64 VirtualAddress){
+    inline PageMapIndexer2MBPML4(u64 VirtualAddress){
         VirtualAddress >>= 21;
 
         PT_i = VirtualAddress & 0x1FF;
         VirtualAddress >>= 9;
+
+        PD_i = VirtualAddress & 0x1FF;
+        VirtualAddress >>= 9;
+
+        PDP_i = VirtualAddress & 0x1FF;
+    }
+};
+
+struct PageMapIndexer1GBPML4{
+    u64 PDP_i;
+    u64 PD_i;
+
+    inline PageMapIndexer1GBPML4(u64 VirtualAddress){
+        VirtualAddress >>= 30;
 
         PD_i = VirtualAddress & 0x1FF;
         VirtualAddress >>= 9;
@@ -78,26 +103,21 @@ struct PageTable{
 
 class VMManager{
     PageTable *PML4;
-    size_t MappedPages;
+    size_t MappedPages4KB;
+    size_t MappedPages2MB;
+    size_t MappedPages1GB;
 
 public:
-    void MapMemory(void *virtualMemory, void *PhysicalAddress);
-    
-    inline size_t GetMappedPages() { return MappedPages; }
+    inline size_t GetMappedPages4KB() { return MappedPages4KB; }
+    inline size_t GetMappedPages2MB() { return MappedPages2MB; }
+    inline size_t GetMappedPages1GB() { return MappedPages1GB; }
 
-    inline void *AllocateAndMap(){
-        void *page = PhisicalAllocator::Get();
-        MapMemory(page, page);
-        return page;
-    }
+public:
+    void MapMemory4KB(void *virtualMemory, void *PhysicalAddress);
+    void MapMemory2MB(void *virtualMemory, void *PhysicalAddress);
+    void MapMemory1GB(void *virtualMemory, void *PhysicalAddress);
 
-    inline void *AllocateAndMap(void *virtualAddress){
-        void *page = PhisicalAllocator::Get();
-        MapMemory(virtualAddress, page);
-        return virtualAddress;
-    }
-
-    inline VMManager(PageTable *PML4Address) : PML4(PML4Address), MappedPages(0) {}
+    inline VMManager(PageTable *PML4Address) : PML4(PML4Address), MappedPages4KB(0) {}
     VMManager() = default;
 };
 

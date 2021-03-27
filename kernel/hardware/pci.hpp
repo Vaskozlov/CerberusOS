@@ -2,7 +2,7 @@
 #define pci_hpp
 
 #include <kernel.h>
-#include <acpi.hpp>
+#include <hardware/acpi.hpp>
 
 namespace PCI{
 

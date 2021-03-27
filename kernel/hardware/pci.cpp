@@ -1,6 +1,5 @@
-#include <pci.hpp>
-#include <PhisicalAllocator.hpp>
-#include <VMManager.hpp>
+#include "pci.hpp"
+#include "memory/VMManager.hpp"
 #include <printf/Printf.h>
 
 extern VMManager KernelVMM;
@@ -11,7 +10,7 @@ namespace PCI{
         u64 offset = function << 12;
         u64 functionAddress = deviceAddress + offset;
 
-        KernelVMM.MapMemory((void*)functionAddress, (void*)functionAddress);
+        KernelVMM.MapMemory2MB((void*)functionAddress, (void*)functionAddress);
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)functionAddress;
         
         if (pciDeviceHeader->DeviceID == 0) return;
@@ -27,7 +26,7 @@ namespace PCI{
         u64 offset = device << 15;
         u64 deviceAddress = busAddress + offset;
 
-        KernelVMM.MapMemory((void*)deviceAddress, (void*)deviceAddress);
+        KernelVMM.MapMemory2MB((void*)deviceAddress, (void*)deviceAddress);
 
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)deviceAddress;
         
@@ -43,7 +42,7 @@ namespace PCI{
         u64 offset = bus << 20;
         u64 busAddress = baseAddress + offset;
 
-        KernelVMM.MapMemory((void*)busAddress, (void*)busAddress);
+        KernelVMM.MapMemory2MB((void*)busAddress, (void*)busAddress);
 
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)busAddress;
         

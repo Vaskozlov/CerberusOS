@@ -2,11 +2,9 @@
 #define PhisicalAllocator_hpp
 
 #include <kernel.h>
-#include <BitMap.hpp>
+#include <structures/BitMap.hpp>
 
-inline constexpr u64 ToMB(u64 mb) { return mb * (1 << 20); }
-
-enum EFI_MEMORY_TYPES{
+enum EFI_MEMORY_TYPE{
     EfiReservedMemory       = 0,
     EfiLoaderCode           = 1,
     EfiLoaderData           = 2,
@@ -25,57 +23,164 @@ enum EFI_MEMORY_TYPES{
 };
 
 class PhisicalAllocator{
-    static u64          LastAccess;
-    static u64          TotalMemory;
-    static u64          AvailableMemory;
-    static u64          UsedMemory;
-    static u64          ReservedMemory;
-    static u64          mMapEnteries;
-    static u64          PagesForBitMap;
-    static u64          *KernelStart;
-    static u64          *KernelEnd;
-    static void         *MainMemorySegment;
-    static BitMap<u64>  PageBitMap;
-    static const char   *EFI_MEMORY_TYPE_STRING[];
 
-public:
-    inline static u64 GetTotalMemory()      {   return TotalMemory;       }
-    inline static u64 GetAvailableMemory()  {   return AvailableMemory;   }
-    inline static u64 GetUsedMemory()       {   return UsedMemory;        }
-    inline static u64 GetReservedMemory()   {   return ReservedMemory;    }
-    inline static u64 GetmMapEnteries()     {   return mMapEnteries;      }
-    inline static u64 GetPagesForBitMap()   {   return PagesForBitMap;    }
-    inline static u64 *GetKernelStart()     {   return KernelStart;       }
-    inline static u64 *GetKernelEnd()       {   return KernelEnd;         }
-    inline static void *GetMainMemorySegment() { return MainMemorySegment; }
+    static u64  LockedMemory;
+    static u64  AllocatorHead;
+    static u64  TotalMemory;
+    static u64  ReservedMemory;
+    static u64  AvailableMemory;
+    static u64  mMapEnteries;
+
+    static u64  KernelStart;
+    static u64  KernelEnd;
+
+    static BitMapDouble<u64> BigEnteries;
+    static BitMapDoubleConst<u64, 512> *MiddleEntries;
+    static BitMapConst<u64, 512> *SmallEntries;
+
+    static const char   *EFI_MEMORY_TYPE_STRING[];
     
-    inline static const char *GetEfiTypeString(u16 type) {  
-        return type < (u16) EfiUknownMemory ? EFI_MEMORY_TYPE_STRING[type] : EFI_MEMORY_TYPE_STRING[EfiUknownMemory];
+public:
+    static inline u64 GetTotalMemory()     { return TotalMemory;     }
+    static inline u64 GetLockedMemory()    { return LockedMemory;    }
+    static inline u64 GetReservedMemory()  { return ReservedMemory;  }
+    static inline u64 GetAvailableMemory() { return AvailableMemory; }
+    static inline u64 GetKernelStart()     { return KernelStart;     }
+    static inline u64 GetKernelEnd()       { return KernelEnd;       }
+
+    inline static const char *GetEfiTypeString(EFI_MEMORY_TYPE type) {  
+        return type < EfiUknownMemory ? EFI_MEMORY_TYPE_STRING[type] : EFI_MEMORY_TYPE_STRING[EfiUknownMemory];
+    }
+
+private:
+    static size_t UniversalLock4KB(void* address);
+    static size_t UniversalLock2MB(void* address);
+    static size_t UniversalLock1GB(void *address);
+
+private:
+    static size_t UniversalUnLock4KB(void* address);
+    static size_t UniversalUnLock2MB(void* address);
+    static size_t UniversalUnLock1GB(void *address);
+
+private:
+    static inline void Reserve4KB(void* address){
+        auto size = UniversalLock4KB(address);
+        AvailableMemory -= size;
+        ReservedMemory += size;
+    }
+
+    static inline void Reserve2MB(void* address){
+        auto size = UniversalLock2MB(address);
+        AvailableMemory -= size;
+        ReservedMemory += size;
     }
     
+    static inline void Reserve1GB(void *address){
+        auto size = UniversalLock1GB(address);
+        AvailableMemory -= size;
+        ReservedMemory += size;
+    }
+
 private:
-    static void Free(void *address);
-    static void Free(void *address, size_t numberOFpages);
+    static inline void UnReserve4KB(void* address){
+        auto size = UniversalUnLock4KB(address);
+        ReservedMemory -= size;
+        AvailableMemory += size;
+    }
 
-    static void Lock(void *address);
-    static void Lock(void *address, size_t numberOFpages);
+    static inline void UnReserve2MB(void* address){
+        auto size = UniversalUnLock2MB(address);
+        ReservedMemory -= size;
+        AvailableMemory += size;
+    }
+
+    static inline void UnReserve1GB(void *address){
+        auto size = UniversalUnLock1GB(address);
+        ReservedMemory -= size;
+        AvailableMemory += size;
+    }
 
 public:
-    static void Reserve(void *address);
-    static void Reserve(void *address, size_t numberOFpages);
+    static inline void Lock4KB(void* address){
+        auto size = UniversalLock4KB(address);
+        AvailableMemory -= size;
+        LockedMemory += size;
+    }
 
-    static void Release(void *address);
-    static void Release(void *address, size_t numberOFpages);
+    static inline void Lock4KB(void* address, size_t times){
+        for (size_t i = 0; i < times; i++){
+            auto size = UniversalLock4KB((void*)((u64)address + i * 0x1000));
+            AvailableMemory -= size;
+            LockedMemory += size;
+        }
+    }
 
-    static void *Get();
+    static inline void Lock2MB(void* address){
+        auto size = UniversalLock2MB(address);
+        AvailableMemory -= size;
+        LockedMemory += size;
+    }
+
+    static inline void Lock2MB(void* address, size_t times){
+        for (size_t i = 0; i < times; i++){
+            auto size = UniversalLock2MB((void*)((u64)address + (i << 21UL)));
+            AvailableMemory -= size;
+            LockedMemory += size;
+        }
+    }
+    
+    static inline void Lock1GB(void *address){
+        auto size = UniversalLock1GB(address);
+        AvailableMemory -= size;
+        LockedMemory += size;
+    }
 
 public:
-    static void Init();
+    static inline void UnLock4KB(void* address){
+        auto size = UniversalUnLock4KB(address);
+        LockedMemory -= size;
+        AvailableMemory += size;
+    }
+
+    static inline void UnLock4KB(void* address, size_t times){
+        for (size_t i = 0; i < times; i++){
+            auto size = UniversalUnLock4KB((void*)((u64)address + i * 0x1000));
+            AvailableMemory -= size;
+            LockedMemory += size;
+        }
+    }
+
+    static inline void UnLock2MB(void* address){
+        auto size = UniversalUnLock2MB(address);
+        LockedMemory -= size;
+        AvailableMemory += size;
+    }
+
+    static inline void UnLock2MB(void* address, size_t times){
+        for (size_t i = 0; i < times; i++){
+            auto size = UniversalUnLock2MB((void*)((u64)address + (i << 21UL)));
+            AvailableMemory -= size;
+            LockedMemory += size;
+        }
+    }
+
+    static inline void UnLock1GB(void *address){
+        auto size = UniversalUnLock1GB(address);
+        LockedMemory -= size;
+        AvailableMemory += size;
+    }
 
 public:
-    PhisicalAllocator()     = delete;
-    ~PhisicalAllocator()    = delete;
+    static void *Get1GB();
+    static void *Get2MB();
+    static void *Get4KB();
 
+private:
+    static size_t Init(void *location, size_t availableMemory, size_t TotalMemory);
+
+public:
+    static size_t SetUp();
 };
+
 
 #endif /* PhisicalAllocator_hpp */

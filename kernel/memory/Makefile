@@ -10,6 +10,3 @@ $(BUILD_DIR)/%.o: memory/%.cpp
 
 $(BUILD_DIR)/%.o: memory/%.s
 	$(CC) $(ASMFLAGS) $< -o $@
-
-CFLAGS += -I./memory
-CXXFLAGS += -I ./memory

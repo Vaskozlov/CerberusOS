@@ -6,7 +6,7 @@ $(BUILD_DIR)/%.o: render/%.c
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/%.o: render/%.cpp
-	$(CXX) $(CXXFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) -O1 $< -o $@
 
 $(BUILD_DIR)/%.o: render/%.s
 	$(CC) $(ASMFLAGS) $< -o $@

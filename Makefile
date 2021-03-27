@@ -1,5 +1,5 @@
 OSNAME := cerberusOS
-LOOP_DEVICE := /dev/loop20
+LOOP_DEVICE := /dev/loop24
 OVMFDIR = /usr/share/edk2-ovmf/x64
 
 all: compile install run
@@ -35,6 +35,18 @@ install: mount
 run:
 	qemu-system-x86_64 \
 	-smp 1 \
+	-no-shutdown \
+	-M q35 \
+	-d int \
+	-drive file=$(OSNAME).img,if=virtio -m 1G \
+	-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",\
+	readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none \
+	-rtc clock=host,base=localtime
+
+
+run-kvm:
+	qemu-system-x86_64 --enable-kvm \
+	-cpu host \
 	-no-shutdown \
 	-M q35 \
 	-drive file=$(OSNAME).img,if=virtio -m 1G \

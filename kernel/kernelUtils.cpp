@@ -1,5 +1,11 @@
-#include <kernelUtils.hpp>
-#include <pci.hpp>
+#include "kernelUtils.hpp"
+#include "printf/Printf.h"
+#include "hardware/acpi.hpp"
+#include "hardware/pci.hpp"
+#include "hardware/io.hpp"
+#include "scheduling/pit/pit.hpp"
+#include "render/basicFrameManager.hpp"
+#include "interrupts/Interrupts.h"
 
 IDTR KernelInfo::idtr;
 GDTDescriptor KernelInfo::gdt;
@@ -10,22 +16,23 @@ extern kernel_services_t *KS;
 __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
 
 void KernelInfo::InitVMM(){
-    PML4 = (PageTable*) PhisicalAllocator::Get();
+    PML4 = (PageTable*) PhisicalAllocator::Get4KB();
     memset(PML4, 0, sizeof(PageTable));
 
     KernelVMM = VMManager(PML4);
     u64 fbBase = (u64)KS->frameBuffer.base_address;
-    u64 fbSize = (u64)KS->frameBuffer.buffer_size + (2 << 20);
+    u64 fbSize = (u64)KS->frameBuffer.buffer_size + (1 << 21UL);
+    fbBase -= (fbBase & ((1 << 21UL) - 1));
     
-    
-    for (size_t i = fbBase; i < fbBase + fbSize; i += (2 << 20)){
-        KernelVMM.MapMemory((void*)i, (void*)i);
+
+    for (size_t i = 0; i < PhisicalAllocator::GetTotalMemory() + (1<<30UL); i += (1 << 30UL)){
+        KernelVMM.MapMemory1GB((void*)i, (void*)i);
     }
 
-    for (size_t i = 0; i < PhisicalAllocator::GetTotalMemory() + (2<<20); i += (2 << 20)){
-        KernelVMM.MapMemory((void*)i, (void*)i);
+    for (size_t i = fbBase; i < fbBase + fbSize; i += (1 << 21UL)){
+        KernelVMM.MapMemory2MB((void*)i, (void*)i);
     }
-    
+
     __asm__ __volatile__ (
         "mov %0, %%cr3\n"
         :
@@ -33,7 +40,7 @@ void KernelInfo::InitVMM(){
     );
     
 
-    BasicRender::ClearScreen();
+    //BasicRender::ClearScreen();
 }
 
 void KernelInfo::InitGDT(){
@@ -103,7 +110,24 @@ void KernelInfo::InitIDT(){
     int_PageFault->selector = 0x08;
     int_PageFault->type_attr = IDT_TA_InterruptGate;
 
+    IDTDescriptorEntry *int_PIC = (IDTDescriptorEntry *) (idtr.offset + 0x20 * sizeof(IDTDescriptorEntry));
+    int_PIC->setOffset((u64)Pit_Handler);
+    int_PIC->selector = 0x08;
+    int_PIC->type_attr = IDT_TA_InterruptGate;
+
+    IDTDescriptorEntry *int_IQR0 = (IDTDescriptorEntry *) (idtr.offset + 0x21 * sizeof(IDTDescriptorEntry));
+    int_IQR0->setOffset((u64)EmptyIQR_Handler);
+    int_IQR0->selector = 0x08;
+    int_IQR0->type_attr = IDT_TA_InterruptGate;
+
+    IDTDescriptorEntry *int_IQR1 = (IDTDescriptorEntry *) (idtr.offset + 0x2C * sizeof(IDTDescriptorEntry));
+    int_IQR1->setOffset((u64)EmptyIQR_Handler);
+    int_IQR1->selector = 0x08;
+    int_IQR1->type_attr = IDT_TA_InterruptGate;
+
     __asm__ __volatile__ ("lidt %0" : : "m" (idtr));
+
+    RemapPIC();
 
     Printf("IDT ready\n");
 }
@@ -119,11 +143,23 @@ void KernelInfo::Init(){
     InitGDT();
     InitIDT();
 
+    PIT::SetDivisor(2000);
+    
     Printf("Wait for VMM initialization\n");
-    PhisicalAllocator::Init();
-
+    PhisicalAllocator::SetUp();
+    
     InitVMM();
     InitACPI();
+    
+    outb(0x08, PIC1_DATA);
+    outb(0x70, PIC2_DATA);
 
-    Printf("KernelInfo ready. Available memeory: %llu MB\n", PhisicalAllocator::GetAvailableMemory() / 1024 / 1024);
+    __asm__ __volatile__ ("sti");
+
+    for (int i = 0 ; i < 10; i++){
+        PIT::Sleepd(1.0);
+        Putchar('1');
+    }
+
+    Printf("KernelInfo ready in %.10lf seconds. Available memeory: %llu MB\n", PIT::GetTimeSicneBoot(), PhisicalAllocator::GetAvailableMemory() / 1024 / 1024);
 }

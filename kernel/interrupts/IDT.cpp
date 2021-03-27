@@ -1,4 +1,4 @@
-#include <IDT.hpp>
+#include "IDT.hpp"
 
 void IDTDescriptorEntry::setOffset(u64 offset){
     this->offset0 = (u16)(offset & 0x000000000000ffff);

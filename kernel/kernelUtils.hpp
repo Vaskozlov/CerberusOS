@@ -1,14 +1,10 @@
 #ifndef kernelUtils_hpp
 #define kernelUtils_hpp
 
-#include <kernel.h>
-#include <gdt/gdt.hpp>
-#include <printf/Printf.h>
-#include <interrupts/IDT.hpp>
-#include <interrupts/Interrupts.h>
-#include <memory/VMManager.hpp>
-#include <basicFrameManager.hpp>
-#include <harware/acpi.hpp>
+#include "kernel.h"
+#include "gdt/gdt.hpp"
+#include "interrupts/IDT.hpp"
+#include "memory/VMManager.hpp"
 
 extern VMManager KernelVMM;
 

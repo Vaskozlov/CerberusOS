@@ -1,6 +1,6 @@
-#include <acpi.hpp>
+#include "pci.hpp"
+#include "acpi.hpp"
 #include <string.h>
-#include <pci.hpp>
 
 extern kernel_services_t *KS;
 

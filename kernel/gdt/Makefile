@@ -10,6 +10,3 @@ $(BUILD_DIR)/%.o: gdt/%.cpp
 
 $(BUILD_DIR)/%.o: gdt/%.s
 	$(CC) $(ASMFLAGS) $< -o $@
-
-CFLAGS += -I./gdt
-CXXFLAGS += -I ./gdt

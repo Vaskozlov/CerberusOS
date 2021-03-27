@@ -10,6 +10,3 @@ $(BUILD_DIR)/%.o: structures/%.cpp
 
 $(BUILD_DIR)/%.o: structures/%.s
 	$(CC) $(ASMFLAGS) $< -o $@
-
-CFLAGS += -I./structures
-CXXFLAGS += -I ./structures

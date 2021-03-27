@@ -10,6 +10,3 @@ $(BUILD_DIR)/%.o: interrupts/%.cpp
 
 $(BUILD_DIR)/%.o: interrupts/%.s
 	$(CC) -Wno-unused-command-line-argument -mgeneral-regs-only -mno-red-zone $(ASMFLAGS) $< -o $@
-
-CFLAGS += -I./interrupts
-CXXFLAGS += -I ./interrupts

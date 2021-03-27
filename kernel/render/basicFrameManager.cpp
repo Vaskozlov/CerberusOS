@@ -27,7 +27,7 @@ void BasicRender::ClearScreen(){
     CursorPosition.y = 10;
 }
 
-__attribute__((optnone)) 
+
 int BasicRender::PutChar(int c){
     u16 value;
     u32 *pixels = (u32*) FrameAddress;

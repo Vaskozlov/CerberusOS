@@ -14,6 +14,9 @@ class KernelInfo{
     static GDTDescriptor gdt;
 
 private:
+    static void SetUpIDTEntry(void *handler, u16 position, u8 selector, u8 type_attr);
+
+private:
     static void InitVMM();
     static void InitGDT();
     static void InitIDT();

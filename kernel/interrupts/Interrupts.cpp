@@ -6,7 +6,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 
-inline void Go2Sleep() { while (1) __asm__ __volatile__ ("hlt"); }
+inline void Go2Sleep() { while (1) {__asm__ __volatile__ ("hlt");} }
 
 __attribute__((interrupt))
 void DevideByZero_Handler(struct interrupt_frame *frame){
@@ -75,7 +75,7 @@ void DoubleFault_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt)) 
 void GeneralProtection_Handler(struct interrupt_frame *frame){
-    Printf("GP fault\n");
+    Printf("GP fault at %p\n", frame->ip);
 
     Go2Sleep();
     return;

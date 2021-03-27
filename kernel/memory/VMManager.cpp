@@ -62,7 +62,7 @@ void VMManager::MapMemory4KB(void *virtualMemory, void *PhysicalAddress){
     PDE.SetAddress(PhysicalAddress);
     PDE.SetFlag(PageDirectoryFlags::present);
     PDE.SetFlag(PageDirectoryFlags::readWrite);
-    PD->entries[indexer.PT_i] = PDE;
+    PT->entries[indexer.P_i] = PDE;
 }
 
 void VMManager::MapMemory2MB(void *virtualMemory, void *PhysicalAddress){

@@ -4,7 +4,7 @@ OUTPUT_ARCH(i386:x86-64)
 ENTRY(_start)
 SECTIONS
 {
-  . = 0;
+  . = 0x1000;
    _kernelStart = .;
   ImageBase = .;
   /* .hash and/or .gnu.hash MUST come first! */

@@ -272,6 +272,8 @@ size_t PhisicalAllocator::SetUp(){
     AvailableMemory *= 0x1000;
 
     auto initSize = Init(mainMemory, AvailableMemory, TotalMemory);
+    PhisicalAllocator::Get4KB(); // skip first 0x1000
+    
     {
         i64 selfSize2MB = initSize >> 21;
         i64 selfSize4KB = initSize >> 12;

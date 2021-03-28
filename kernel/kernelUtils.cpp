@@ -125,5 +125,7 @@ void KernelInfo::Init(){
     InitVMM();
     InitACPI();
 
+    BasicRender::ClearScreen();
+
     Printf("KernelInfo ready in %.10lf seconds. Available memeory: %llu MB\n", PIT::GetTimeSicneBoot(), PhisicalAllocator::GetAvailableMemory() / 1024 / 1024);
 }

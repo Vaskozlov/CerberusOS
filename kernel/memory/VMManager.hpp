@@ -5,6 +5,7 @@
 #include "PhisicalAllocator.hpp"
 
 enum PageDirectoryFlags{
+    NotPresented    = 0b0,
     present         = 0b1,
     readWrite       = 0b10,
     superuser       = 0b100,
@@ -16,8 +17,12 @@ enum PageDirectoryFlags{
     ignore1         = 0b100000000,
     available0      = 0b1000000000,
     available1      = 0b10000000000,
-    available2      = 0b100000000000 
+    available2      = 0b100000000000,
+    PageSize4KB     = 0b1000000000000,
+    PageSize2MB     = 0b10000000000000,
+    PageSize1GB     = 0b100000000000000,
 };
+
 
 class PageDirectoryEntry{
     u64 value;
@@ -35,8 +40,16 @@ public:
         return (void*)(value - (value % 0x1000));
     }
 
+    inline PageDirectoryFlags GetFlags(){
+        return (PageDirectoryFlags)(value % 0x1000);
+    }
+
     inline bool IsFlagSet(PageDirectoryFlags flag){
         return (value & flag) > 0;
+    }
+
+    inline void RemoveFlags(){
+        value -= value % 0x1000;
     }
 
 public:
@@ -113,12 +126,19 @@ public:
     inline size_t GetMappedPages1GB() { return MappedPages1GB; }
 
 public:
+    PageDirectoryFlags GetPageFLags(void *virtualMemory);
     void MapMemory4KB(void *virtualMemory, void *PhysicalAddress);
     void MapMemory2MB(void *virtualMemory, void *PhysicalAddress);
     void MapMemory1GB(void *virtualMemory, void *PhysicalAddress);
 
+    void UnMapMemory4KB(void *virtualMemory, void *PhysicalAddress);
+    void UnMapMemory2MB(void *virtualMemory, void *PhysicalAddress);
+    void UnMapMemory1GB(void *virtualMemory, void *PhysicalAddress);
+
     inline VMManager(PageTable *PML4Address) : PML4(PML4Address), MappedPages4KB(0) {}
     VMManager() = default;
 };
+
+void PrintPDE(PageDirectoryFlags flags);
 
 #endif /* VMManager_hpp */

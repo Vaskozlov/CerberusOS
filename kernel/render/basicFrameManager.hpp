@@ -37,6 +37,10 @@ public:
         FrameBuffer = newFrameBuffer;
     }
 
+    static inline void SetCursorPosition(vec2<u32> pos){
+        CursorPosition = pos;
+    }
+
 public:
     BasicRender() = delete;
     ~BasicRender() = delete;

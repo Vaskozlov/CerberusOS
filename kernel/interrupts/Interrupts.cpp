@@ -2,9 +2,12 @@
 #include <hardware/io.hpp>
 #include <printf/Printf.h>
 #include "scheduling/pit/pit.hpp"
+#include <memory/VMManager.hpp>
+#include <memory/kmalloc.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
+extern VMManager KernelVMM;
 
 inline void Go2Sleep() { while (1) {__asm__ __volatile__ ("hlt");} }
 
@@ -97,9 +100,15 @@ __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame,
         : "=r" (memoryRegion)
     );
    
-    Printf("Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
-    
-    Go2Sleep();
+    if (memoryRegion > kMallocHeader.MallocBegin && memoryRegion < kMallocHeader.MallocHead){
+        auto page = PhisicalAllocator::Get2MB();
+        KernelVMM.MapMemory2MB((void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
+    }
+    else{
+        Printf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
+        Go2Sleep();
+    }
+
     return;
 }
 

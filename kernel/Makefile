@@ -14,6 +14,9 @@ GNU_EFI_DIR 	:= ../gnu-efi
 TARGET 			:= kernel.elf
 LINUX_HEADERS 	:= /usr/src/sys/build
 
+MAJORE_VERSION := 1
+MINORE_VERSION := 1
+
 ifeq (FreeBSD, $(OS))
 LDSCRIPT := linkers/elf_$(ARCH)_fbsd_efi.lds
 else
@@ -29,7 +32,9 @@ CFLAGS :=   -O3 -g \
 			-I $(LINUX_HEADERS)/include \
 			-I $(MUSL_DIR)/arch \
 			-I . \
-			-std=c11
+			-std=c11 \
+			-D MAJORE_VERSION=$(MAJORE_VERSION) \
+			-D MINORE_VERSION=$(MINORE_VERSION)
 
 CXXFLAGS := -O3 -g \
 			-c \
@@ -40,7 +45,9 @@ CXXFLAGS := -O3 -g \
 			-I $(LINUX_HEADERS)/include \
 			-I $(MUSL_DIR)/arch \
 			-I . \
-			-std=c++17
+			-std=c++17 \
+			-D MAJORE_VERSION=$(MAJORE_VERSION) \
+			-D MINORE_VERSION=$(MINORE_VERSION)
 
 ASMFLAGS := -O3\
 			-Wall -Wextra \

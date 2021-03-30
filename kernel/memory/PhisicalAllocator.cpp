@@ -218,13 +218,6 @@ void *PhisicalAllocator::Get1GB(){
     return (void*)(index << 30);
 }
 
-template<class T>
-const inline T align(T number, size_t power)
-{
-    auto middle = (number & ((1UL << power) - 1));
-    middle = middle == 0 ? (1UL << power) : middle;
-    return number + (1UL << power) - middle;
-}
 
 size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t totalMemory){
     TotalMemory = totalMemory;
@@ -326,77 +319,3 @@ size_t PhisicalAllocator::SetUp(){
     return initSize;
 }
 
-
-/*
-
-
-    if (mMapEnteries > 0) return PPASize;
-
-    void *selfLocation = NULL;
-    size_t largesrSegment = 0;
-    u64 numberOfPages = 0;
-    mMapEnteries = KS->mMapSize / KS->mMapDescriptorSize;
-
-    for (size_t i = 0; i < mMapEnteries; i++){
-        MemoryDescriptor_t *descriptor = (MemoryDescriptor_t *)((u64)KS->mMap + i * KS->mMapDescriptorSize);
-       
-        if (
-            descriptor->type == EFI_MEMORY_TYPES::EfiConventionalMemory &&
-            descriptor->numberOfPages > largesrSegment
-        ){
-            selfLocation = descriptor->physicalStart;
-            largesrSegment = descriptor->numberOfPages;
-        }
-        numberOfPages += descriptor->numberOfPages;
-    }
-
-    AvailableMemory = largesrSegment * 0x1000;
-    TotalMemory = numberOfPages * 0x1000;
-
-    u64 extra2MBEnteries = (TotalMemory >> 21) % 512;
-    Enteries1GB = (TotalMemory >> 30);
-    Address = selfLocation;
-    BigHeaders = (Header1GB *)selfLocation;
-    AllocatorHead = sizeof(Header1GB) * (Enteries1GB + 1) + (u64) selfLocation;
-    PPASize = (Enteries1GB + 1) * (sizeof(Header2MB) * 512);
-
-    Printf("First memset %lu\n", numberOfPages);
-    memset(selfLocation, 0, (Enteries1GB + 1) * sizeof(Header1GB));
-
-    for (u64 i = 0; i < Enteries1GB; i++){
-        BigHeaders[i].headers2MB = (Header2MB*) ((u64)AllocatorHead);
-        BigHeaders[i].enteries = 512;
-        BigHeaders[i].locked = 0;
-        BigHeaders[i].availableGate = 0;
-        AllocatorHead += sizeof(Header2MB) * 512;
-    }
-    
-    if (extra2MBEnteries){
-        BigHeaders[Enteries1GB].enteries = extra2MBEnteries;
-        memset((void*)AllocatorHead, 0, sizeof(Header2MB) * extra2MBEnteries + sizeof(Header1GB));
-        BigHeaders[Enteries1GB].headers2MB = (Header2MB*) (AllocatorHead);
-        AllocatorHead += sizeof(Header2MB) * extra2MBEnteries;
-
-
-        for (u32 i = extra2MBEnteries; i < 512; i++){
-            BigHeaders[Enteries1GB].headers2MB[i].locked = 1;
-        }
-
-        Enteries1GB++;
-    }
-
-    Lock2MB(selfLocation);
-
-    for (size_t i = 0; i < mMapEnteries; i++){
-        MemoryDescriptor_t *descriptor = (MemoryDescriptor_t *)((u64)KS->mMap + i * KS->mMapDescriptorSize);
-
-        if (descriptor->type != EFI_MEMORY_TYPES::EfiConventionalMemory)
-            Reserve4KB(descriptor->physicalStart, descriptor->numberOfPages);
-    }
-    
-    Lock4KB((void*)KernelStart, ((u64)KernelEnd - (u64)KernelStart) / 0x1000);
-    Lock4KB(KS->frameBuffer.base_address, KS->frameBuffer.buffer_size / 0x1000 + 1);
-    
-    return PPASize;
-
-*/

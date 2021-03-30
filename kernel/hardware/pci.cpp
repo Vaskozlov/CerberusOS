@@ -1,6 +1,8 @@
 #include "pci.hpp"
 #include "memory/VMManager.hpp"
 #include <printf/Printf.h>
+#include "ahci/ahci.hpp"
+#include <memory/kmalloc.h>
 
 extern VMManager KernelVMM;
 
@@ -16,10 +18,19 @@ namespace PCI{
         if (pciDeviceHeader->DeviceID == 0) return;
         if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
 
-        Printf("%s %s\n",
-            GetVendorName(pciDeviceHeader->VendorId),
-            GetSubclassName(pciDeviceHeader->Class, pciDeviceHeader->SubClass)
-        );
+        
+        switch (pciDeviceHeader->Class) {
+
+            case 0x01:
+                switch (pciDeviceHeader->SubClass) {
+                    case 0x06:
+                        switch (pciDeviceHeader->ProgIF) {
+                            case 0x1: // AHCI 1.0
+                                new AHCI::AHCIDriver(pciDeviceHeader);
+                        }
+                }
+        }
+
     }
 
     void EnumerateDevice(u64 busAddress, u64 device){

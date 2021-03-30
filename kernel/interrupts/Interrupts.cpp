@@ -3,10 +3,10 @@
 #include <printf/Printf.h>
 #include "scheduling/pit/pit.hpp"
 #include <memory/VMManager.hpp>
-#include <memory/kmalloc.hpp>
+#include <memory/kmalloc.h>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 extern VMManager KernelVMM;
 
 inline void Go2Sleep() { while (1) {__asm__ __volatile__ ("hlt");} }
@@ -100,8 +100,9 @@ __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame,
         : "=r" (memoryRegion)
     );
    
-    if (memoryRegion > kMallocHeader.MallocBegin && memoryRegion < kMallocHeader.MallocHead){
+    if (memoryRegion >= MallocMainHeder.MallocBegin && memoryRegion < MallocMainHeder.MallocHead){
         auto page = PhisicalAllocator::Get2MB();
+        Printf("Memory %p %p\n", (void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
         KernelVMM.MapMemory2MB((void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
     }
     else{
@@ -166,4 +167,4 @@ void RemapPIC(){
     outb(a2, PIC2_DATA);
 }
 
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop

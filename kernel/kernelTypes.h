@@ -12,6 +12,26 @@
 #  define __END_DECL
 #endif /* __cplusplus */
 
+#if defined(__clang__)
+#  define COMPILER clang
+#  define COMPILER_NAME "clang"
+#elif defined(__GNUC__)
+#  define COMPILER GCC
+#  define COMPILER_NAME "gcc"
+#endif
+
+#if defined(MAJORE_VERSION)
+#  define CERBERUS_MAJORE_VERSION MAJORE_VERSION
+#else
+#  define CERBERUS_MAJORE_VERSION 0
+#endif
+
+#if defined(MINORE_VERSION)
+#  define CERBERUS_MINORE_VERSION MINORE_VERSION
+#else
+#  define CERBERUS_MINORE_VERSION 0
+#endif
+
 /**
  * str2u16 - converts array of char to u16
  * @str: array of char
@@ -70,5 +90,15 @@ typedef uint8_t     u8;
 typedef uint16_t    u16;
 typedef uint32_t    u32;
 typedef uint64_t    u64;
+
+#if defined(__cplusplus)
+template<class T>
+inline T align(T number, size_t power)
+{
+    auto middle = (number & ((1UL << power) - 1));
+    middle = middle == 0 ? (1UL << power) : middle;
+    return number + (1UL << power) - middle;
+}
+#endif
 
 #endif /* kernelTypes_h */

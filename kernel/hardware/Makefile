@@ -10,3 +10,5 @@ $(BUILD_DIR)/%.o: hardware/%.cpp
 
 $(BUILD_DIR)/%.o: hardware/%.s
 	$(CC) $(ASMFLAGS) $< -o $@
+
+include hardware/ahci/Makefile

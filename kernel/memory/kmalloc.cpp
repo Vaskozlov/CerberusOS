@@ -1,101 +1,105 @@
-#include "kmalloc.hpp"
+#include "kmalloc.h"
 #include <printf/Printf.h>
+#include <memory/VMManager.hpp>
 
-MallocHeader kMallocHeader;
-
-template<class T>
-const inline T align(T number, size_t power)
-{
-    auto middle = (number & ((1UL << power) - 1));
-    middle = middle == 0 ? (1UL << power) : middle;
-    return number + (1UL << power) - middle;
-}
+MallocHeader_t MallocMainHeder;
+extern VMManager KernelVMM;
 
 void InitKMalloc(){
-    kMallocHeader.MallocBegin = align(PhisicalAllocator::GetTotalMemory(), 30);
-    kMallocHeader.MallocHead = kMallocHeader.MallocBegin;
-    kMallocHeader.MappedPages = 0;
-    kMallocHeader.firstElem = NULL;
+    MallocMainHeder.MallocBegin = align(PhisicalAllocator::GetTotalMemory(), 30);
+    MallocMainHeder.MallocHead = MallocMainHeder.MallocBegin;
 }
 
-static void SplitRegion(kMallocElem *elem, size_t firstRegSize){
-    if (elem->size - firstRegSize < sizeof(kMallocElem) * 2) return;
+static void SplitRegion(kMallocElem_t *region, size_t size){
 
-    kMallocElem *anotherReg = (kMallocElem *)((u64)elem + firstRegSize + sizeof(kMallocElem));
-    anotherReg->free = true;
-    anotherReg->next = NULL;
-    anotherReg->previous = elem;
-    anotherReg->size = elem->size - (firstRegSize + sizeof(kMallocElem) * 2);
-    elem->size = firstRegSize;
-    elem->next = anotherReg;
+    if ((i64)region->size - (i64)size - (i64)sizeof(kMallocElem_t) < 1) return;
+
+    kMallocElem_t *newRegion = (kMallocElem_t *) ((u64)region + sizeof(kMallocElem_t) + size);
+    newRegion->size = region->size - size - sizeof(kMallocElem_t);
+    newRegion->free = 1;
+    newRegion->next = NULL;
+    newRegion->previous = region;
+    region->next = newRegion;
+    region->size = size;
 }
 
 void *kmalloc(u64 size){
-    if (size == 0) return NULL;
-    if (size >= PhisicalAllocator::GetAvailableMemory()) return NULL;
-    u64 smallestSize = 0xFFFFFFFFFFFFFFFF;
-    kMallocElem *bestElem = NULL;
+    u64 minimumSize = UINT64_MAX;
+    kMallocElem_t *suitableElem = NULL;
+    kMallocElem_t *elem = MallocMainHeder.firstElem;
 
-    kMallocElem *elem = kMallocHeader.firstElem;
-    
-    while(elem != NULL){
-        if (elem->free == true && elem->size >= size && elem->size < smallestSize){
-            smallestSize = elem->size;
-            bestElem = elem;
+    while (elem != NULL){
+
+        if (elem->free == 1 && elem->size >= size && elem->size < minimumSize){
+            suitableElem = elem;
+            minimumSize = elem->size;
         }
+
         elem = elem->next;
     }
 
-    if (bestElem == NULL){
-        kMallocElem *newElem = (kMallocElem*) kMallocHeader.MallocHead;
-        kMallocHeader.MallocHead += ((((size) >> 21UL) + 1) << 21UL) + sizeof(kMallocElem);
-        
-        newElem->size = ((((size) >> 21UL) + 1) << 21UL) - sizeof(kMallocElem);
-        newElem->next = NULL;
-        newElem->free = true;
-        newElem->previous = NULL;
+    if (suitableElem == NULL){
+        suitableElem = (kMallocElem_t*) MallocMainHeder.MallocHead;
+        MallocMainHeder.MallocHead += align(size + sizeof(kMallocElem_t) * 2, 21);
+        suitableElem->size = align(size + sizeof(kMallocElem_t), 21) - sizeof(kMallocElem_t);
+        suitableElem->free = 1;
+        suitableElem->next = NULL;
+        suitableElem->previous = MallocMainHeder.lastElem;
 
-        bestElem = newElem;
-        smallestSize = newElem->size;
+        if (MallocMainHeder.lastElem == NULL) MallocMainHeder.firstElem = suitableElem;
+        else MallocMainHeder.lastElem->next = suitableElem;
+    
+        SplitRegion(suitableElem, size);
 
-        if (kMallocHeader.firstElem == NULL) kMallocHeader.firstElem = newElem;
-
-        kMallocHeader.lastElem = newElem;
+        MallocMainHeder.lastElem = suitableElem->next == NULL ? suitableElem : suitableElem->next;
     }
+    else{
+        kMallocElem_t *suited = suitableElem->next;
+        SplitRegion(suitableElem, size);
+        kMallocElem_t *mayNew = suitableElem->next == NULL ? suitableElem : suitableElem->next;
 
-    SplitRegion(bestElem, size);
-    bestElem->free = false;
-    return (void*)((u64)bestElem + sizeof(kMallocElem));
+        if (suited == NULL){
+            MallocMainHeder.lastElem = mayNew;
+        }
+        else{
+            suited->previous = mayNew;
+            mayNew->next = suited;
+        }
+    }
+    suitableElem->free = 0;
+
+    elem = MallocMainHeder.firstElem;
+    return (void*)((u64)suitableElem + sizeof(kMallocElem_t));
 }
 
 void kfree(void *address){
-    kMallocElem *elem2Clear = (kMallocElem *)((u64) address - sizeof(kMallocElem));
-    
+
+    kMallocElem_t *elem2Clear = (kMallocElem_t *)((u64) address - sizeof(kMallocElem_t));
+
     if (elem2Clear->free == 1){
         Printf("Double free on pointer %p\n", address);
         return;
     }
 
-    elem2Clear->free = true;
-    
-    if (elem2Clear == kMallocHeader.firstElem)
-        kMallocHeader.firstElem = elem2Clear;
+    elem2Clear->free = 1;
 
-    if (elem2Clear->next != NULL && elem2Clear->next->free == true){
-        kMallocElem *nextNext = elem2Clear->next->next;
-        elem2Clear->size += sizeof(kMallocElem) + elem2Clear->next->size;
+    if (elem2Clear->previous != NULL && elem2Clear->previous->free == 1){
+        kMallocElem_t *elemBefore = elem2Clear->previous;
 
-        if (nextNext != NULL)
-            nextNext->previous = elem2Clear;
-
-        elem2Clear->next = nextNext;
+        elemBefore->next = elem2Clear->next;
+        elemBefore->size += elem2Clear->size + sizeof(kMallocElem_t);
+        
+        if (elem2Clear->next != NULL) elem2Clear->next->previous = elemBefore;
+        elem2Clear = elemBefore;
     }
 
-    if (elem2Clear->previous != NULL && elem2Clear->previous->free == true){
-        elem2Clear->previous->size += sizeof(kMallocElem) + elem2Clear->size;
-        elem2Clear->previous->next = elem2Clear->next;
+    if (elem2Clear->next != NULL && elem2Clear->next->free == 1){
+        kMallocElem_t *elemNext = elem2Clear->next;
 
-        if (elem2Clear->next != NULL)
-            elem2Clear->next->previous = elem2Clear->previous;
+        if (elemNext == MallocMainHeder.lastElem) MallocMainHeder.lastElem = elem2Clear;
+
+        elem2Clear->size += elemNext->size + sizeof(kMallocElem_t);
+        elem2Clear->next = elemNext->next;
+        if (elemNext->next != NULL) elemNext->next->previous = elem2Clear;
     }
 }

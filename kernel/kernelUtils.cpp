@@ -6,14 +6,7 @@
 #include "scheduling/pit/pit.hpp"
 #include "render/basicFrameManager.hpp"
 #include "interrupts/Interrupts.h"
-
-template<class T>
-const inline T align(T number, size_t power)
-{
-    auto middle = (number & ((1UL << power) - 1));
-    middle = middle == 0 ? (1UL << power) : middle;
-    return number + (1UL << power) - middle;
-}
+#include "memory/kmalloc.h"
 
 IDTR KernelInfo::idtr;
 GDTDescriptor KernelInfo::gdt;
@@ -123,9 +116,19 @@ void KernelInfo::Init(){
     PhisicalAllocator::SetUp();
 
     InitVMM();
-    InitACPI();
+   
+    //InitACPI();
 
     BasicRender::ClearScreen();
+    InitKMalloc();
 
-    Printf("KernelInfo ready in %.10lf seconds. Available memeory: %llu MB\n", PIT::GetTimeSicneBoot(), PhisicalAllocator::GetAvailableMemory() / 1024 / 1024);
+    Printf(
+        "KernelInfo ready in %.10lf seconds. Available memeory: %llu MB, " 
+        "Cerberus majore version %u, Cerberus minore version %u, compiled with %s\n",
+        PIT::GetTimeSicneBoot(),
+        PhisicalAllocator::GetAvailableMemory() / 1024 / 1024,
+        CERBERUS_MAJORE_VERSION,
+        CERBERUS_MINORE_VERSION,
+        COMPILER_NAME
+    );
 }

@@ -8,11 +8,9 @@ double PIT::Frequency1Div = 0.0;
 void PIT::SetDivisor(u16 divisor){
     Divisor = divisor;
 
-    //outb(0x36, 0x43);
-    //io_wait();
-    outb((unsigned char)(Divisor & 0x00FF), 0x40);
-    io_wait();
-    outb((unsigned char)((divisor & 0xff00) >> 8), 0x40);
+    ARCH::outb((unsigned char)(Divisor & 0x00FF), 0x40);
+    ARCH::io_wait();
+    ARCH::outb((unsigned char)((divisor & 0xff00) >> 8), 0x40);
 }
 
 void PIT::Sleepd(double second){

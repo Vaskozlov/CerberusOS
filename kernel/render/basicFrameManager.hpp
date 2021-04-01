@@ -4,6 +4,8 @@
 #include <render.h>
 #include <kernel.h>
 
+extern kernel_services_t *KS;
+
 template <typename T>
 struct vec2{
     T x, y;
@@ -21,8 +23,9 @@ enum PixelColor{
 };
 
 class BasicRender{
-    static FrameBuffer_t *FrameBuffer;
-    static vec2<u32>     CursorPosition;
+    static FrameBuffer_t    *FrameBuffer;
+    static vec2<u32>        CursorPosition;
+    static vec2<u32>        PrintingSize;
     
 public:
     static Color_t  ClearColor;
@@ -31,10 +34,13 @@ public:
 public:
     static void ClearScreen();
     static int PutChar(int c);
+    static void SetColor(unsigned char r, unsigned char g, unsigned char b);
 
 public:
     static inline void SetFrameBuffer(FrameBuffer_t *newFrameBuffer){
         FrameBuffer = newFrameBuffer;
+        PrintingSize.x = newFrameBuffer->pixelsPerScanline / KS->psf2.header.width;
+        PrintingSize.y = newFrameBuffer->height / KS->psf2.header.height;
     }
 
     static inline void SetCursorPosition(vec2<u32> pos){

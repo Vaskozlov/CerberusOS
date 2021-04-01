@@ -4,6 +4,7 @@
  *  Function to print char
  */
 int (*Putchar)(int) = 0x0;
+void (*SetColor)(unsigned char r, unsigned char g, unsigned char b) = 0x0;
 char NumberBuffer[127];
 
 /**

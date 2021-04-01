@@ -2,7 +2,6 @@
 #include "printf/Printf.h"
 #include "hardware/acpi.hpp"
 #include "hardware/pci.hpp"
-#include "hardware/io.hpp"
 #include "scheduling/pit/pit.hpp"
 #include "render/basicFrameManager.hpp"
 #include "interrupts/Interrupts.h"
@@ -48,8 +47,6 @@ void KernelInfo::InitVMM(){
         :
         : "r" (PML4)
     );
-    
-    //BasicRender::ClearScreen();
 }
 
 void KernelInfo::InitGDT(){
@@ -72,9 +69,9 @@ void KernelInfo::InitIDT(){
     idtr.offset = (u64) IDTBuffer;
     
     SetUpIDTEntry(  (void*) DevideByZero_Handler,       0x00, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) Debug_Handler,              0x01, 0x08, IDT_TA_TrapGate);
-    SetUpIDTEntry(  (void*) Breakpoint_Handler,         0x03, 0x08, IDT_TA_TrapGate);
-    SetUpIDTEntry(  (void*) Overflow_Handler,           0x04, 0x08, IDT_TA_TrapGate);
+    SetUpIDTEntry(  (void*) Debug_Handler,              0x01, 0x08, IDT_TA_TrapGate     );
+    SetUpIDTEntry(  (void*) Breakpoint_Handler,         0x03, 0x08, IDT_TA_TrapGate     );
+    SetUpIDTEntry(  (void*) Overflow_Handler,           0x04, 0x08, IDT_TA_TrapGate     );
     SetUpIDTEntry(  (void*) BoundRange_Handler,         0x05, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) InvalidOpcode_Handler,      0x06, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) DeviceNotAvailable_Handler, 0x07, 0x08, IDT_TA_InterruptGate);
@@ -86,12 +83,10 @@ void KernelInfo::InitIDT(){
     SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x21, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x2C, 0x08, IDT_TA_InterruptGate);
 
-
     __asm__ __volatile__ ("lidt %0" : : "m" (idtr));
 
     RemapPIC();
-
-    Printf("IDT ready\n");
+    Printf("IDT and PIC ready\n");
 }
 
 void KernelInfo::InitACPI(){
@@ -104,27 +99,24 @@ void KernelInfo::InitACPI(){
 void KernelInfo::Init(){
     InitGDT();
     InitIDT();
-
-    outb(0x08, PIC1_DATA);
-    outb(0x70, PIC2_DATA);
+    
+    ARCH::outb(0x08, PIC1_DATA);
+    ARCH::outb(0x70, PIC2_DATA);
 
     __asm__ __volatile__ ("sti");
 
-    PIT::SetDivisor(2000);
+    PIT::SetDivisor(1000);
     
     Printf("Wait for VMM initialization\n");
     PhisicalAllocator::SetUp();
 
     InitVMM();
-   
-    //InitACPI();
-
-    BasicRender::ClearScreen();
     InitKMalloc();
+    InitACPI();
 
     Printf(
-        "KernelInfo ready in %.10lf seconds. Available memeory: %llu MB, " 
-        "Cerberus majore version %u, Cerberus minore version %u, compiled with %s\n",
+        "KernelInfo ready in \xff\xff\0\xff%.10lf\xff\xff\xff\xff seconds. Available memeory: \xff\xff\0\xff%llu MB\xff\xff\xff\xff, " 
+        "Cerberus majore version \xff\xff\0\xff%u\xff\xff\xff\xff, Cerberus minore version \xff\xff\0\xff%u\xff\xff\xff\xff, compiled with %s\n",
         PIT::GetTimeSicneBoot(),
         PhisicalAllocator::GetAvailableMemory() / 1024 / 1024,
         CERBERUS_MAJORE_VERSION,

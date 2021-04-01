@@ -12,9 +12,8 @@ namespace AHCI {
     {
         ABAR = (HBAMmeory*)(((PCI::PCIHeader0*)pciBaseAddress)->BAR5);
         
-        if ((u64)ABAR > PhisicalAllocator::GetTotalMemory()){
+        if ((u64)ABAR > PhisicalAllocator::GetTotalMemory())
             KernelVMM.MapMemory4KB(ABAR, ABAR);
-        }
 
         Printf("AHCI Driver ready\n");
     }

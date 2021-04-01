@@ -2,7 +2,7 @@
 #define pit_hpp
 
 #include <kernel.h>
-#include <hardware/io.hpp>
+#include <arch.hpp>
 
 #define PIT_A 0x40
 #define PIT_B 0x41

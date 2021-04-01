@@ -1,27 +1,35 @@
 #include <basicFrameManager.hpp>
+#include <printf/Printf.h>
 
 #define Psf2Glyph KS->psf2.header
 #define PixelsPerScalLine FrameBuffer->pixelsPerScanline
 #define FrameAddress FrameBuffer->base_address
 
-extern kernel_services_t *KS;
-
 // seting up static variables
 FrameBuffer_t   *BasicRender::FrameBuffer;
-vec2<u32>       BasicRender::CursorPosition   = {10U, 10U};
-Color_t         BasicRender::ClearColor       = {PixelColor::COLOR_BLACK};
-Color_t         BasicRender::FontColor        = {PixelColor::COLOR_WHITE};
+vec2<u32>       BasicRender::PrintingSize;
+vec2<u32>       BasicRender::CursorPosition  = {0, 0};
+Color_t         BasicRender::ClearColor      = {PixelColor::COLOR_BLACK};
+Color_t         BasicRender::FontColor       = {PixelColor::COLOR_WHITE};
 
-void BasicRender::ClearScreen(){
-    u32 *pixels = FrameAddress;
+static inline u16 rotate_left (uint16_t u, size_t r)
+{
+    __asm__ ("rolw %%cl, %0" : "+r" (u) : "c" (r));
+    return u;
+}
 
-    for(
-        ;
-        pixels < FrameAddress + FrameBuffer->buffer_size / sizeof(u32);
-        pixels++
-    ){
-        *pixels = ClearColor.value;
-    }
+void BasicRender::ClearScreen(){    
+    u64 times = FrameBuffer->buffer_size / sizeof(u32) / 2;
+
+    __asm__ __volatile__(
+        "movq %1, %%rdi\n"
+        "movl %2, %%edx\n"
+        "shl $32, %%rdx\n"
+        "orq %%rdx, %%rax\n"
+        "rep stosq"
+        :
+        : "c" (times), "r" (FrameAddress), "rax" (ClearColor.value)
+    );
 
     CursorPosition.x = 10;
     CursorPosition.y = 10;
@@ -30,48 +38,41 @@ void BasicRender::ClearScreen(){
 
 int BasicRender::PutChar(int c){
     u16 value;
-    u32 *pixels = (u32*) FrameAddress;
     u8 *font_ptr = (u8 *) KS->psf2.glyph_buffer + (c * Psf2Glyph.charsize);
 
-    if (CursorPosition.x + Psf2Glyph.width >= PixelsPerScalLine){
-        CursorPosition.x = 10;
-        CursorPosition.y += Psf2Glyph.height;
+    if (CursorPosition.x >= PrintingSize.x){
+        CursorPosition.x = 0;
+        CursorPosition.y ++;
     }
 
-    if (CursorPosition.y + Psf2Glyph.height >= FrameBuffer->height) return -1;
+    if (CursorPosition.y > PrintingSize.y) return -1;
 
     if (c == '\n'){
-        CursorPosition.x = 10;
-        CursorPosition.y += Psf2Glyph.height;
+        CursorPosition.x = 0;
+        CursorPosition.y++;
         return c;
     }
 
-    for (u32 y = CursorPosition.y; y < CursorPosition.y + Psf2Glyph.height; y++){
-        value = *((u16*)font_ptr);
-
-    #if defined(__x86_64__) || defined(__AMD64__)
-        __asm__ __volatile__(
-            "rolw $1, %0;\n"
-            : "=r" (value)
-            : "r" (value)
-        );
-    #else
-        // add later
-    #endif
-
+    for (u32 y = 0; y < Psf2Glyph.height; y++){
+        
+        auto lineAddress = FrameAddress + (y + Psf2Glyph.height * CursorPosition.y) * PixelsPerScalLine + CursorPosition.x * Psf2Glyph.width + Psf2Glyph.width;
+    
+        value = rotate_left(*((u16*)font_ptr), 1);
         font_ptr += sizeof(value);
-        value <<= 1;
 
-        for (u32 x = CursorPosition.x + Psf2Glyph.width - 1; x >= CursorPosition.x; x--){
-            if ((value & 0b1) > 0)
-                *(pixels + x + (y * PixelsPerScalLine)) = FontColor.value;
-            else
-                *(pixels + x + (y * PixelsPerScalLine)) = ClearColor.value;
-            
-           value >>= 1;
+        for (u32 x = Psf2Glyph.width; x > 0; x--){
+            *lineAddress = (value & 0b1) > 0 ? FontColor.value : ClearColor.value;
+            lineAddress--;
+            value >>= 1;
         }
     }
 
-    CursorPosition.x += Psf2Glyph.width + 1;
+    CursorPosition.x++;
     return c;
+}
+
+void BasicRender::SetColor(unsigned char r, unsigned char g, unsigned char b){
+    FontColor.color.r = b;
+    FontColor.color.g = g;
+    FontColor.color.b = r;
 }

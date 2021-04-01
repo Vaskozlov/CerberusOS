@@ -1,4 +1,5 @@
 #include "Printf.h"
+#include "PrintTypes.h"
 
 /**
  *  get_flag - searc fol flags in __fmt
@@ -150,6 +151,14 @@ int Printf(const char *__restrict __fmt, ...)
 	int printed_bytes = 0;
 
 	for (; *__fmt != '\0'; __fmt++){
+
+        if (*__fmt == '\xFF'){
+            if (SetColor != NULL){
+                SetColor(*((unsigned char*)__fmt + 1), *((unsigned char*)__fmt + 2), *((unsigned char*)__fmt + 3));
+                __fmt += 3;
+            }
+            continue;
+        }
 
 		if (*__fmt == '%'){
 			__fmt++;

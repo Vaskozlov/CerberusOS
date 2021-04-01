@@ -17,7 +17,6 @@ namespace PCI{
         
         if (pciDeviceHeader->DeviceID == 0) return;
         if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
-
         
         switch (pciDeviceHeader->Class) {
 
@@ -27,10 +26,12 @@ namespace PCI{
                         switch (pciDeviceHeader->ProgIF) {
                             case 0x1: // AHCI 1.0
                                 new AHCI::AHCIDriver(pciDeviceHeader);
+                                break;
                         }
+                        break;
                 }
+                break;
         }
-
     }
 
     void EnumerateDevice(u64 busAddress, u64 device){
@@ -44,9 +45,8 @@ namespace PCI{
         if (pciDeviceHeader->DeviceID == 0) return;
         if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
 
-        for (u64 function = 0; function < 8; function++){
+        for (u64 function = 0; function < 8; function++)
             EnumerateFunction(deviceAddress, function);
-        }
     }
 
     void EnumerateBUS(u64 baseAddress, u64 bus){
@@ -60,9 +60,8 @@ namespace PCI{
         if (pciDeviceHeader->DeviceID == 0) return;
         if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
 
-        for (u64 device = 0; device < 32; device++){
+        for (u64 device = 0; device < 32; device++)
             EnumerateDevice(busAddress, device);
-        }
     }
 
     void EnumeratePCI(ACPI::MCFGHeader *mcfg){
@@ -71,10 +70,8 @@ namespace PCI{
         for (int i = 0; i < enteries; i++){
             ACPI::DeviceConfig *newDeviceConfig = (ACPI::DeviceConfig*)((u64)mcfg + sizeof(ACPI::MCFGHeader) + sizeof(ACPI::DeviceConfig) * i);
 
-            for (u64 bus = newDeviceConfig->startBus; bus < newDeviceConfig->endBus; bus++){
+            for (u64 bus = newDeviceConfig->startBus; bus < newDeviceConfig->endBus; bus++)
                 EnumerateBUS(newDeviceConfig->baseAddress, bus);
-            }
         }
-
     }
 }

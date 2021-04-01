@@ -32,6 +32,7 @@ typedef uint8_t u8;
  * Return printed char
  */
 extern int (*Putchar)(int);
+extern void (*SetColor)(unsigned char r, unsigned char g, unsigned char b);
 
 /**
  *  parameters - structure with parameters

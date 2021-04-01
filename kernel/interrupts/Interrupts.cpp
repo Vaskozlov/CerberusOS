@@ -1,5 +1,5 @@
 #include "Interrupts.h"
-#include <hardware/io.hpp>
+#include <arch.hpp>
 #include <printf/Printf.h>
 #include "scheduling/pit/pit.hpp"
 #include <memory/VMManager.hpp>
@@ -9,14 +9,12 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 extern VMManager KernelVMM;
 
-inline void Go2Sleep() { while (1) {__asm__ __volatile__ ("hlt");} }
-
 __attribute__((interrupt))
 void DevideByZero_Handler(struct interrupt_frame *frame){
    
     Printf("Zero division error\n");
     
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -24,7 +22,7 @@ __attribute__((interrupt))
 void Debug_Handler(struct interrupt_frame *frame){
     Printf("Debug\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -32,7 +30,7 @@ __attribute__((interrupt))
 void Breakpoint_Handler(struct interrupt_frame *frame){
     Printf("Breakpoint\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -40,7 +38,7 @@ __attribute__((interrupt))
 void Overflow_Handler(struct interrupt_frame *frame){
     Printf("Overflow error\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -48,7 +46,7 @@ __attribute__((interrupt))
 void BoundRange_Handler(struct interrupt_frame *frame){
     Printf("Bound Range error\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -56,7 +54,7 @@ __attribute__((interrupt))
 void InvalidOpcode_Handler(struct interrupt_frame *frame){
     Printf("InvalidOpcode error\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -64,7 +62,7 @@ __attribute__((interrupt))
 void DeviceNotAvailable_Handler(struct interrupt_frame *frame){
     Printf("Device not available error\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -72,7 +70,7 @@ __attribute__((interrupt))
 void DoubleFault_Handler(struct interrupt_frame *frame){
     Printf("Warning double fault accured! Stop execution!\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return; 
 }
 
@@ -80,7 +78,7 @@ __attribute__((interrupt))
 void GeneralProtection_Handler(struct interrupt_frame *frame){
     Printf("GP fault at %p\n", frame->ip);
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
@@ -88,26 +86,25 @@ __attribute__((interrupt))
 void SegmentNotPresent_Handler(struct interrupt_frame *frame){
     Printf("Segment not present error\n");
 
-    Go2Sleep();
+    ARCH::Go2Sleep();
     return;
 }
 
 __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame, unsigned long error_code){
-    u64 memoryRegion; 
+    u64 memoryRegion;
 
     __asm__ __volatile__(
         "movq %%cr2, %0\n"
         : "=r" (memoryRegion)
     );
    
-    if (memoryRegion >= MallocMainHeder.MallocBegin && memoryRegion < MallocMainHeder.MallocHead){
+    if (memoryRegion != 0x0 && memoryRegion >= MallocMainHeder.MallocBegin && memoryRegion < MallocMainHeder.MallocHead){
         auto page = PhisicalAllocator::Get2MB();
-        Printf("Memory %p %p\n", (void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
         KernelVMM.MapMemory2MB((void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
     }
     else{
         Printf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
-        Go2Sleep();
+        ARCH::Go2Sleep();
     }
 
     return;
@@ -126,45 +123,45 @@ void Pit_Handler(struct interrupt_frame *frame){
 }
 
 void PIC_EndMaster(){
-    outb(PIC_EOI, PIC1_COMMAND);
+    ARCH::outb(PIC_EOI, PIC1_COMMAND);
 }
 
 void PIC_EndSlave(){
-    outb(PIC_EOI, PIC2_COMMAND);
-    outb(PIC_EOI, PIC1_COMMAND);
+    ARCH::outb(PIC_EOI, PIC2_COMMAND);
+    ARCH::outb(PIC_EOI, PIC1_COMMAND);
 }
    
 void RemapPIC(){
     uint8_t a1, a2; 
 
-    a1 = inb(PIC1_DATA);
-    io_wait();
-    a2 = inb(PIC2_DATA);
-    io_wait();
+    a1 = ARCH::inb(PIC1_DATA);
+    ARCH::io_wait();
+    a2 = ARCH::inb(PIC2_DATA);
+    ARCH::io_wait();
 
-    outb(ICW1_INIT | ICW1_ICW4, PIC1_COMMAND);
-    io_wait();
-    outb(ICW1_INIT | ICW1_ICW4, PIC2_COMMAND);
-    io_wait();
+    ARCH::outb(ICW1_INIT | ICW1_ICW4, PIC1_COMMAND);
+    ARCH::io_wait();
+    ARCH::outb(ICW1_INIT | ICW1_ICW4, PIC2_COMMAND);
+    ARCH::io_wait();
 
-    outb(0x20, PIC1_DATA);
-    io_wait();
-    outb(0x28, PIC2_DATA);
-    io_wait();
+    ARCH::outb(0x20, PIC1_DATA);
+    ARCH::io_wait();
+    ARCH::outb(0x28, PIC2_DATA);
+    ARCH::io_wait();
 
-    outb(4, PIC1_DATA);
-    io_wait();
-    outb(2, PIC2_DATA);
-    io_wait();
+    ARCH::outb(4, PIC1_DATA);
+    ARCH::io_wait();
+    ARCH::outb(2, PIC2_DATA);
+    ARCH::io_wait();
 
-    outb(ICW4_8086, PIC1_DATA);
-    io_wait();
-    outb(ICW4_8086, PIC2_DATA);
-    io_wait();
+    ARCH::outb(ICW4_8086, PIC1_DATA);
+    ARCH::io_wait();
+    ARCH::outb(ICW4_8086, PIC2_DATA);
+    ARCH::io_wait();
 
-    outb(a1, PIC1_DATA);
-    io_wait();
-    outb(a2, PIC2_DATA);
+    ARCH::outb(a1, PIC1_DATA);
+    ARCH::io_wait();
+    ARCH::outb(a2, PIC2_DATA);
 }
 
 #pragma GCC diagnostic pop

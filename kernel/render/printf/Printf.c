@@ -300,7 +300,7 @@ int Printf(unsigned int printWay, const char *__restrict __fmt, ...)
 					break;
 
 				case 'p':
-					mem8set(&param, 0, sizeof(param));
+					memset(&param, 0, sizeof(param));
 					param.hashtag_flag = 1;
 					printed_bytes += PrintUInt(&param, (uintmax_t)va_arg(args, void*), *__fmt, printWay);
 					break;

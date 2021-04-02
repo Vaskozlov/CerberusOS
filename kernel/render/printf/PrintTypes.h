@@ -60,14 +60,6 @@ typedef struct parameters
 } parameters_t;
 
 /**
- * 	mem8set - sets value to dest n times
- *  @dest: pointer where to put value
- *  @value: byte to place at dest
- *  @n: how many times set value at dest
- */
-void mem8set(void *dest, i8 value, size_t n);
-
-/**
  *  init_parameters - sets zero to all field in parameters_t, except precision which is -1
  *  @param: parameters_t where to set zeroes
  */

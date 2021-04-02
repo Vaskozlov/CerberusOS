@@ -6,6 +6,8 @@
 
 __BEGIN_DECLS
 
+void *memset (void *__s, int __c, size_t __n) __THROW __nonnull ((1));
+
 /**
  * Printf - prints anything
  * @__fmt: the format string

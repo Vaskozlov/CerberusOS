@@ -12,9 +12,8 @@ extern "C" int _start(kernel_services_t *services){
     SetColorWay[0] = BasicRender::SetColor;
 
     BasicRender::SetFrameBuffer(&KS->frameBuffer);
-    
     KernelInfo::Init();
+
     while (1){ __asm__ __volatile__("hlt"); }
-    
     return 0;
 }

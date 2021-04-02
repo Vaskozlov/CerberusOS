@@ -13,10 +13,8 @@
 #endif /* __cplusplus */
 
 #if defined(__clang__)
-#  define COMPILER clang
 #  define COMPILER_NAME "clang"
 #elif defined(__GNUC__)
-#  define COMPILER GCC
 #  define COMPILER_NAME "gcc"
 #endif
 

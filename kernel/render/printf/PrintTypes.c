@@ -116,15 +116,6 @@ static int FillOctBuffer(unsigned long long value, unsigned buffer_pointer, int 
     return buffer_pointer;
 }
 
-/**
- *  See Printf.h
- */
-void mem8set(void *dest, i8 value, size_t times){
-	char *pointer = dest;
-
-	for (; pointer != (char*)dest + times; pointer++)
-		*pointer = value;
-}
 
 /**
  *  See Printf.h

@@ -284,7 +284,7 @@ void PrintPDE(PageDirectoryFlags flags){
             break;
     }
 
-    Printf(
+    kprintf(
         "Presented: %u\n"
         "readWrite: %u\n"
         "superuser: %u\n"

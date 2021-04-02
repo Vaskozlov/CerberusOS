@@ -54,7 +54,7 @@ void KernelInfo::InitGDT(){
     gdt.address = (u64) &DefaultGDT;
     LoadGDT(&gdt);
 
-    Printf("GDT ready %p\n", &DefaultGDT);  
+    kprintf("GDT ready %p\n", &DefaultGDT);  
 }
 
 void KernelInfo::SetUpIDTEntry(void *handler, u16 position, u8 selector, u8 type_attr){
@@ -86,7 +86,7 @@ void KernelInfo::InitIDT(){
     __asm__ __volatile__ ("lidt %0" : : "m" (idtr));
 
     RemapPIC();
-    Printf("IDT and PIC ready\n");
+    kprintf("IDT and PIC ready\n");
 }
 
 void KernelInfo::InitACPI(){
@@ -107,14 +107,14 @@ void KernelInfo::Init(){
 
     PIT::SetDivisor(1000);
     
-    Printf("Wait for VMM initialization\n");
+    kprintf("Wait for VMM initialization\n");
     PhisicalAllocator::SetUp();
 
     InitVMM();
     InitKMalloc();
     InitACPI();
 
-    Printf(
+    kprintf( 
         "KernelInfo ready in \xff\xff\0\xff%.10lf\xff\xff\xff\xff seconds. Available memeory: \xff\xff\0\xff%llu MB\xff\xff\xff\xff, " 
         "Cerberus majore version \xff\xff\0\xff%u\xff\xff\xff\xff, Cerberus minore version \xff\xff\0\xff%u\xff\xff\xff\xff, compiled with %s\n",
         PIT::GetTimeSicneBoot(),

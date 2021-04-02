@@ -31,8 +31,8 @@ typedef uint8_t u8;
  * Putchar - print char (You have to set before using Printf!)
  * Return printed char
  */
-extern int (*Putchar)(int);
-extern void (*SetColor)(unsigned char r, unsigned char g, unsigned char b);
+extern int (*PutcharWay[8])(int);
+extern void (*SetColorWay[8])(unsigned char r, unsigned char g, unsigned char b);
 
 /**
  *  parameters - structure with parameters
@@ -80,7 +80,7 @@ void init_parameters(parameters_t *param);
  *  @print_type: similar to C printf specifiers for unsigned/signed values
  *  Return: number of pinted chars
  */
-int PrintUInt(parameters_t *param,  unsigned long long value, char print_type);
+int PrintUInt(parameters_t *param,  unsigned long long value, char print_type, unsigned int printWay);
 
 /**
  *  PrintFloat - prints double (don't use numbers bigger than uintmax_t)
@@ -88,7 +88,7 @@ int PrintUInt(parameters_t *param,  unsigned long long value, char print_type);
  *  @value: value to print on screen
  *  Return: number of pinted chars
  */
-int PrintFloat(parameters_t *param, double value);
+int PrintFloat(parameters_t *param, double value, unsigned int printWay);
 
 /**
  *  PrintString - prints string
@@ -96,7 +96,7 @@ int PrintFloat(parameters_t *param, double value);
  *  @value: string to print on screen
  *  Return: number of pinted chars
  */
-int PrintString(parameters_t *param, const char *str);
+int PrintString(parameters_t *param, const char *str, unsigned int printWay);
 
 __END_DECL
 

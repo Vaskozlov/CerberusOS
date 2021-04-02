@@ -12,7 +12,7 @@ __BEGIN_DECLS
  *
  * Return: number of bytes printed
  */
-int Printf(const char *__restrict __fmt, ...);
+int Printf(unsigned int printWay, const char *__restrict __fmt, ...);
 
 __END_DECLS
 

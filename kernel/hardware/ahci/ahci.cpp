@@ -15,7 +15,7 @@ namespace AHCI {
         if ((u64)ABAR > PhisicalAllocator::GetTotalMemory())
             KernelVMM.MapMemory4KB(ABAR, ABAR);
 
-        Printf("AHCI Driver ready\n");
+        kprintf("AHCI Driver ready\n");
     }
 
     AHCIDriver::~AHCIDriver(){

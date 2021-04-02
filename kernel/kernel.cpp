@@ -8,8 +8,8 @@ kernel_services_t *KS;
 
 extern "C" int _start(kernel_services_t *services){
     KS = services;
-    Putchar = BasicRender::PutChar;
-    SetColor = BasicRender::SetColor;
+    PutcharWay[0] = BasicRender::PutChar;
+    SetColorWay[0] = BasicRender::SetColor;
 
     BasicRender::SetFrameBuffer(&KS->frameBuffer);
     

@@ -12,7 +12,7 @@ extern VMManager KernelVMM;
 __attribute__((interrupt))
 void DevideByZero_Handler(struct interrupt_frame *frame){
    
-    Printf("Zero division error\n");
+    kprintf("Zero division error\n");
     
     ARCH::Go2Sleep();
     return;
@@ -20,7 +20,7 @@ void DevideByZero_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void Debug_Handler(struct interrupt_frame *frame){
-    Printf("Debug\n");
+    kprintf("Debug\n");
 
     ARCH::Go2Sleep();
     return;
@@ -28,7 +28,7 @@ void Debug_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void Breakpoint_Handler(struct interrupt_frame *frame){
-    Printf("Breakpoint\n");
+    kprintf("Breakpoint\n");
 
     ARCH::Go2Sleep();
     return;
@@ -36,7 +36,7 @@ void Breakpoint_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void Overflow_Handler(struct interrupt_frame *frame){
-    Printf("Overflow error\n");
+    kprintf("Overflow error\n");
 
     ARCH::Go2Sleep();
     return;
@@ -44,7 +44,7 @@ void Overflow_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void BoundRange_Handler(struct interrupt_frame *frame){
-    Printf("Bound Range error\n");
+    kprintf("Bound Range error\n");
 
     ARCH::Go2Sleep();
     return;
@@ -52,7 +52,7 @@ void BoundRange_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void InvalidOpcode_Handler(struct interrupt_frame *frame){
-    Printf("InvalidOpcode error\n");
+    kprintf("InvalidOpcode error\n");
 
     ARCH::Go2Sleep();
     return;
@@ -60,7 +60,7 @@ void InvalidOpcode_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void DeviceNotAvailable_Handler(struct interrupt_frame *frame){
-    Printf("Device not available error\n");
+    kprintf("Device not available error\n");
 
     ARCH::Go2Sleep();
     return;
@@ -68,7 +68,7 @@ void DeviceNotAvailable_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void DoubleFault_Handler(struct interrupt_frame *frame){
-    Printf("Warning double fault accured! Stop execution!\n");
+    kprintf("Warning double fault accured! Stop execution!\n");
 
     ARCH::Go2Sleep();
     return; 
@@ -76,7 +76,7 @@ void DoubleFault_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt)) 
 void GeneralProtection_Handler(struct interrupt_frame *frame){
-    Printf("GP fault at %p\n", frame->ip);
+    kprintf("GP fault at %p\n", frame->ip);
 
     ARCH::Go2Sleep();
     return;
@@ -84,7 +84,7 @@ void GeneralProtection_Handler(struct interrupt_frame *frame){
 
 __attribute__((interrupt))
 void SegmentNotPresent_Handler(struct interrupt_frame *frame){
-    Printf("Segment not present error\n");
+    kprintf("Segment not present error\n");
 
     ARCH::Go2Sleep();
     return;
@@ -103,7 +103,7 @@ __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame,
         KernelVMM.MapMemory2MB((void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
     }
     else{
-        Printf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
+        kprintf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
         ARCH::Go2Sleep();
     }
 

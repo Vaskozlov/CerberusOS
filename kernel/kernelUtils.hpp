@@ -27,7 +27,6 @@ public:
 
 public:
     static void Init();
-
 };
 
 #endif /* kernelUtils_hpp */

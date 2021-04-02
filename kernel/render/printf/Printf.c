@@ -141,8 +141,11 @@ int get_size(const char *__restrict __fmt, parameters_t *param)
 	}
 }
 
-int Printf(const char *__restrict __fmt, ...)
+int Printf(unsigned int printWay, const char *__restrict __fmt, ...)
 {
+    int (*Putchar)(int) = PutcharWay[printWay];
+    void (*SetColor)(unsigned char r, unsigned char g, unsigned char b) = SetColorWay[printWay];
+
 	if (__fmt == 0x0 || Putchar == 0x0)
 		return -1;
 
@@ -235,7 +238,7 @@ int Printf(const char *__restrict __fmt, ...)
 							value = -value;
 						}
 
-						printed_bytes += PrintUInt(&param, (unsigned long long) value, *__fmt);
+						printed_bytes += PrintUInt(&param, (unsigned long long) value, *__fmt, printWay);
 					}
 					break;
 
@@ -264,14 +267,14 @@ int Printf(const char *__restrict __fmt, ...)
 								break;
 						}
 
-						printed_bytes += PrintUInt(&param, value, *__fmt);
+						printed_bytes += PrintUInt(&param, value, *__fmt, printWay);
 					}
 					break;
 
 				case 'f':
 					
 				case 'F':
-					printed_bytes += PrintFloat(&param, va_arg(args, double));
+					printed_bytes += PrintFloat(&param, va_arg(args, double), printWay);
 					break; 
 					
 				case 'e':
@@ -288,7 +291,7 @@ int Printf(const char *__restrict __fmt, ...)
 					break;
 
 				case 's':
-					PrintString(&param, va_arg(args, const char *));
+					PrintString(&param, va_arg(args, const char *), printWay);
 					break;
 
 				case 'c':
@@ -299,7 +302,7 @@ int Printf(const char *__restrict __fmt, ...)
 				case 'p':
 					mem8set(&param, 0, sizeof(param));
 					param.hashtag_flag = 1;
-					printed_bytes += PrintUInt(&param, (uintmax_t)va_arg(args, void*), *__fmt);
+					printed_bytes += PrintUInt(&param, (uintmax_t)va_arg(args, void*), *__fmt, printWay);
 					break;
 
 				case 'n':

@@ -77,7 +77,7 @@ void kfree(void *address){
     kMallocElem_t *elem2Clear = (kMallocElem_t *)((u64) address - sizeof(kMallocElem_t));
 
     if (elem2Clear->free == 1){
-        Printf("Double free on pointer %p\n", address);
+        kprintf("Double free on pointer %p\n", address);
         return;
     }
 

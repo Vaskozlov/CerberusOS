@@ -3,8 +3,8 @@
 /**
  *  Function to print char
  */
-int (*Putchar)(int) = 0x0;
-void (*SetColor)(unsigned char r, unsigned char g, unsigned char b) = 0x0;
+int (*PutcharWay[8])(int) = {0x0};
+void (*SetColorWay[8])(unsigned char r, unsigned char g, unsigned char b) = {0x0};
 char NumberBuffer[127];
 
 /**
@@ -129,7 +129,8 @@ void mem8set(void *dest, i8 value, size_t times){
 /**
  *  See Printf.h
  */
-int PrintUInt(parameters_t *param, unsigned long long value, char print_type){
+int PrintUInt(parameters_t *param, unsigned long long value, char print_type, unsigned int printWay){
+    int (*Putchar)(int) = PutcharWay[printWay];
     
     if (print_type == 'p' && value == 0x0)
     {
@@ -225,8 +226,9 @@ int PrintUInt(parameters_t *param, unsigned long long value, char print_type){
 /**
  *  See PrintF.h
  */
-int PrintFloat(parameters_t *param, double value)
+int PrintFloat(parameters_t *param, double value, unsigned int printWay)
 {
+    int (*Putchar)(int) = PutcharWay[printWay];
     char lazy_char = '\0';
 
     if (isinf(value)){
@@ -360,9 +362,10 @@ int PrintFloat(parameters_t *param, double value)
 /**
  *  See Printf.h
  */
-int PrintString(parameters_t *param, const char *str)
+int PrintString(parameters_t *param, const char *str, unsigned int printWay)
 {
     int printed_bytes = 0;
+    int (*Putchar)(int) = PutcharWay[printWay];
 
     if (param->precision == -1)
         param->precision = 1 << 25;

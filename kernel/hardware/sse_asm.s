@@ -1,0 +1,2 @@
+.global LoadGDT
+.text

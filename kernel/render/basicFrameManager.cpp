@@ -1,5 +1,6 @@
 #include <basicFrameManager.hpp>
 #include <printf/Printf.h>
+#include <arch.hpp>
 
 #define Psf2Glyph KS->psf2.header
 #define PixelsPerScalLine FrameBuffer->pixelsPerScanline
@@ -12,15 +13,11 @@ vec2<u32>       BasicRender::CursorPosition  = {0, 0};
 Color_t         BasicRender::ClearColor      = {PixelColor::COLOR_BLACK};
 Color_t         BasicRender::FontColor       = {PixelColor::COLOR_WHITE};
 
-static inline u16 rotate_left (uint16_t u, size_t r)
-{
-    __asm__ ("rolw %%cl, %0" : "+r" (u) : "c" (r));
-    return u;
-}
-
 void BasicRender::ClearScreen(){    
-    u64 times = FrameBuffer->buffer_size / sizeof(u32) / 2;
-
+    static const int zero = 0;
+    u64 times = FrameBuffer->buffer_size / sizeof(u32) / 32;
+    float clearData[] = {*(float*)(&ClearColor.value), *(float*)(&zero), *(float*)(&ClearColor.value), *(float*)(&zero)};
+    
     __asm__ __volatile__(
         "movq %1, %%rdi\n"
         "movl %2, %%edx\n"
@@ -31,8 +28,8 @@ void BasicRender::ClearScreen(){
         : "c" (times), "r" (FrameAddress), "rax" (ClearColor.value)
     );
 
-    CursorPosition.x = 10;
-    CursorPosition.y = 10;
+    CursorPosition.x = 0;
+    CursorPosition.y = 0;
 }
 
 
@@ -57,7 +54,7 @@ int BasicRender::PutChar(int c){
         
         auto lineAddress = FrameAddress + (y + Psf2Glyph.height * CursorPosition.y) * PixelsPerScalLine + CursorPosition.x * Psf2Glyph.width + Psf2Glyph.width;
     
-        value = rotate_left(*((u16*)font_ptr), 1);
+        value = ARCH::rotate_left(*((u16*)font_ptr), 1);
         font_ptr += sizeof(value);
 
         for (u32 x = Psf2Glyph.width; x > 0; x--){

@@ -105,18 +105,21 @@ void KernelInfo::Init(){
 
     __asm__ __volatile__ ("sti");
 
-    PIT::SetDivisor(1000);
+    PIT::SetFrequency(1000);
     
     kprintf("Wait for VMM initialization\n");
     PhisicalAllocator::SetUp();
 
     InitVMM();
     InitKMalloc();
-    InitACPI();
+    //InitACPI();
 
     kprintf( 
-        "KernelInfo ready in \xff\xff\0\xff%.10lf\xff\xff\xff\xff seconds. Available memeory: \xff\xff\0\xff%llu MB\xff\xff\xff\xff, " 
-        "Cerberus majore version \xff\xff\0\xff%u\xff\xff\xff\xff, Cerberus minore version \xff\xff\0\xff%u\xff\xff\xff\xff, compiled with %s\n",
+        "KernelInfo ready in \xff\xff\0\xff%lu\xff\xff\xff\xff MS."
+        "Available memeory: \xff\xff\0\xff%llu MB\xff\xff\xff\xff, " 
+        "Cerberus majore version \xff\xff\0\xff%u\xff\xff\xff\xff, "
+        "Cerberus minore version \xff\xff\0\xff%u\xff\xff\xff\xff, "
+        "compiled with \xff\xff\0\xff%s\xff\xff\xff\xff\n",
         PIT::GetTimeSicneBoot(),
         PhisicalAllocator::GetAvailableMemory() / 1024 / 1024,
         CERBERUS_MAJORE_VERSION,

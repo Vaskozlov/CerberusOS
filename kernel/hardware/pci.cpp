@@ -12,7 +12,6 @@ namespace PCI{
         u64 offset = function << 12;
         u64 functionAddress = deviceAddress + offset;
 
-        KernelVMM.MapMemory2MB((void*)functionAddress, (void*)functionAddress);
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)functionAddress;
         
         if (pciDeviceHeader->DeviceID == 0) return;
@@ -21,7 +20,7 @@ namespace PCI{
         switch (pciDeviceHeader->Class) {
 
             case 0x01:
-                switch (pciDeviceHeader->SubClass) {
+                switch (pciDeviceHeader->Subclass) {
                     case 0x06:
                         switch (pciDeviceHeader->ProgIF) {
                             case 0x1: // AHCI 1.0
@@ -38,8 +37,6 @@ namespace PCI{
         u64 offset = device << 15;
         u64 deviceAddress = busAddress + offset;
 
-        KernelVMM.MapMemory2MB((void*)deviceAddress, (void*)deviceAddress);
-
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)deviceAddress;
         
         if (pciDeviceHeader->DeviceID == 0) return;
@@ -53,7 +50,7 @@ namespace PCI{
         u64 offset = bus << 20;
         u64 busAddress = baseAddress + offset;
 
-        KernelVMM.MapMemory2MB((void*)busAddress, (void*)busAddress);
+        //KernelVMM.MapMemory2MB((void*)busAddress, (void*)busAddress);
 
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)busAddress;
         

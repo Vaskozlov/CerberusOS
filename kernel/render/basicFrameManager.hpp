@@ -47,6 +47,8 @@ public:
         CursorPosition = pos;
     }
 
+    static inline vec2<u32> GetCursorPosition() { return CursorPosition; }
+
 public:
     BasicRender() = delete;
     ~BasicRender() = delete;

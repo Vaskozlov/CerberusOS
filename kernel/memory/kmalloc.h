@@ -23,19 +23,29 @@ typedef struct MallocHeader{
 extern MallocHeader_t MallocMainHeder;
 
 void InitKMalloc();
-void *kmalloc(u64 size);
+void *kmalloc_smallest(u64 size);
+void *kmalloc_fast(u64 size);
+void *kmalloc_biggest(u64 size);
 void kfree(void *address);
 
 __END_DECLS
 
 #if (defined(__cplusplus) || defined(c_plusplus))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winline-new-delete"
-  inline void *operator new(size_t size)    { return kmalloc(size); }
-  inline void *operator new[](size_t size)  { return kmalloc(size); }
-  inline void operator delete(void *p)      { return kfree(p);      }
-  inline void operator delete[](void *p)    { return kfree(p);      }
-#pragma GCC diagnostic pop
+
+__attribute__((always_inline)) inline void *kmalloc(u64 size) { return kmalloc_smallest(size); }
+
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Winline-new-delete"
+    __attribute__((always_inline)) inline void *operator new  (size_t size)  { return kmalloc(size); }
+    __attribute__((always_inline)) inline void *operator new[](size_t size)  { return kmalloc(size); }
+    __attribute__((always_inline)) inline void operator delete  (void *p)    { return kfree(p);      }
+    __attribute__((always_inline)) inline void operator delete[](void *p)    { return kfree(p);      }
+#  pragma GCC diagnostic pop
+
+#else
+
+#define kmalloc(size) kmalloc_smallest(size)
+
 #endif
 
 #endif /* kmalloc_hpp */

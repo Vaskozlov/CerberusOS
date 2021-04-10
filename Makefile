@@ -34,22 +34,26 @@ install: mount
 
 run:
 	qemu-system-x86_64 \
-	-smp 1 \
+	-d int \
+	-cpu EPYC-v2 \
 	-no-shutdown \
 	-M q35 \
-	-d int \
-	-drive file=$(OSNAME).img,if=virtio -m 1G \
+	-drive file=$(OSNAME).img -m 4G \
+	-drive file=blank.img \
 	-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",\
 	readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none \
 	-rtc clock=host,base=localtime
 
+run-test:
+	qemu-system-x86_64 -M q35 -drive file=$(OSNAME).img -m 1G -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none
 
 run-kvm:
 	qemu-system-x86_64 --enable-kvm \
 	-cpu host \
 	-no-shutdown \
 	-M q35 \
-	-drive file=$(OSNAME).img,if=virtio -m 1G \
+	-drive file=$(OSNAME).img -m 1G \
 	-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",\
-	readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none \
+	readonly=on \
+	-drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none \
 	-rtc clock=host,base=localtime

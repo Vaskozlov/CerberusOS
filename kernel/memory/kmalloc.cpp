@@ -23,21 +23,7 @@ static void SplitRegion(kMallocElem_t *region, size_t size){
     region->size = size;
 }
 
-void *kmalloc(u64 size){
-    u64 minimumSize = UINT64_MAX;
-    kMallocElem_t *suitableElem = NULL;
-    kMallocElem_t *elem = MallocMainHeder.firstElem;
-
-    while (elem != NULL){
-
-        if (elem->free == 1 && elem->size >= size && elem->size < minimumSize){
-            suitableElem = elem;
-            minimumSize = elem->size;
-        }
-
-        elem = elem->next;
-    }
-
+inline void *FillElem(kMallocElem_t *suitableElem, u64 size){
     if (suitableElem == NULL){
         suitableElem = (kMallocElem_t*) MallocMainHeder.MallocHead;
         MallocMainHeder.MallocHead += align(size + sizeof(kMallocElem_t) * 2, 21);
@@ -66,10 +52,62 @@ void *kmalloc(u64 size){
             mayNew->next = suited;
         }
     }
-    suitableElem->free = 0;
 
-    elem = MallocMainHeder.firstElem;
+    suitableElem->free = 0;
     return (void*)((u64)suitableElem + sizeof(kMallocElem_t));
+}
+
+void *kmalloc_smallest(u64 size){
+    u64 minimumSize = UINT64_MAX;
+    kMallocElem_t *suitableElem = NULL;
+    kMallocElem_t *elem = MallocMainHeder.firstElem;
+
+    while (elem != NULL){
+
+        if (elem->free == 1 && elem->size >= size && elem->size < minimumSize){
+            suitableElem = elem;
+            minimumSize = elem->size;
+        }
+
+        elem = elem->next;
+    }
+
+    return FillElem(suitableElem, size);
+}
+
+void *kmalloc_fast(u64 size){
+    kMallocElem_t *suitableElem = NULL;
+    kMallocElem_t *elem = MallocMainHeder.firstElem;
+
+    while (elem != NULL){
+
+        if (elem->free == 1 && elem->size >= size){
+            suitableElem = elem;
+           break;
+        }
+
+        elem = elem->next;
+    }
+
+    return FillElem(suitableElem, size);
+}
+
+void *kmalloc_biggest(u64 size){
+    u64 minimumSize = 0;
+    kMallocElem_t *suitableElem = NULL;
+    kMallocElem_t *elem = MallocMainHeder.firstElem;
+
+    while (elem != NULL){
+
+        if (elem->free == 1 && elem->size >= size && elem->size > minimumSize){
+            suitableElem = elem;
+            minimumSize = elem->size;
+        }
+
+        elem = elem->next;
+    }
+
+    return FillElem(suitableElem, size);
 }
 
 void kfree(void *address){

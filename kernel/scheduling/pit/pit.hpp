@@ -15,25 +15,28 @@
 
 class PIT{
     static u64 Divisor;
-    static double TimeSicneBoot;
+    static u64 TimeSicneBoot;
     static double Frequency1Div;
 
 public:
-    static inline u64 GetFrequency() { return PIT_SCALE / Divisor; }
-    static inline void Tick() { TimeSicneBoot += 1.0/GetFrequency(); }
+    static strict_inline u64 GetFrequency() { return PIT_SCALE / Divisor; }
+    static strict_inline void Tick() { TimeSicneBoot++; }
 
 public:
     static void Sleep(i64 milliseconds);
-    static void Sleepd(double seconds);
+    
+    strict_inline static void Sleepd(double seconds){
+        Sleep((i64)(seconds * 1000));
+    }
 
 public:
     static void SetDivisor(u16 divisor);
-    inline static void SetFrequency(u64 frequency){
-        Frequency1Div = 1.0/frequency;
+
+    strict_inline static void SetFrequency(u64 frequency){
         SetDivisor(PIT_SCALE / frequency);
     }
 
-    inline static double GetTimeSicneBoot() { return TimeSicneBoot; }
+    strict_inline static u64 GetTimeSicneBoot() { return TimeSicneBoot; }
 
 public:
     PIT() = delete;

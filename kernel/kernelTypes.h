@@ -30,6 +30,8 @@
 #  define CERBERUS_MINORE_VERSION 0
 #endif
 
+#define strict_inline __attribute__((always_inline)) inline
+
 /**
  * str2u16 - converts array of char to u16
  * @str: array of char
@@ -74,11 +76,6 @@
         | ((u64)str[offstr_offsetset])\
         )
 
-#ifndef MAX
-#  define MAX(a, b) (a > b ? a : b)
-#  define MIN(a, b) (a < b ? a : b)
-#endif /* MAX */
-
 typedef int8_t      i8;
 typedef int16_t     i16;
 typedef int32_t     i32;
@@ -90,13 +87,36 @@ typedef uint32_t    u32;
 typedef uint64_t    u64;
 
 #if defined(__cplusplus)
-template<class T>
-inline T align(T number, size_t power)
-{
-    auto middle = (number & ((1UL << power) - 1));
-    middle = middle == 0 ? (1UL << power) : middle;
-    return number + (1UL << power) - middle;
-}
+
+    template<class T>
+    strict_inline T align(T number, size_t power)
+    {
+        auto middle = (number & ((1UL << power) - 1));
+        middle = middle == 0 ? (1UL << power) : middle;
+        return number + (1UL << power) - middle;
+    }
+
+    template<typename T>
+    struct ByteMask{
+        T value;
+        u8 mask[sizeof(T)];
+    };
+
+    #define _MAX 1
+
+    template<typename T>
+    strict_inline T MAX(T a, T b) { return a > b ? a : b; }
+
+    template<typename T>
+    strict_inline T MIN(T a, T b) { return a < b ? a : b; }
+
+
+#else
+#  ifndef _MAX
+#    define MAX(a, b) ((a) > (b) ? (a) : (b))
+#    define MIN(a, b) ((a) < (b) ? (a) : (b))
+#    define _MAX 1
+#  endif
 #endif
 
 #endif /* kernelTypes_h */

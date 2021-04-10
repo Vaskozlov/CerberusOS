@@ -11,8 +11,11 @@ __BEGIN_DECLS
 #define TO_RAD(x) x / 180 * PI
 #define TO_DEG(x) x * 180 * PI
 
-#define MAX(a, b) (a > b ? a : b)
-#define MIN(a, b) (a < b ? a : b)
+#ifndef _MAX
+#  define MAX(a, b) ((a) > (b) ? (a) : (b))
+#  define MIN(a, b) ((a) < (b) ? (a) : (b))
+#  define _MAX 1
+#endif
 
 #define SIZE_STANDART 0
 #define SIZE_h 1
@@ -58,6 +61,11 @@ typedef struct parameters
 	int width;
 	int precision;
 } parameters_t;
+
+/**
+ *  Powers of 10. From 10^0 to 10^300
+ */
+extern const double powerof10[302];
 
 /**
  *  init_parameters - sets zero to all field in parameters_t, except precision which is -1

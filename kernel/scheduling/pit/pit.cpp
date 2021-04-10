@@ -1,9 +1,9 @@
 #include "pit.hpp"
 #include <printf/Printf.h>
 
-u64 PIT::Divisor = 65535;
-double PIT::TimeSicneBoot = 0.0;
-double PIT::Frequency1Div = 0.0;
+u64     PIT::Divisor = 65535;
+u64     PIT::TimeSicneBoot = 0;
+double  PIT::Frequency1Div = 0.0;
 
 void PIT::SetDivisor(u16 divisor){
     Divisor = divisor;
@@ -13,12 +13,8 @@ void PIT::SetDivisor(u16 divisor){
     ARCH::outb((unsigned char)((divisor & 0xff00) >> 8), 0x40);
 }
 
-void PIT::Sleepd(double second){
-    double startTime = TimeSicneBoot;
-    while (TimeSicneBoot < startTime + second) __asm__ __volatile__("hlt");
-}
-
 void PIT::Sleep(i64 milliseconds){
-    Sleepd((double)milliseconds / 1000);
+    u64 startTime = TimeSicneBoot;
+    while (TimeSicneBoot < startTime + milliseconds) ARCH::hlt();
 }
 

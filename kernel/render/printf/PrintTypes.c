@@ -12,10 +12,7 @@ char NumberBuffer[127];
  */
 const char *hex_values[] = {"0123456789abcdef", "0123456789ABCDEF"};
 
-/**
- *  Powers of 10. From 10^0 to 10^300
- */
-const double powerof10[] = {
+const double powerof10[302] = {
     1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7,
     1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14,
     1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20,

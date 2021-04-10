@@ -224,15 +224,15 @@ size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t to
     AvailableMemory = availableMemory;
     LockedMemory = 0;
 
-    BigEnteries = BitMapDouble<u64>((u64*)location, MAX(totalMemory >> 30, 1));
-    AllocatorHead = (u64)location + align(MAX(totalMemory >> 30, 63), 6) / bitsizeof(u64) * sizeof(u64) * 2;
+    BigEnteries = BitMapDouble<u64>((u64*)location, MAX<size_t>(totalMemory >> 30, 1));
+    AllocatorHead = (u64)location + align(MAX<size_t>(totalMemory >> 30, 63), 6) / bitsizeof(u64) * sizeof(u64) * 2;
     BigEnteries.clear();
 
     MiddleEntries = (BitMapDoubleConst<u64, 512>*)AllocatorHead;
-    AllocatorHead += MAX(((totalMemory >> 21) + 1) * sizeof(BitMapDoubleConst<u64, 512>) / 512 * 2, 16);
+    AllocatorHead += MAX<size_t>(((totalMemory >> 21) + 1) * sizeof(BitMapDoubleConst<u64, 512>) / 512 * 2, 16);
     
     SmallEntries = (BitMapConst<u64, 512>*)AllocatorHead;
-    AllocatorHead += MAX(((totalMemory / 0x1000) + 1) * sizeof(BitMapConst<u64, 512>) / 512, 8);
+    AllocatorHead += MAX<size_t>(((totalMemory / 0x1000) + 1) * sizeof(BitMapConst<u64, 512>) / 512, 8);
     memset(location, 0, AllocatorHead - (u64)location);
 
     return AllocatorHead - (u64)location;

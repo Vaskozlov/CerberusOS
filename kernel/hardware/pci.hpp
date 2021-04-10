@@ -7,41 +7,42 @@
 namespace PCI{
 
     struct DeviceHeader{
-        u16     VendorId;
-        u16     DeviceID;
-        u16     Command;
-        u16     Status;
-        u8      RevisionID;
-        u8      ProgIF;
-        u8      SubClass;
-        u8      Class;
-        u8      CacheLineSize;
-        u8      LatencyTimes;
-        u8      HeaderType;
-        u8      BIST;
+        uint16_t VendorID;
+        uint16_t DeviceID;
+        uint16_t Command;
+        uint16_t Status;
+        uint8_t RevisionID;
+        uint8_t ProgIF;
+        uint8_t Subclass;
+        uint8_t Class;
+        uint8_t CacheLineSize;
+        uint8_t LatencyTimer;
+        uint8_t HeaderType;
+        uint8_t BIST;
     };
 
-    struct PCIHeader0{
-        DeviceHeader header;
-        u32 BAR0;
-        u32 BAR1;
-        u32 BAR2;
-        u32 BAR3;
-        u32 BAR4;
-        u32 BAR5;
-        u32 cardVusCISPtr;
-        u16 subSystemVendorID;
-        u16 subSystemID;
-        u32 expansionROBMBaseAddr;
-        u8 capabilitiesPtr;
-        u8 reserved0;
-        u16 reserved1;
-        u32 reserved2;
-        u8 interruptLine;
-        u8 interruptPin;
-        u8 minGrant;
-        u8 MaxLatancy;
+    struct PCIHeader0 {
+        DeviceHeader Header;
+        uint32_t BAR0;
+        uint32_t BAR1;
+        uint32_t BAR2;
+        uint32_t BAR3;
+        uint32_t BAR4;
+        uint32_t BAR5;
+        uint32_t CardbusCISPtr;
+        uint16_t SubsystemVendorID;
+        uint16_t SubsystemID;
+        uint32_t ExpansionROMBaseAddr;
+        uint8_t CapabilitiesPtr;
+        uint8_t Rsv0;
+        uint16_t Rsv1;
+        uint32_t Rsv2;
+        uint8_t InterruptLine;
+        uint8_t InterruptPin;
+        uint8_t MinGrant;
+        uint8_t MaxLatency;
     };
+
 
     extern const char *DeviceClasses[];
     const char *GetVendorName(u16 vendorID);

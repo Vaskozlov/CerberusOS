@@ -50,8 +50,6 @@ namespace PCI{
         u64 offset = bus << 20;
         u64 busAddress = baseAddress + offset;
 
-        //KernelVMM.MapMemory2MB((void*)busAddress, (void*)busAddress);
-
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)busAddress;
         
         if (pciDeviceHeader->DeviceID == 0) return;

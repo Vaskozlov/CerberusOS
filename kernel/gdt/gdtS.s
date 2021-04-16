@@ -1,6 +1,6 @@
 .global LoadGDT
-
 .text
+.type LoadGDT,@function
 
 LoadGDT:
     lgdt 0(%rdi)

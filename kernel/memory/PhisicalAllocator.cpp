@@ -37,18 +37,30 @@ const char *PhisicalAllocator::EFI_MEMORY_TYPE_STRING[] = {
     "EfiUknownMemory"
 };
 
+template<typename T>
+strict_inline static u64 GetGB(T memsize) { return (u64)memsize >> 30UL ; }
+
+template<typename T>
+strict_inline static u64 GetMB(T memsize) { return (u64)memsize >> 20UL ; }
+
+template<typename T>
+strict_inline static u64 Get2MBIndex(T memsize) { return ((u64)memsize >> 21UL) % 512; }
+
+template<typename T>
+strict_inline static u64 Get4KBIndex(T memsize) { return ((u64)memsize >> 12UL) % 512; }
+
 size_t PhisicalAllocator::UniversalLock4KB(void* address){
-    size_t bigIndex = (u64)address >> 30;
-    size_t index = ((u64)address >> 21) % 512;
-    size_t smallIndex = ((u64)address >> 12) % 512;
+    size_t bigIndex = GetGB(address);
+    size_t index = Get2MBIndex(address);
+    size_t smallIndex = Get4KBIndex(address);
 
     BitMapDoubleConst<u64, 512>* header = MiddleEntries + bigIndex;
     BitMapConst<u64, 512> *smallHeader = SmallEntries + bigIndex * 512 + index;
     
-    if ((u64)address > TotalMemory) return 0;
-    if (BigEnteries.get0(bigIndex) == 1) return 0;
-    if (header->get0(index) == 1) return 0;
-    if (smallHeader->get(smallIndex) == 1) return 0;
+    if ((u64)address > TotalMemory)         return 0;
+    if (BigEnteries.get0(bigIndex) == 1)    return 0;
+    if (header->get0(index) == 1)           return 0;
+    if (smallHeader->get(smallIndex) == 1)  return 0;
 
     BigEnteries.set1(bigIndex, 1);
     header->set1(index, 1);
@@ -58,21 +70,20 @@ size_t PhisicalAllocator::UniversalLock4KB(void* address){
 }
 
 size_t PhisicalAllocator::UniversalLock2MB(void* address){
-    size_t bigIndex = (u64)address >> 30;
-    size_t index = ((u64)address >> 21) % 512;
+    size_t bigIndex = GetGB(address);
+    size_t index = Get2MBIndex(address);
     BitMapDoubleConst<u64, 512>* header = MiddleEntries + bigIndex;
     
-    if ((u64)address >= TotalMemory) return 0;
-    if (BigEnteries.get0(bigIndex) == 1) return 0;
-    if (header->get0(index) == 1) return 0;
-
+    if ((u64)address >= TotalMemory)        return 0;
+    if (BigEnteries.get0(bigIndex) == 1)    return 0;
+    if (header->get0(index) == 1)           return 0;
     header->set0(index, 1);
 
     return (1<<21UL);
 }
 
 size_t PhisicalAllocator::UniversalLock1GB(void *address){
-    size_t index = (u64)address >> 30;
+    size_t index = GetGB(address);
 
     if (index >= BigEnteries.size()) return 0;
     if (BigEnteries.get0(index) == 1) return 0;
@@ -83,9 +94,9 @@ size_t PhisicalAllocator::UniversalLock1GB(void *address){
 }
 
 size_t PhisicalAllocator::UniversalUnLock4KB(void* address){
-    size_t bigIndex = (u64)address >> 30;
-    size_t index = ((u64)address >> 21) % 512;
-    size_t smallIndex = ((u64)address >> 12) % 512;
+    size_t bigIndex = GetGB(address);
+    size_t index = Get2MBIndex(address);
+    size_t smallIndex = Get4KBIndex(address);
 
     BitMapConst<u64, 512> *smallHeader = SmallEntries + bigIndex * 512 + index;
     
@@ -98,12 +109,12 @@ size_t PhisicalAllocator::UniversalUnLock4KB(void* address){
 }
 
 size_t PhisicalAllocator::UniversalUnLock2MB(void* address){
-    size_t bigIndex = (u64)address >> 30;
-    size_t index = ((u64)address >> 21) % 512;
+    size_t bigIndex = GetGB(address);
+    size_t index = Get2MBIndex(address);
     BitMapDoubleConst<u64, 512>* header = MiddleEntries + bigIndex;
     
-    if ((u64)address >= TotalMemory) return 0;
-    if (header->get0(index) == 0) return 0;
+    if ((u64)address >= TotalMemory)    return 0;
+    if (header->get0(index) == 0)       return 0;
 
     AvailableMemory += (1<<21UL);
     LockedMemory -= (1<<21UL);
@@ -113,14 +124,14 @@ size_t PhisicalAllocator::UniversalUnLock2MB(void* address){
 }
 
 size_t PhisicalAllocator::UniversalUnLock1GB(void *address){
-    size_t index = (u64)address >> 30;
+    size_t bigIndex = GetGB(address);
 
-    if (index >= BigEnteries.size()) return 0;
-    if (BigEnteries.get0(index) == 0) return 0;
+    if (bigIndex >= BigEnteries.size())     return 0;
+    if (BigEnteries.get0(bigIndex) == 0)    return 0;
 
     AvailableMemory += (1<<30UL);
     LockedMemory -= (1<<30UL);
-    BigEnteries.set0(index, 0);
+    BigEnteries.set0(bigIndex, 0);
 
     return (1<<30UL);
 }
@@ -134,12 +145,11 @@ void *PhisicalAllocator::Get4KB(){
 
         BigEnteries.set1(index, 1);
         BitMapDoubleConst<u64, 512>* header = MiddleEntries + index;
-     
         
         u64 middleIndex = header->findFree1();
         header->set1(middleIndex, 1);
 
-        BitMapConst<u64, 512> *smallHeader = SmallEntries + index;
+        BitMapConst<u64, 512> *smallHeader = SmallEntries + index * 512 + middleIndex;
        
         u64 smallIndex = smallHeader->findFree();
         smallHeader->set(smallIndex, 1);
@@ -172,6 +182,7 @@ void *PhisicalAllocator::Get4KB(){
     AvailableMemory -= 0x1000;
     LockedMemory += 0x1000;
     smallHeader->set(smallIndex, 1);
+
     return (void*)((index << 30) + (middleIndex << 21) + (smallIndex << 12));
 }
 

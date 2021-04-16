@@ -17,5 +17,4 @@ namespace ACPI{
         }
         return NULL;
     }
-
 }

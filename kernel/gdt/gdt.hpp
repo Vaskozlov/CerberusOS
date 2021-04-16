@@ -28,7 +28,6 @@ struct GDT{
 __attribute__((aligned(0x10)));
 
 extern GDT DefaultGDT;
-
 extern "C" void LoadGDT(GDTDescriptor *gdtDescriptor);
 
 #endif /* gdt_h */

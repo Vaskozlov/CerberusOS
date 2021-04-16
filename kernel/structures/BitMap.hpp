@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <kernelTypes.h>
+#include <printf/Printf.h>
 
 #define bitsizeof(x) (sizeof(x) * 8)
 
@@ -76,6 +77,99 @@ strict_inline size_t findFree(T *_buffer, size_t _size){
 
     return UINTMAX_MAX;
 }
+
+
+template<typename T>
+strict_inline size_t findFree0Is0And1Is0(T *_buffer0, T *_buffer1, size_t _size){
+    size_t i = 0;
+    auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+
+    while (i < maxIndex - 1){
+        
+        T value = _buffer0[i];
+        value |= _buffer1[i];
+     
+        if (value == ~((T)0)) {i++; continue;}
+
+        for (size_t j = 0; j < bitsizeof(T); j++){
+            if ((value & 0b1) == 0) return i * bitsizeof(T) + j; 
+            value = value >> 1;
+        }
+        
+        i++;
+    }
+
+    T value = _buffer0[i];
+    value |= _buffer1[i];
+
+    if (value == ~((T)0)) return UINTMAX_MAX;
+
+    for (size_t j = 0; j < _size % bitsizeof(T); j++){
+        if ((value & 0b1) == 0) return i * bitsizeof(T) + j; 
+        value = value >> 1;
+    }
+
+    return UINTMAX_MAX;
+}
+
+template<typename T>
+strict_inline size_t findFree1not0(T *_buffer0, T *_buffer1, size_t _size){
+    size_t i = 0;
+    auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+
+    while (i < maxIndex - 1){
+        T value  = (_buffer0[i] ^ _buffer1[i]) & _buffer1[i];
+
+        if (value == 0) { i++; continue; }
+
+        for (size_t j = 0; j < bitsizeof(T); j++){
+            if ((value & 0b1) == 1) return i * bitsizeof(T) + j; 
+            value = value >> 1;
+        }
+
+        i++;
+    }
+
+    T value  = (_buffer0[i] ^ _buffer1[i]) & _buffer1[i];
+    if (value == 0) return UINTMAX_MAX;
+
+    for (size_t j = 0; j < _size % bitsizeof(T); j++){
+        if ((value & 0b1) == 1) return i * bitsizeof(T) + j; 
+        value = value >> 1;
+    }
+    
+    return UINTMAX_MAX;
+}
+
+template<typename T>
+strict_inline size_t findFree0not1(T *_buffer0, T *_buffer1, size_t _size){
+    size_t i = 0;
+    auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+
+    while (i < maxIndex - 1){
+        T value  = (_buffer0[i] ^ _buffer1[i]) & _buffer0[i];
+
+        if (value == 0) continue;
+
+        for (size_t j = 0; j < bitsizeof(T); j++){
+            if ((value & 0b1) == 1) return i * bitsizeof(T) + j; 
+            value = value >> 1;
+        }
+        
+        i++;
+    }
+
+    T value  = (_buffer0[i] ^ _buffer1[i]) & _buffer0[i];
+    if (value == 0) return UINTMAX_MAX;
+
+    for (size_t j = 0; j < _size % bitsizeof(T); j++){
+        if ((value & 0b1) == 1) return i * bitsizeof(T) + j; 
+        value = value >> 1;
+    }
+
+    return UINTMAX_MAX;
+}
+
 
 template<typename T>
 class BitMap{
@@ -185,37 +279,11 @@ public:
     }
 
     size_t findFree0Is0And1Is0(){
-        size_t i = 0;
-        auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+        return ::findFree0Is0And1Is0<T>(_buffer0, _buffer1, _size);
+    }
 
-        while (i < maxIndex - 1){
-            
-            T value0 = _buffer0[i];
-            T value1 = _buffer1[i];
-            T value  = ~(value0 | value1);
-
-            if (value == ~((T)0)) continue;
-
-            for (size_t j = 0; j < bitsizeof(T); j++){
-                if (value == 1) return i * bitsizeof(T) + j; 
-                value = value >> 1;
-            }
-            
-            i++;
-        }
-
-        T value0 = _buffer0[i];
-        T value1 = _buffer1[i];
-        T value  = (value0 | value1);
-
-        if (value == ~((T)0)) return UINTMAX_MAX;
-
-        for (size_t j = 0; j < _size % bitsizeof(T); j++){
-            if ((value & 0b1) == 0) return i * bitsizeof(T) + j; 
-            value = value >> 1;
-        }
-
-        return UINTMAX_MAX;
+    size_t findFree0not1(){
+        return ::findFree0not1<T>(_buffer0, _buffer1, _size);
     }
 
     strict_inline void clear(){
@@ -224,37 +292,7 @@ public:
     }
 
     size_t findFree1not0(){
-        size_t i = 0;
-        auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
-
-        while (i < maxIndex - 1){
-            
-            T value0 = _buffer0[i];
-            T value1 = _buffer1[i];
-            T value  = (value0 ^ value1) & value1;
-
-            if (value == 0) continue;
-
-            for (size_t j = 0; j < bitsizeof(T); j++){
-                if ((value & 0b1) == 1) return i * bitsizeof(T) + j; 
-                value = value >> 1;
-            }
-            
-            i++;
-        }
-
-        T value0 = _buffer0[i];
-        T value1 = _buffer1[i];
-        T value  = (value0 ^ value1) & value1;
-
-        if (value == 0) return UINTMAX_MAX;
-
-        for (size_t j = 0; j < _size % bitsizeof(T); j++){
-            if ((value & 0b1) == 1) return i * bitsizeof(T) + j; 
-            value = value >> 1;
-        }
-
-        return UINTMAX_MAX;
+        return ::findFree1not0<T>(_buffer0, _buffer1, _size);
     }
 
 public:
@@ -277,7 +315,7 @@ public:
     }
 
     void set1(size_t index, u8 value) {
-        ::set<T>(_buffer0, index, value, N);
+        ::set<T>(_buffer1, index, value, N);
     }
 
     void set01(size_t index, u8 value) {
@@ -305,105 +343,15 @@ public:
     }
 
     size_t findFree0Is0And1Is0(){
-        size_t i = 0;
-        auto maxIndex = MAX<size_t>(N / bitsizeof(T), 1);
-
-        while (i < maxIndex - 1){
-            
-            T value0 = _buffer0[i];
-            T value1 = _buffer1[i];
-            T value  = ~(value0 | value1);
-
-            if (value == ~((T)0)) continue;
-
-            for (size_t j = 0; j < bitsizeof(T); j++){
-                if (value == 1) return i * bitsizeof(T) + j; 
-                value = value >> 1;
-            }
-            
-            i++;
-        }
-
-        T value0 = _buffer0[i];
-        T value1 = _buffer1[i];
-        T value  = (value0 | value1);
-
-        if (value == ~((T)0)) return UINTMAX_MAX;
-
-        for (size_t j = 0; j < N % bitsizeof(T); j++){
-            if ((value & 0b1) == 0) return i * bitsizeof(T) + j; 
-            value = value >> 1;
-        }
-
-        return UINTMAX_MAX;
+        return ::findFree0Is0And1Is0<T>(_buffer0, _buffer1, N);
     }
 
     size_t findFree1not0(){
-        size_t i = 0;
-        auto maxIndex = MAX<size_t>(N / bitsizeof(T), 1);
-
-        while (i < maxIndex - 1){
-            
-            T value0 = _buffer0[i];
-            T value1 = _buffer1[i];
-            T value  = (value0 ^ value1) & value1;
-
-            if (value == 0) { i++; continue; }
-
-            for (size_t j = 0; j < bitsizeof(T); j++){
-                if ((value & 0b1) == 1) return i * bitsizeof(T) + j; 
-                value = value >> 1;
-            }
-            
-            i++;
-        }
-
-        T value0 = _buffer0[i];
-        T value1 = _buffer1[i];
-        T value  = (value0 ^ value1) & value1;
-
-        if (value == 0) return UINTMAX_MAX;
-
-        for (size_t j = 0; j < N % bitsizeof(T); j++){
-            if (value == 1) return i * bitsizeof(T) + j; 
-            value = value >> 1;
-        }
-
-        return UINTMAX_MAX;
+        return ::findFree1not0<T>(_buffer0, _buffer1, N);
     }
 
     size_t findFree0not1(){
-        size_t i = 0;
-        auto maxIndex = MAX<size_t>(N / bitsizeof(T), 1);
-
-        while (i < maxIndex - 1){
-            
-            T value0 = _buffer0[i];
-            T value1 = _buffer1[i];
-            T value  = (value0 ^ value1) | value0;
-
-            if (value == ~((T)0)) continue;
-
-            for (size_t j = 0; j < bitsizeof(T); j++){
-                if ((value & 0b1) == 0) return i * bitsizeof(T) + j; 
-                value = value >> 1;
-            }
-            
-            i++;
-        }
-
-        T value0 = _buffer0[i];
-        T value1 = _buffer1[i];
-        T value  = (value0 ^ value1) & value0;
-
-        if (value == 0) return UINTMAX_MAX;
-
-        for (size_t j = 0; j < N % bitsizeof(T); j++){
-            if (value == 1) return i * bitsizeof(T) + j; 
-            value = value >> 1;
-        }
-
-        return UINTMAX_MAX;
+        return ::findFree0not1<T>(_buffer0, _buffer1, N);
     }
 
     strict_inline void clear(){

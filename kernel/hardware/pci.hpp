@@ -43,7 +43,6 @@ namespace PCI{
         uint8_t MaxLatency;
     };
 
-
     extern const char *DeviceClasses[];
     const char *GetVendorName(u16 vendorID);
     const char *GetDeviceName(u16 vendorID, u16 deviceID);

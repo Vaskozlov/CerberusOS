@@ -1,6 +1,6 @@
 OSNAME := cerberusOS
 LOOP_DEVICE := /dev/loop24
-OVMFDIR = /usr/share/edk2-ovmf/x64
+OVMFDIR = ovmf
 
 all: compile install run
 

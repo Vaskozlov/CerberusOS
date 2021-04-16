@@ -32,14 +32,14 @@ __END_DECLS
 
 #if (defined(__cplusplus) || defined(c_plusplus))
 
-__attribute__((always_inline)) inline void *kmalloc(u64 size) { return kmalloc_smallest(size); }
+strict_inline void *kmalloc(u64 size) { return kmalloc_smallest(size); }
 
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Winline-new-delete"
-    __attribute__((always_inline)) inline void *operator new  (size_t size)  { return kmalloc(size); }
-    __attribute__((always_inline)) inline void *operator new[](size_t size)  { return kmalloc(size); }
-    __attribute__((always_inline)) inline void operator delete  (void *p)    { return kfree(p);      }
-    __attribute__((always_inline)) inline void operator delete[](void *p)    { return kfree(p);      }
+    strict_inline void *operator new  (size_t size)  { return kmalloc(size); }
+    strict_inline void *operator new[](size_t size)  { return kmalloc(size); }
+    strict_inline void operator delete  (void *p)    { return kfree(p);      }
+    strict_inline void operator delete[](void *p)    { return kfree(p);      }
 #  pragma GCC diagnostic pop
 
 #else

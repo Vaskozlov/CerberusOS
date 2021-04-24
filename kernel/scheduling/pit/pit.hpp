@@ -20,7 +20,7 @@ class PIT{
 
 public:
     static strict_inline u64 GetFrequency() { return PIT_SCALE / Divisor; }
-    static strict_inline void Tick() { TimeSicneBoot++; }
+    static strict_inline void Tick()        { TimeSicneBoot++; }
 
 public:
     static void Sleep(i64 milliseconds);

@@ -23,7 +23,8 @@ else
 LDSCRIPT := linkers/elf_$(ARCH)_efi.lds
 endif
 
-CFLAGS :=   -O3 -g \
+CFLAGS :=  \
+			-O0 -g \
 			-c \
 			-fno-stack-protector \
 			-fno-exceptions \
@@ -36,7 +37,8 @@ CFLAGS :=   -O3 -g \
 			-D MAJORE_VERSION=$(MAJORE_VERSION) \
 			-D MINORE_VERSION=$(MINORE_VERSION)
 
-CXXFLAGS := -O3 -g \
+CXXFLAGS := \
+			-O3 -g \
 			-c \
 			-fno-stack-protector \
 			-fno-exceptions \
@@ -44,6 +46,7 @@ CXXFLAGS := -O3 -g \
 			-Wall -Wextra \
 			-I $(LINUX_HEADERS)/include \
 			-I $(MUSL_DIR)/arch \
+			-I ./arch/$(ARCH)\
 			-I . \
 			-std=c++17 \
 			-D MAJORE_VERSION=$(MAJORE_VERSION) \
@@ -51,15 +54,16 @@ CXXFLAGS := -O3 -g \
 
 ASMFLAGS := -O3\
 			-Wall -Wextra \
-			-m64 -c
+			-m64 -c -g
 
 LDFLAGS :=	-static \
 			-Bsymbolic \
 			-nostdlib \
 			-T $(LDSCRIPT) 
 
-LOADLIBES := 	$(MUSL_DIR)/lib/libc.a \
-				$(MUSL_DIR)/lib/libm.a
+LOADLIBES := \
+			$(MUSL_DIR)/lib/libc.a \
+			$(MUSL_DIR)/lib/libm.a
 
 C_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.c, %.o, $(notdir $(wildcard *.c))))
 CPP_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.cpp, %.o, $(notdir $(wildcard *.cpp))))
@@ -72,6 +76,7 @@ include gdt/Makefile
 include interrupts/Makefile
 include hardware/Makefile
 include scheduling/Makefile
+include arch/Makefile
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

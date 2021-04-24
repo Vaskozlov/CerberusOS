@@ -118,7 +118,7 @@ strict_inline size_t findFree1not0(T *_buffer0, T *_buffer1, size_t _size){
     auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
 
     while (i < maxIndex - 1){
-        T value  = (_buffer0[i] ^ _buffer1[i]) & _buffer1[i];
+        T value  = (_buffer0[i] xor _buffer1[i]) & _buffer1[i];
 
         if (value == 0) { i++; continue; }
 

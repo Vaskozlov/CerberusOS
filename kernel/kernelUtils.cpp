@@ -26,21 +26,17 @@ void KernelInfo::InitVMM(){
 
     u64 totalMemory = PhisicalAllocator::GetTotalMemory();
 
-    for (u64 i = 0x1000; i < 512 * 0x1000; i += 0x1000){
+    for (u64 i = 0x1000; i < 512 * 0x1000; i += 0x1000)
         KernelVMM.MapMemory4KB((void*)i, (void*)i);
-    }
 
-    for (u64 i = (1<<21UL); i < (1<<30UL) && i < totalMemory; i += (1<<21UL)){
+    for (u64 i = (1<<21UL); i < (1<<30UL) && i < totalMemory; i += (1<<21UL))
         KernelVMM.MapMemory2MB((void*)i, (void*)i);
-    }
 
-    for (size_t i = 1; i < align(PhisicalAllocator::GetTotalMemory(), 30); i += (1 << 30UL)){
+    for (size_t i = 1; i < align(PhisicalAllocator::GetTotalMemory(), 30); i += (1 << 30UL))
         KernelVMM.MapMemory1GB((void*)i, (void*)i);
-    }
 
-    for (size_t i = fbBase; i < fbBase + fbSize; i += (1 << 21UL)){
+    for (size_t i = fbBase; i < fbBase + fbSize; i += (1 << 21UL))
         KernelVMM.MapMemory2MB((void*)i, (void*)i);
-    }
    
     __asm__ __volatile__ (
         "mov %0, %%cr3\n"
@@ -113,6 +109,8 @@ void KernelInfo::Init(){
     InitVMM();
     InitKMalloc();
     //InitACPI();
+
+    BasicRender::ClearScreen();
 
     kprintf( 
         "KernelInfo ready in \xff\xff\0\xff%lu\xff\xff\xff\xff MS."

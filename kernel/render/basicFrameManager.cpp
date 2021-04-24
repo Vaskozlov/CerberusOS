@@ -6,7 +6,6 @@
 #define PixelsPerScalLine FrameBuffer->pixelsPerScanline
 #define FrameAddress FrameBuffer->base_address
 
-// seting up static variables
 FrameBuffer_t   *BasicRender::FrameBuffer;
 vec2<u32>       BasicRender::PrintingSize;
 vec2<u32>       BasicRender::CursorPosition  = {0, 0};
@@ -14,20 +13,9 @@ Color_t         BasicRender::ClearColor      = {PixelColor::COLOR_BLACK};
 Color_t         BasicRender::FontColor       = {PixelColor::COLOR_WHITE};
 
 void BasicRender::ClearScreen(){    
-    static const int zero = 0;
-    u64 times = FrameBuffer->buffer_size / sizeof(u32) / 32;
-    float clearData[] = {*(float*)(&ClearColor.value), *(float*)(&zero), *(float*)(&ClearColor.value), *(float*)(&zero)};
-    
-    __asm__ __volatile__(
-        "movq %1, %%rdi\n"
-        "movl %2, %%edx\n"
-        "shl $32, %%rdx\n"
-        "orq %%rdx, %%rax\n"
-        "rep stosq"
-        :
-        : "c" (times), "r" (FrameAddress), "rax" (ClearColor.value)
-    );
+    u64 times = FrameBuffer->buffer_size / sizeof(u32) / 2;
 
+    ARCH::memset64(FrameAddress, (u64)ClearColor.value | ((u64)ClearColor.value << 32UL), times);
     CursorPosition.x = 0;
     CursorPosition.y = 0;
 }
@@ -35,7 +23,7 @@ void BasicRender::ClearScreen(){
 
 int BasicRender::PutChar(int c){
     u16 value;
-    u8 *font_ptr = (u8 *) KS->psf2.glyph_buffer + (c * Psf2Glyph.charsize);
+    u8  *font_ptr = (u8 *) KS->psf2.glyph_buffer + (c * Psf2Glyph.charsize);
 
     if (CursorPosition.x >= PrintingSize.x){
         CursorPosition.x = 0;
@@ -54,7 +42,7 @@ int BasicRender::PutChar(int c){
         
         auto lineAddress = FrameAddress + (y + Psf2Glyph.height * CursorPosition.y) * PixelsPerScalLine + CursorPosition.x * Psf2Glyph.width + Psf2Glyph.width;
     
-        value = ARCH::rotate_left(*((u16*)font_ptr), 1);
+        value = ARCH::rotate_left16(*((u16*)font_ptr),1);
         font_ptr += sizeof(value);
 
         for (u32 x = Psf2Glyph.width; x > 0; x--){

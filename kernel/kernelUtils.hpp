@@ -23,7 +23,7 @@ private:
     static void InitACPI();
 
 public:
-    static inline const PageTable *GetPageTableAddr() { return PML4; }
+    static strict_inline const PageTable *GetPageTableAddr() { return PML4; }
 
 public:
     static void Init();

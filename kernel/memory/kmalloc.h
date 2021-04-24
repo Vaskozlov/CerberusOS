@@ -6,18 +6,18 @@
 __BEGIN_DECLS
 
 typedef struct kMallocElem{
-    uint8_t free;
-    u64 size;
-    struct kMallocElem *next;
-    struct kMallocElem *previous;
+    uint8_t             free;
+    u64                 size;
+    struct kMallocElem  *next;
+    struct kMallocElem  *previous;
 } kMallocElem_t;
 
 typedef struct MallocHeader{
-    u64 MappedPages;
-    u64 MallocHead;
-    u64 MallocBegin;
-    struct kMallocElem *firstElem;
-    struct kMallocElem *lastElem;
+    u64                 MappedPages;
+    u64                 MallocHead;
+    u64                 MallocBegin;
+    struct kMallocElem  *firstElem;
+    struct kMallocElem  *lastElem;
 } MallocHeader_t;
 
 extern MallocHeader_t MallocMainHeder;
@@ -44,7 +44,7 @@ strict_inline void *kmalloc(u64 size) { return kmalloc_smallest(size); }
 
 #else
 
-#define kmalloc(size) kmalloc_smallest(size)
+#  define kmalloc(size) kmalloc_smallest(size)
 
 #endif
 

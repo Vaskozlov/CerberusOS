@@ -39,8 +39,8 @@ namespace PCI{
 
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)deviceAddress;
         
-        if (pciDeviceHeader->DeviceID == 0) return;
-        if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
+        if (pciDeviceHeader->DeviceID == 0)         return;
+        if (pciDeviceHeader->DeviceID  == 0xFFFF)   return;
 
         for (u64 function = 0; function < 8; function++)
             EnumerateFunction(deviceAddress, function);
@@ -52,8 +52,8 @@ namespace PCI{
 
         DeviceHeader *pciDeviceHeader = (DeviceHeader*)busAddress;
         
-        if (pciDeviceHeader->DeviceID == 0) return;
-        if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
+        if (pciDeviceHeader->DeviceID == 0)         return;
+        if (pciDeviceHeader->DeviceID  == 0xFFFF)   return;
 
         for (u64 device = 0; device < 32; device++)
             EnumerateDevice(busAddress, device);

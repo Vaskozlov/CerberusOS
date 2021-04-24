@@ -2,6 +2,16 @@ OSNAME := cerberusOS
 LOOP_DEVICE := /dev/loop24
 OVMFDIR = ovmf
 
+QEMU_FLAGS := \
+			-d int \
+			-M q35 \
+			-m 2G \
+			-drive file=$(OSNAME).img \
+			-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",readonly=on \
+			-drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" \
+			-net none \
+			-rtc clock=host,base=localtime
+
 all: compile install run
 
 compile:
@@ -11,49 +21,36 @@ setup:
 	./install.sh
 
 clean:
-	rm -fr build
-	mkdir -p build
+	@rm -fr build
+	@mkdir -p build
 
 mount:
-	sudo mount $(LOOP_DEVICE) /mnt/os
+	@mount $(LOOP_DEVICE) /mnt/os
 
 umount:
-	sudo umount $(LOOP_DEVICE)
+	@umount $(LOOP_DEVICE)
 
 los:
-	losetup --offset 1048576 --sizelimit 46934528 $(LOOP_DEVICE) $(OSNAME).img
+	@losetup --offset 1048576 --sizelimit 46934528 $(LOOP_DEVICE) $(OSNAME).img
 
 install_font:
 	sudo cp ./font/* /mnt/os/font
 	sudo cp ./startup.nsh /mnt/os
 
 install: mount
-	sudo cp build/BOOTX64.EFI /mnt/os/EFI/BOOT
-	sudo cp build/kernel.elf /mnt/os
-	make umount
+	@cp build/BOOTX64.EFI /mnt/os/EFI/BOOT
+	@cp build/kernel.elf /mnt/os
+	@make umount
 
 run:
-	qemu-system-x86_64 \
-	-d int \
+	@qemu-system-x86_64 \
 	-cpu EPYC-v2 \
-	-no-shutdown \
-	-M q35 \
-	-drive file=$(OSNAME).img -m 4G \
-	-drive file=blank.img \
-	-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",\
-	readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none \
-	-rtc clock=host,base=localtime
-
-run-test:
-	qemu-system-x86_64 -M q35 -drive file=$(OSNAME).img -m 1G -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none
+ 	$(QEMU_FLAGS)
 
 run-kvm:
-	qemu-system-x86_64 --enable-kvm \
+	@qemu-system-x86_64 --enable-kvm \
 	-cpu host \
-	-no-shutdown \
-	-M q35 \
-	-drive file=$(OSNAME).img -m 1G \
-	-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",\
-	readonly=on \
-	-drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none \
-	-rtc clock=host,base=localtime
+	$(QEMU_FLAGS)
+	
+run-debug:
+	screen -dmS qemu-debug-micronet qemu-system-x86_64 -s -S -cpu EPYC-v2 $(QEMU_FLAGS)

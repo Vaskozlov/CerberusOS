@@ -45,7 +45,7 @@ namespace AHCI{
         uint32_t portsImplemented = ABAR->portsImplemented;
         for (int i = 0; i < 32; i++){
             if (portsImplemented & (1 << i)){
-                PortType portType = CheckPortType(&ABAR->ports[i]);
+                PortType portType = CheckPortType((HBAPort*)&ABAR->ports[i]);
 
                 if (portType == PortType::SATA || portType == PortType::SATAPI){
                     ports[portCount] = new Port();

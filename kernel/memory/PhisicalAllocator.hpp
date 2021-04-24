@@ -34,11 +34,11 @@ class PhisicalAllocator{
     static u64  KernelStart;
     static u64  KernelEnd;
 
-    static BitMapDouble<u64> BigEnteries;
-    static BitMapDoubleConst<u64, 512> *MiddleEntries;
-    static BitMapConst<u64, 512> *SmallEntries;
+    static BitMapDouble<u64>             BigEnteries;
+    static BitMapDoubleConst<u64, 512>  *MiddleEntries;
+    static BitMapConst<u64, 512>        *SmallEntries;
 
-    static const char   *EFI_MEMORY_TYPE_STRING[];
+    static const char                   *EFI_MEMORY_TYPE_STRING[];
     
 public:
     static strict_inline u64 GetTotalMemory()     { return TotalMemory;     }

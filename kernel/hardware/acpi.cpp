@@ -11,10 +11,9 @@ namespace ACPI{
 
         for (int i = 0; i < enteries; i++){
             ACPI::SDTHeader *newSTDHeader = (ACPI::SDTHeader*)*(u64*)((u64)sdtHeader + sizeof(ACPI::SDTHeader) + (i * 8));
-
-            if (strncmp((const char *)newSTDHeader->signature, signature, 4) == 0)
-                return newSTDHeader;
+            if (*((u32*)newSTDHeader->signature) == *((u32*)signature)) return newSTDHeader;
         }
+        
         return NULL;
     }
 }

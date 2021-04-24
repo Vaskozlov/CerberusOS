@@ -49,9 +49,8 @@ void VMManager::MapMemory4KB(void *virtualMemory, void *PhysicalAddress){
 
         PML4->entries[indexer.PDP_i] = PDE;
     }
-    else{
+    else
         PDP = (PageTable*)PDE.GetAddress();
-    }
 
     PDE = PDP->entries[indexer.PD_i];
 
@@ -64,9 +63,8 @@ void VMManager::MapMemory4KB(void *virtualMemory, void *PhysicalAddress){
         PDE.SetFlag(PageDirectoryFlags::readWrite);
         PDP->entries[indexer.PD_i] = PDE;
     }
-    else{
+    else
         PD = (PageTable*) PDE.GetAddress();
-    }
 
     PDE = PD->entries[indexer.PT_i];
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
@@ -78,9 +76,8 @@ void VMManager::MapMemory4KB(void *virtualMemory, void *PhysicalAddress){
         PDE.SetFlag(PageDirectoryFlags::readWrite);
         PD->entries[indexer.PT_i] = PDE;
     }
-    else{
+    else
         PT = (PageTable*) PDE.GetAddress();
-    }
 
     PDE = PT->entries[indexer.P_i];
 
@@ -110,9 +107,8 @@ void VMManager::MapMemory2MB(void *virtualMemory, void *PhysicalAddress){
 
         PML4->entries[indexer.PDP_i] = PDE;
     }
-    else{
+    else
         PDP = (PageTable*)PDE.GetAddress();
-    }
 
     PDE = PDP->entries[indexer.PD_i];
 
@@ -125,10 +121,8 @@ void VMManager::MapMemory2MB(void *virtualMemory, void *PhysicalAddress){
         PDE.SetFlag(PageDirectoryFlags::readWrite);
         PDP->entries[indexer.PD_i] = PDE;
     }
-    else{
+    else
         PD = (PageTable*) PDE.GetAddress();
-    }
-
    
     PDE = PD->entries[indexer.PT_i];
 
@@ -158,9 +152,8 @@ void VMManager::MapMemory1GB(void *virtualMemory, void *PhysicalAddress){
 
         PML4->entries[indexer.PDP_i] = PDE;
     }
-    else{
+    else
         PDP = (PageTable*)PDE.GetAddress();
-    }
 
     PDE = PDP->entries[indexer.PD_i];
 
@@ -183,19 +176,17 @@ void VMManager::UnMapMemory4KB(void *virtualMemory, void *PhysicalAddress){
     PDE = PML4->entries[indexer.PDP_i];
     
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false) return;
-    else
-        PDP = (PageTable*)PDE.GetAddress();
+    else PDP = (PageTable*)PDE.GetAddress();
 
     PDE = PDP->entries[indexer.PD_i];
 
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false) return;
-    else
-        PD = (PageTable*) PDE.GetAddress();
+    else PD = (PageTable*) PDE.GetAddress();
 
     PDE = PD->entries[indexer.PT_i];
+    
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false) return;
-    else
-        PT = (PageTable*) PDE.GetAddress();
+    else PT = (PageTable*) PDE.GetAddress();
 
     PDE = PT->entries[indexer.P_i];
 
@@ -215,14 +206,12 @@ void VMManager::UnMapMemory2MB(void *virtualMemory, void *PhysicalAddress){
     PDE = PML4->entries[indexer.PDP_i];
     
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false) return;
-    else
-        PDP = (PageTable*)PDE.GetAddress();
+    else PDP = (PageTable*)PDE.GetAddress();
 
     PDE = PDP->entries[indexer.PD_i];
 
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false) return;
-    else
-        PD = (PageTable*) PDE.GetAddress();
+    else PD = (PageTable*) PDE.GetAddress();
    
     PDE = PD->entries[indexer.PT_i];
 
@@ -241,8 +230,7 @@ void VMManager::UnMapMemory1GB(void *virtualMemory, void *PhysicalAddress){
     PDE = PML4->entries[indexer.PDP_i];
     
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false) return;
-    else
-        PDP = (PageTable*)PDE.GetAddress();
+    else PDP = (PageTable*)PDE.GetAddress();
 
     PDE = PDP->entries[indexer.PD_i];
 
@@ -252,7 +240,6 @@ void VMManager::UnMapMemory1GB(void *virtualMemory, void *PhysicalAddress){
     PDE.RemoveFlags();
     PDP->entries[indexer.PD_i] = PDE;
 }
-
 
 void PrintPDE(PageDirectoryFlags flags){
     

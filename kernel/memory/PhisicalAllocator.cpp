@@ -15,9 +15,9 @@ u64 PhisicalAllocator::mMapEnteries;
 u64 PhisicalAllocator::KernelStart  = (u64)&_kernelStart;
 u64 PhisicalAllocator::KernelEnd    = (u64)&_KernelEnd;
 
-BitMapDouble<u64> PhisicalAllocator::BigEnteries;
-BitMapDoubleConst<u64, 512>* PhisicalAllocator::MiddleEntries;
-BitMapConst<u64, 512> *PhisicalAllocator::SmallEntries;
+BitMapDouble<u64>           PhisicalAllocator::BigEnteries;
+BitMapDoubleConst<u64, 512> *PhisicalAllocator::MiddleEntries;
+BitMapConst<u64, 512> *     PhisicalAllocator::SmallEntries;
 
 const char *PhisicalAllocator::EFI_MEMORY_TYPE_STRING[] = {
     "EfiReserverMemory",

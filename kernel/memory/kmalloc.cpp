@@ -23,7 +23,7 @@ static void SplitRegion(kMallocElem_t *region, size_t size){
     region->size = size;
 }
 
-inline void *FillElem(kMallocElem_t *suitableElem, u64 size){
+strict_inline void *FillElem(kMallocElem_t *suitableElem, u64 size){
     if (suitableElem == NULL){
         suitableElem = (kMallocElem_t*) MallocMainHeder.MallocHead;
         MallocMainHeder.MallocHead += align(size + sizeof(kMallocElem_t) * 2, 21);

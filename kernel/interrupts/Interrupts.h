@@ -1,6 +1,7 @@
 #ifndef Interrupts_hpp
 #define Interrupts_hpp
 
+#include <arch.hpp>
 #include <kernel.h>
 
 #ifdef __x86_64__
@@ -26,7 +27,7 @@ struct interrupt_frame
     uword_t flags;
     uword_t sp;
     uword_t ss;
-};
+} __attribute__((interrupt));
 
 __attribute__((interrupt))
 void Debug_Handler(struct interrupt_frame *frame);
@@ -68,7 +69,14 @@ __attribute__((interrupt))
 void EmptyIQR_Handler(struct interrupt_frame *frame);
 
 void RemapPIC();
-void PIC_EndMaster();
-void PIC_EndSlave();
+
+strict_inline void PIC_EndMaster(){
+    ARCH::outb(PIC_EOI, PIC1_COMMAND);
+}
+
+strict_inline void PIC_EndSlave(){
+    ARCH::outb(PIC_EOI, PIC2_COMMAND);
+    ARCH::outb(PIC_EOI, PIC1_COMMAND);
+}
 
 #endif /* Interrupts_hpp */

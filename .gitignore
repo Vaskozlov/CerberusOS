@@ -4,3 +4,4 @@ build/*
 cerberusOS.img
 .vscode/*
 ovmf/*
+blank.img

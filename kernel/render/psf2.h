@@ -62,8 +62,8 @@ typedef struct {
  * @Psf2Header_t: psf2 header
  */
 typedef struct {
-    void *glyph_buffer;
-    Psf2Header_t header;
+    void            *glyph_buffer;
+    Psf2Header_t    header;
 } Psf2Font_t;
 
 /**

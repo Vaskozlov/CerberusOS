@@ -1,5 +1,4 @@
 #include "Interrupts.h"
-#include <arch.hpp>
 #include <printf/Printf.h>
 #include "scheduling/pit/pit.hpp"
 #include <memory/VMManager.hpp>
@@ -7,87 +6,80 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
 extern VMManager KernelVMM;
 
 __attribute__((interrupt))
 void DevideByZero_Handler(struct interrupt_frame *frame){
    
     kprintf("Zero division error\n");
-    
     ARCH::Go2Sleep();
+
     return;
 }
 
 __attribute__((interrupt))
 void Debug_Handler(struct interrupt_frame *frame){
-    kprintf("Debug\n");
 
+    kprintf("Debug\n");
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt))
 void Breakpoint_Handler(struct interrupt_frame *frame){
+    
     kprintf("Breakpoint\n");
-
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt))
 void Overflow_Handler(struct interrupt_frame *frame){
+    
     kprintf("Overflow error\n");
-
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt))
 void BoundRange_Handler(struct interrupt_frame *frame){
+    
     kprintf("Bound Range error\n");
-
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt))
 void InvalidOpcode_Handler(struct interrupt_frame *frame){
+    
     kprintf("InvalidOpcode error\n");
-
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt))
 void DeviceNotAvailable_Handler(struct interrupt_frame *frame){
+    
     kprintf("Device not available error\n");
-
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt))
 void DoubleFault_Handler(struct interrupt_frame *frame){
+    
     kprintf("Warning double fault accured! Stop execution!\n");
-
     ARCH::Go2Sleep();
-    return; 
+ 
 }
 
 __attribute__((interrupt)) 
 void GeneralProtection_Handler(struct interrupt_frame *frame){
-    kprintf("GP fault at %p\n", frame->ip);
 
+    kprintf("GP fault at %p\n", frame->ip);
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt))
 void SegmentNotPresent_Handler(struct interrupt_frame *frame){
+    
     kprintf("Segment not present error\n");
-
     ARCH::Go2Sleep();
-    return;
 }
 
 __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame, unsigned long error_code){
@@ -120,15 +112,6 @@ __attribute__((interrupt))
 void Pit_Handler(struct interrupt_frame *frame){
     PIT::Tick();
     PIC_EndMaster();
-}
-
-void PIC_EndMaster(){
-    ARCH::outb(PIC_EOI, PIC1_COMMAND);
-}
-
-void PIC_EndSlave(){
-    ARCH::outb(PIC_EOI, PIC2_COMMAND);
-    ARCH::outb(PIC_EOI, PIC1_COMMAND);
 }
    
 void RemapPIC(){

@@ -98,6 +98,6 @@ int PrintFloat(parameters_t *param, double value, unsigned int printWay);
  */
 int PrintString(parameters_t *param, const char *str, unsigned int printWay);
 
-__END_DECL
+__END_DECLS
 
 #endif /* PrintTypes_h */

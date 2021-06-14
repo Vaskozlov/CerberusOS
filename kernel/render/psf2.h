@@ -3,7 +3,7 @@
 
 #include <kernelTypes.h>
 
-__BEGIN_DECL
+__BEGIN_DECLS
 
 #define PSF2_MAGIC0             0x72U
 #define PSF2_MAGIC1             0xb5U
@@ -21,19 +21,6 @@ __BEGIN_DECL
  * INIT_PSF2 - clear PSF2Header struct
  */
 #define INIT_PSF2 {0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U}
-
-/**
- * COPY_PSF2 - copy PSF2Header from src to dest
- */
-#define COPY_PSF2(src, dest) \
-    dest.magic = src.magic; \
-    dest.version = src.version; \
-    dest.headersize = src.headersize; \
-    dest.flags = src.flags; \
-    dest.length = src.length; \
-    dest.charsize = src.charsize; \
-    dest.height = src.height; \
-    dest.width = src.width
 
 /**
  * Psf2Header - header for PSF font version 2
@@ -90,6 +77,6 @@ typedef union{
     ColorMask_t color;
 } Color_t;
 
-__END_DECL
+__END_DECLS
 
 #endif /* psf2_h */

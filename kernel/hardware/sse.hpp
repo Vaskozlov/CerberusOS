@@ -14,7 +14,7 @@ class SSE{
     static u64 flags;
 
 public:
-    strict_inline void Scan4SSE(){
+    always_inline void Scan4SSE(){
         flags = ASM_Scan4SSE();
     }
 

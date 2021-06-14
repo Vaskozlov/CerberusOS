@@ -38,16 +38,16 @@ const char *PhisicalAllocator::EFI_MEMORY_TYPE_STRING[] = {
 };
 
 template<typename T>
-strict_inline static u64 GetGB(T memsize) { return (u64)memsize >> 30UL ; }
+always_inline static u64 GetGB(T memsize) { return (u64)memsize >> 30UL ; }
 
 template<typename T>
-strict_inline static u64 GetMB(T memsize) { return (u64)memsize >> 20UL ; }
+always_inline static u64 GetMB(T memsize) { return (u64)memsize >> 20UL ; }
 
 template<typename T>
-strict_inline static u64 Get2MBIndex(T memsize) { return ((u64)memsize >> 21UL) % 512; }
+always_inline static u64 Get2MBIndex(T memsize) { return ((u64)memsize >> 21UL) % 512; }
 
 template<typename T>
-strict_inline static u64 Get4KBIndex(T memsize) { return ((u64)memsize >> 12UL) % 512; }
+always_inline static u64 Get4KBIndex(T memsize) { return ((u64)memsize >> 12UL) % 512; }
 
 size_t PhisicalAllocator::UniversalLock4KB(void* address){
     size_t bigIndex = GetGB(address);
@@ -235,15 +235,15 @@ size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t to
     AvailableMemory = availableMemory;
     LockedMemory = 0;
 
-    BigEnteries = BitMapDouble<u64>((u64*)location, MAX<size_t>(totalMemory >> 30, 1));
-    AllocatorHead = (u64)location + align(MAX<size_t>(totalMemory >> 30, 63), 6) / bitsizeof(u64) * sizeof(u64) * 2;
+    BigEnteries = BitMapDouble<u64>((u64*)location, cerb::MAX<size_t>(totalMemory >> 30, 1));
+    AllocatorHead = (u64)location + cerb::align(cerb::MAX<size_t>(totalMemory >> 30, 63), 6) / bitsizeof(u64) * sizeof(u64) * 2;
     BigEnteries.clear();
 
     MiddleEntries = (BitMapDoubleConst<u64, 512>*)AllocatorHead;
-    AllocatorHead += MAX<size_t>(((totalMemory >> 21) + 1) * sizeof(BitMapDoubleConst<u64, 512>) / 512 * 2, 16);
+    AllocatorHead += cerb::MAX<size_t>(((totalMemory >> 21) + 1) * sizeof(BitMapDoubleConst<u64, 512>) / 512 * 2, 16);
     
     SmallEntries = (BitMapConst<u64, 512>*)AllocatorHead;
-    AllocatorHead += MAX<size_t>(((totalMemory / 0x1000) + 1) * sizeof(BitMapConst<u64, 512>) / 512, 8);
+    AllocatorHead += cerb::MAX<size_t>(((totalMemory / 0x1000) + 1) * sizeof(BitMapConst<u64, 512>) / 512, 8);
     memset(location, 0, AllocatorHead - (u64)location);
 
     return AllocatorHead - (u64)location;

@@ -11,7 +11,7 @@
 #pragma GCC diagnostic ignored "-Wreorder-ctor"
 
 template<typename T>
-strict_inline T get(T *_buffer, size_t index, size_t _size){
+always_inline T get(T *_buffer, size_t index, size_t _size){
     if (index >= _size) return UINT8_MAX;
 
     size_t elemIndex = index / bitsizeof(T);
@@ -19,7 +19,7 @@ strict_inline T get(T *_buffer, size_t index, size_t _size){
 }
 
 template<typename T>
-strict_inline T get2(T *_buffer0, T *_buffer1, size_t index, size_t _size){
+always_inline T get2(T *_buffer0, T *_buffer1, size_t index, size_t _size){
     if (index >= _size) return UINT8_MAX;
 
     size_t elemIndex = index / bitsizeof(T);
@@ -27,7 +27,7 @@ strict_inline T get2(T *_buffer0, T *_buffer1, size_t index, size_t _size){
 }
 
 template<typename T>
-strict_inline void set(T *_buffer, size_t index, u8 value, size_t _size){
+always_inline void set(T *_buffer, size_t index, u8 value, size_t _size){
     if (index >= _size) return;
 
     size_t elemIndex = index / bitsizeof(T);
@@ -36,7 +36,7 @@ strict_inline void set(T *_buffer, size_t index, u8 value, size_t _size){
 }
 
 template<typename T>
-strict_inline void set2(T *_buffer0, T *_buffer1, size_t index, u8 value, size_t _size){
+always_inline void set2(T *_buffer0, T *_buffer1, size_t index, u8 value, size_t _size){
     if (index >= _size) return;
 
     size_t elemIndex = index / bitsizeof(T);
@@ -51,9 +51,9 @@ strict_inline void set2(T *_buffer0, T *_buffer1, size_t index, u8 value, size_t
 }
 
 template<typename T>
-strict_inline size_t findFree(T *_buffer, size_t _size){
+always_inline size_t findFree(T *_buffer, size_t _size){
     size_t i = 0;
-    auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+    auto maxIndex = cerb::MAX<size_t>(_size / bitsizeof(T), 1);
 
     while (i < maxIndex - 1){
         if (_buffer[i] < ~((T)0)){
@@ -80,9 +80,9 @@ strict_inline size_t findFree(T *_buffer, size_t _size){
 
 
 template<typename T>
-strict_inline size_t findFree0Is0And1Is0(T *_buffer0, T *_buffer1, size_t _size){
+always_inline size_t findFree0Is0And1Is0(T *_buffer0, T *_buffer1, size_t _size){
     size_t i = 0;
-    auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+    auto maxIndex = cerb::MAX<size_t>(_size / bitsizeof(T), 1);
 
     while (i < maxIndex - 1){
         
@@ -113,9 +113,9 @@ strict_inline size_t findFree0Is0And1Is0(T *_buffer0, T *_buffer1, size_t _size)
 }
 
 template<typename T>
-strict_inline size_t findFree1not0(T *_buffer0, T *_buffer1, size_t _size){
+always_inline size_t findFree1not0(T *_buffer0, T *_buffer1, size_t _size){
     size_t i = 0;
-    auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+    auto maxIndex = cerb::MAX<size_t>(_size / bitsizeof(T), 1);
 
     while (i < maxIndex - 1){
         T value  = (_buffer0[i] xor _buffer1[i]) & _buffer1[i];
@@ -142,9 +142,9 @@ strict_inline size_t findFree1not0(T *_buffer0, T *_buffer1, size_t _size){
 }
 
 template<typename T>
-strict_inline size_t findFree0not1(T *_buffer0, T *_buffer1, size_t _size){
+always_inline size_t findFree0not1(T *_buffer0, T *_buffer1, size_t _size){
     size_t i = 0;
-    auto maxIndex = MAX<size_t>(_size / bitsizeof(T), 1);
+    auto maxIndex = cerb::MAX<size_t>(_size / bitsizeof(T), 1);
 
     while (i < maxIndex - 1){
         T value  = (_buffer0[i] ^ _buffer1[i]) & _buffer0[i];
@@ -177,7 +177,7 @@ class BitMap{
     T       *_buffer;
 
 public:
-    strict_inline size_t size() const { return _size; }
+    always_inline size_t size() const { return _size; }
 
 public:
     void set(size_t index, u8 value) {
@@ -192,13 +192,13 @@ public:
         return ::findFree<T>(_buffer, _size);
     }
 
-    strict_inline void clear(){
+    always_inline void clear(){
         memset(_buffer, 0, _size / bitsizeof(T));
     }
 
 public:
     BitMap() = default;
-    strict_inline BitMap(T *buffer, size_t size) : _buffer(buffer), _size(size) {}
+    always_inline BitMap(T *buffer, size_t size) : _buffer(buffer), _size(size) {}
 };
 
 template<typename T, size_t N>
@@ -206,7 +206,7 @@ class BitMapConst{
     T _buffer[N / bitsizeof(T)];
 
 public:
-    constexpr strict_inline size_t size() const { return N; }
+    constexpr always_inline size_t size() const { return N; }
 
 public:
     void set(size_t index, u8 value) {
@@ -221,11 +221,11 @@ public:
         return ::findFree<T>(_buffer, N);
     }
 
-    strict_inline void clear(){
+    always_inline void clear(){
         memset(_buffer, 0, N / bitsizeof(T));
     }
 
-    strict_inline bool IsEmpty(){
+    always_inline bool IsEmpty(){
         for (size_t i = 0; i < N / bitsizeof(T); i++)
             if (_buffer[i] != ~((T)0)) return false;
 
@@ -243,7 +243,7 @@ class BitMapDouble{
     size_t _size;
 
 public:
-    constexpr strict_inline size_t size() const { return _size; }
+    constexpr always_inline size_t size() const { return _size; }
 
 public:
     void set0(size_t index, u8 value) {
@@ -286,7 +286,7 @@ public:
         return ::findFree0not1<T>(_buffer0, _buffer1, _size);
     }
 
-    strict_inline void clear(){
+    always_inline void clear(){
         memset(_buffer0, 0, _size / bitsizeof(T));
         memset(_buffer1, 0, _size / bitsizeof(T));
     }
@@ -297,7 +297,7 @@ public:
 
 public:
     BitMapDouble() = default;
-    strict_inline BitMapDouble(T *buffer, size_t size) : _buffer0(buffer), _buffer1(buffer + MAX<size_t>(size / bitsizeof(T), 1)), _size(size) {}
+    always_inline BitMapDouble(T *buffer, size_t size) : _buffer0(buffer), _buffer1(buffer + cerb::MAX<size_t>(size / bitsizeof(T), 1)), _size(size) {}
 };
 
 template<typename T, size_t N>
@@ -307,7 +307,7 @@ class BitMapDoubleConst{
 
 public:
     u8 initialized;
-    constexpr strict_inline size_t size() const { return N; }
+    constexpr always_inline size_t size() const { return N; }
 
 public:
     void set0(size_t index, u8 value) {
@@ -354,12 +354,12 @@ public:
         return ::findFree0not1<T>(_buffer0, _buffer1, N);
     }
 
-    strict_inline void clear(){
+    always_inline void clear(){
         memset(_buffer0, 0, N / bitsizeof(T));
         memset(_buffer1, 0, N / bitsizeof(T));
     }
 
-    strict_inline bool IsEmpty0(){
+    always_inline bool IsEmpty0(){
 
         for (size_t i = 0; i < N / bitsizeof(T); i++){
             if (_buffer0[i] != ~((T)0)) return false;
@@ -368,7 +368,7 @@ public:
         return true;
     }
 
-    strict_inline bool IsEmpty1(){
+    always_inline bool IsEmpty1(){
 
         for (size_t i = 0; i < N / bitsizeof(T); i++){
             if (_buffer1[i] != ~((T)0)) return false;

@@ -6,6 +6,7 @@
 #include "render/basicFrameManager.hpp"
 #include "interrupts/Interrupts.h"
 #include "memory/kmalloc.h"
+#include <cerberus/printf.h>
 
 IDTR KernelInfo::idtr;
 GDTDescriptor KernelInfo::gdt;
@@ -14,6 +15,7 @@ VMManager KernelVMM;
 extern kernel_services_t *KS;
 
 __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
+
 
 void KernelInfo::InitVMM(){
     PML4 = (PageTable*) PhisicalAllocator::Get4KB();
@@ -32,7 +34,7 @@ void KernelInfo::InitVMM(){
     for (u64 i = (1<<21UL); i < (1<<30UL) && i < totalMemory; i += (1<<21UL))
         KernelVMM.MapMemory2MB((void*)i, (void*)i);
 
-    for (size_t i = 1; i < align(PhisicalAllocator::GetTotalMemory(), 30); i += (1 << 30UL))
+    for (size_t i = 1; i < cerb::align(PhisicalAllocator::GetTotalMemory(), 30); i += (1 << 30UL))
         KernelVMM.MapMemory1GB((void*)i, (void*)i);
 
     for (size_t i = fbBase; i < fbBase + fbSize; i += (1 << 21UL))
@@ -50,7 +52,7 @@ void KernelInfo::InitGDT(){
     gdt.address = (u64) &DefaultGDT;
     LoadGDT(&gdt);
 
-    kprintf("GDT ready %p\n", &DefaultGDT);  
+    cerbPrintf("GDT ready %p\n", &DefaultGDT);  
 }
 
 void KernelInfo::SetUpIDTEntry(void *handler, u16 position, u8 selector, u8 type_attr){
@@ -82,7 +84,7 @@ void KernelInfo::InitIDT(){
     __asm__ __volatile__ ("lidt %0" : : "m" (idtr));
 
     RemapPIC();
-    kprintf("IDT and PIC ready\n");
+    cerbPrintString("IDT and PIC ready\n");
 }
 
 void KernelInfo::InitACPI(){
@@ -103,7 +105,7 @@ void KernelInfo::Init(){
 
     PIT::SetFrequency(1000);
     
-    kprintf("Wait for VMM initialization\n");
+    cerbPrintString("Wait for VMM initialization\n");
     PhisicalAllocator::SetUp();
 
     InitVMM();
@@ -112,16 +114,16 @@ void KernelInfo::Init(){
 
     BasicRender::ClearScreen();
 
-    kprintf( 
-        "KernelInfo ready in \xff\xff\0\xff%lu\xff\xff\xff\xff MS."
+    cerbPrintf( 
+        "KernelInfo ready in %lu MS."
         "Available memeory: \xff\xff\0\xff%llu MB\xff\xff\xff\xff, " 
-        "Cerberus majore version \xff\xff\0\xff%u\xff\xff\xff\xff, "
-        "Cerberus minore version \xff\xff\0\xff%u\xff\xff\xff\xff, "
+        "Cerberus major version \xff\xff\0\xff%u\xff\xff\xff\xff, "
+        "Cerberus minor version \xff\xff\0\xff%u\xff\xff\xff\xff, "
         "compiled with \xff\xff\0\xff%s\xff\xff\xff\xff\n",
         PIT::GetTimeSicneBoot(),
         PhisicalAllocator::GetAvailableMemory() / 1024 / 1024,
-        CERBERUS_MAJORE_VERSION,
-        CERBERUS_MINORE_VERSION,
+        CERBERUS_MAJOR_VERSION,
+        CERBERUS_MINOR_VERSION,
         COMPILER_NAME
     );
 }

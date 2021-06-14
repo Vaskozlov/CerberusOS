@@ -132,7 +132,7 @@ int LoadPSF(EFI_FILE_HANDLE Volume, CHAR16 *FileName){
         (void*)&KernelServices.psf2.header
     );
   
-    if (str2u32(KernelServices.psf2.header.magic, 0) == PSF2_MAGIC){
+    if (*((u32*)KernelServices.psf2.header.magic) == PSF2_MAGIC){
         return LoadPSF2(FontHandle);
     }
     else

@@ -19,24 +19,24 @@ class PIT{
     static double Frequency1Div;
 
 public:
-    static strict_inline u64 GetFrequency() { return PIT_SCALE / Divisor; }
-    static strict_inline void Tick()        { TimeSicneBoot++; }
+    static always_inline u64 GetFrequency() { return PIT_SCALE / Divisor; }
+    static always_inline void Tick()        { TimeSicneBoot++; }
 
 public:
     static void Sleep(i64 milliseconds);
     
-    strict_inline static void Sleepd(double seconds){
+    always_inline static void Sleepd(double seconds){
         Sleep((i64)(seconds * 1000));
     }
 
 public:
     static void SetDivisor(u16 divisor);
 
-    strict_inline static void SetFrequency(u64 frequency){
+    always_inline static void SetFrequency(u64 frequency){
         SetDivisor(PIT_SCALE / frequency);
     }
 
-    strict_inline static u64 GetTimeSicneBoot() { return TimeSicneBoot; }
+    always_inline static u64 GetTimeSicneBoot() { return TimeSicneBoot; }
 
 public:
     PIT() = delete;

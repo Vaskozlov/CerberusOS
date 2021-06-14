@@ -5,3 +5,7 @@ cerberusOS.img
 .vscode/*
 ovmf/*
 blank.img
+disasm.asm
+*.o
+*.a
+CerberusLib/build/*

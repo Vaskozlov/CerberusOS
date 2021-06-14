@@ -70,11 +70,11 @@ void EmptyIQR_Handler(struct interrupt_frame *frame);
 
 void RemapPIC();
 
-strict_inline void PIC_EndMaster(){
+always_inline void PIC_EndMaster(){
     ARCH::outb(PIC_EOI, PIC1_COMMAND);
 }
 
-strict_inline void PIC_EndSlave(){
+always_inline void PIC_EndSlave(){
     ARCH::outb(PIC_EOI, PIC2_COMMAND);
     ARCH::outb(PIC_EOI, PIC1_COMMAND);
 }

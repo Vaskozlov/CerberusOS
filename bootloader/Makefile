@@ -12,7 +12,7 @@ override TOPDIR := $(GNU_EFI_DIR)
 
 HEADERS := /usr/src/sys/build/include
 
-CFLAGS += -Wall -Wextra -std=c11 -I $(HEADERS) -D__KERNEL__ -I $(KERNEL_DIR)
+CFLAGS += -Wall -Wextra -std=c11 -I $(HEADERS) -D__KERNEL__ -I $(KERNEL_DIR) -I ../CerberusLib/include
 override CPPFLAGS := $(filter-out $(CPPFLAGS), -maccumulate-outgoing-args)
 
 ifeq ($(ARCH), x86_64)

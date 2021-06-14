@@ -6,10 +6,14 @@
 
 extern kernel_services_t *KS;
 
-template <typename T>
+template <typename _Tp>
 struct vec2{
-    T x, y;
+    _Tp x, y;
 
+public:
+    always_inline vec2(_Tp X, _Tp Y) : x(X), y(Y) {}
+
+public:
     vec2() = default;
     ~vec2() = default;
 };

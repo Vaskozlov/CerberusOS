@@ -6,7 +6,7 @@ MallocHeader_t MallocMainHeder;
 extern VMManager KernelVMM;
 
 void InitKMalloc(){
-    MallocMainHeder.MallocBegin = align(PhisicalAllocator::GetTotalMemory(), 30);
+    MallocMainHeder.MallocBegin = cerb::align(PhisicalAllocator::GetTotalMemory(), 30);
     MallocMainHeder.MallocHead = MallocMainHeder.MallocBegin;
 }
 
@@ -23,11 +23,11 @@ static void SplitRegion(kMallocElem_t *region, size_t size){
     region->size = size;
 }
 
-strict_inline void *FillElem(kMallocElem_t *suitableElem, u64 size){
+always_inline void *FillElem(kMallocElem_t *suitableElem, u64 size){
     if (suitableElem == NULL){
         suitableElem = (kMallocElem_t*) MallocMainHeder.MallocHead;
-        MallocMainHeder.MallocHead += align(size + sizeof(kMallocElem_t) * 2, 21);
-        suitableElem->size = align(size + sizeof(kMallocElem_t), 21) - sizeof(kMallocElem_t);
+        MallocMainHeder.MallocHead += cerb::align(size + sizeof(kMallocElem_t) * 2, 21);
+        suitableElem->size = cerb::align(size + sizeof(kMallocElem_t), 21) - sizeof(kMallocElem_t);
         suitableElem->free = 1;
         suitableElem->next = NULL;
         suitableElem->previous = MallocMainHeder.lastElem;
@@ -141,3 +141,8 @@ void kfree(void *address){
         if (elemNext->next != NULL) elemNext->next->previous = elem2Clear;
     }
 }
+
+void *operator new  (size_t size)  { return kmalloc(size); }
+void *operator new[](size_t size)  { return kmalloc(size); }
+void operator delete  (void *p)    { return kfree(p);      }
+void operator delete[](void *p)    { return kfree(p);      }

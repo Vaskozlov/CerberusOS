@@ -1,6 +1,7 @@
 LD 	:= ld
 CC 	:= clang
 CXX := clang++
+CCV := $(shell $(CC) -dumpversion)
 
 PREFIX       := /usr/local
 HOSTCC       := $(prefix)clang
@@ -12,10 +13,11 @@ MUSL_DIR 		:= ../musl
 BUILD_DIR 		:= ../build
 GNU_EFI_DIR 	:= ../gnu-efi
 TARGET 			:= kernel.elf
+CERBERUS_DIR 	:= ../CerberusLib
 LINUX_HEADERS 	:= /usr/src/sys/build
 
-MAJORE_VERSION := 1
-MINORE_VERSION := 1
+MAJOR_VERSION := 1
+MINOR_VERSION := 1
 
 ifeq (FreeBSD, $(OS))
 LDSCRIPT := linkers/elf_$(ARCH)_fbsd_efi.lds
@@ -24,33 +26,41 @@ LDSCRIPT := linkers/elf_$(ARCH)_efi.lds
 endif
 
 CFLAGS :=  \
-			-O0 -g \
+			-O0 \
+			-g \
 			-c \
-			-fno-stack-protector \
-			-fno-exceptions \
+			-Wall\
+			-Wextra \
+			-nostdlib \
 			-ffreestanding \
-			-Wall -Wextra \
-			-I $(LINUX_HEADERS)/include \
-			-I $(MUSL_DIR)/arch \
-			-I . \
+			-fno-exceptions \
+			-fno-stack-protector \
 			-std=c11 \
+			-I . \
+			-I $(MUSL_DIR)/arch \
+			-I $(LINUX_HEADERS)/include \
+			-I $(CERBERUS_DIR)/include \
 			-D MAJORE_VERSION=$(MAJORE_VERSION) \
 			-D MINORE_VERSION=$(MINORE_VERSION)
 
-CXXFLAGS := \
-			-O3 -g \
+CXXFLAGS :=  \
+			-O0 \
+			-g \
 			-c \
-			-fno-stack-protector \
-			-fno-exceptions \
+			-Wall\
+			-Wextra \
+			-nostdlib \
 			-ffreestanding \
-			-Wall -Wextra \
-			-I $(LINUX_HEADERS)/include \
-			-I $(MUSL_DIR)/arch \
-			-I ./arch/$(ARCH)\
+			-fno-exceptions \
+			-fno-stack-protector \
+			-std=c++20 \
 			-I . \
-			-std=c++17 \
-			-D MAJORE_VERSION=$(MAJORE_VERSION) \
-			-D MINORE_VERSION=$(MINORE_VERSION)
+			-I ./arch/$(ARCH)\
+			-I $(MUSL_DIR)/arch \
+			-I $(CERBERUS_DIR)/include \
+			-I $(LINUX_HEADERS)/include \
+			-D MAJOR_VERSION=$(MAJOR_VERSION) \
+			-D MINOR_VERSION=$(MINOR_VERSION)
 
 ASMFLAGS := -O3\
 			-Wall -Wextra \
@@ -62,6 +72,7 @@ LDFLAGS :=	-static \
 			-T $(LDSCRIPT) 
 
 LOADLIBES := \
+			$(CERBERUS_DIR)/build/libcerberus.a \
 			$(MUSL_DIR)/lib/libc.a \
 			$(MUSL_DIR)/lib/libm.a
 

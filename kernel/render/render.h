@@ -30,6 +30,6 @@ typedef struct {
     u32     pixelsPerScanline;
 } FrameBuffer_t;
 
-__END_DECL
+__END_DECLS
 
 #endif /* render_h */

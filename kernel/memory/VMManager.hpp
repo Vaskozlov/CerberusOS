@@ -28,27 +28,27 @@ class PageDirectoryEntry{
     u64 value;
 
 public:
-    strict_inline void SetFlag(PageDirectoryFlags flag)        { value |= flag;    }
-    strict_inline void RempoveFlag(PageDirectoryFlags flag)    { value &= ~flag;   }
+    always_inline void SetFlag(PageDirectoryFlags flag)        { value |= flag;    }
+    always_inline void RempoveFlag(PageDirectoryFlags flag)    { value &= ~flag;   }
 
-    strict_inline void SetAddress(void *address) {
+    always_inline void SetAddress(void *address) {
         u64 naddress = (u64)address - (u64)address % 0x1000;
         value |= naddress;
     }
 
-    strict_inline void *GetAddress(){
+    always_inline void *GetAddress(){
         return (void*)(value - (value % 0x1000));
     }
 
-    strict_inline PageDirectoryFlags GetFlags(){
+    always_inline PageDirectoryFlags GetFlags(){
         return (PageDirectoryFlags)(value % 0x1000);
     }
 
-    strict_inline bool IsFlagSet(PageDirectoryFlags flag){
+    always_inline bool IsFlagSet(PageDirectoryFlags flag){
         return (value & flag) > 0;
     }
 
-    strict_inline void RemoveFlags(){
+    always_inline void RemoveFlags(){
         value -= value % 0x1000;
     }
 
@@ -121,9 +121,9 @@ class VMManager{
     size_t MappedPages1GB;
 
 public:
-    strict_inline size_t GetMappedPages4KB() { return MappedPages4KB; }
-    strict_inline size_t GetMappedPages2MB() { return MappedPages2MB; }
-    strict_inline size_t GetMappedPages1GB() { return MappedPages1GB; }
+    always_inline size_t GetMappedPages4KB() { return MappedPages4KB; }
+    always_inline size_t GetMappedPages2MB() { return MappedPages2MB; }
+    always_inline size_t GetMappedPages1GB() { return MappedPages1GB; }
 
 public:
     PageDirectoryFlags GetPageFLags(void *virtualMemory);

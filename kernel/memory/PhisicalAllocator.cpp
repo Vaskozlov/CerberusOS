@@ -1,4 +1,5 @@
 #include <printf/Printf.h>
+#include <cerberus/printf.h>
 #include "PhisicalAllocator.hpp"
 
 extern u64 _kernelStart;
@@ -15,7 +16,7 @@ u64 PhisicalAllocator::mMapEnteries;
 u64 PhisicalAllocator::KernelStart  = (u64)&_kernelStart;
 u64 PhisicalAllocator::KernelEnd    = (u64)&_KernelEnd;
 
-BitMapDouble<u64>           PhisicalAllocator::BigEnteries;
+cerb::DoubleBitmapFree<u64> PhisicalAllocator::BigEnteries;
 BitMapDoubleConst<u64, 512> *PhisicalAllocator::MiddleEntries;
 BitMapConst<u64, 512> *     PhisicalAllocator::SmallEntries;
 
@@ -58,11 +59,11 @@ size_t PhisicalAllocator::UniversalLock4KB(void* address){
     BitMapConst<u64, 512> *smallHeader = SmallEntries + bigIndex * 512 + index;
     
     if ((u64)address > TotalMemory)         return 0;
-    if (BigEnteries.get0(bigIndex) == 1)    return 0;
+    if (BigEnteries.at1(bigIndex) == 1)    return 0;
     if (header->get0(index) == 1)           return 0;
     if (smallHeader->get(smallIndex) == 1)  return 0;
 
-    BigEnteries.set1(bigIndex, 1);
+    BigEnteries.set2(bigIndex, 1);
     header->set1(index, 1);
     smallHeader->set(smallIndex, 1);
     
@@ -75,7 +76,7 @@ size_t PhisicalAllocator::UniversalLock2MB(void* address){
     BitMapDoubleConst<u64, 512>* header = MiddleEntries + bigIndex;
     
     if ((u64)address >= TotalMemory)        return 0;
-    if (BigEnteries.get0(bigIndex) == 1)    return 0;
+    if (BigEnteries.at1(bigIndex) == 1)    return 0;
     if (header->get0(index) == 1)           return 0;
     header->set0(index, 1);
 
@@ -86,9 +87,9 @@ size_t PhisicalAllocator::UniversalLock1GB(void *address){
     size_t index = GetGB(address);
 
     if (index >= BigEnteries.size()) return 0;
-    if (BigEnteries.get0(index) == 1) return 0;
+    if (BigEnteries.at1(index) == 1) return 0;
 
-    BigEnteries.set0(index, 1);
+    BigEnteries.set1(index, 1);
 
     return (1<<30UL);
 }
@@ -127,23 +128,23 @@ size_t PhisicalAllocator::UniversalUnLock1GB(void *address){
     size_t bigIndex = GetGB(address);
 
     if (bigIndex >= BigEnteries.size())     return 0;
-    if (BigEnteries.get0(bigIndex) == 0)    return 0;
+    if (BigEnteries.at1(bigIndex) == 0)    return 0;
 
     AvailableMemory += (1<<30UL);
     LockedMemory -= (1<<30UL);
-    BigEnteries.set0(bigIndex, 0);
+    BigEnteries.set1(bigIndex, 0);
 
     return (1<<30UL);
 }
 
 void *PhisicalAllocator::Get4KB(){
-    size_t index = BigEnteries.findFree1not0();
+    size_t index = BigEnteries.findFirstFreeAndSecondSet();//findFree1not0();
 
     if (index == UINTMAX_MAX){
-        index = BigEnteries.findFree0();
+        index = BigEnteries.findFree1();
         if (index == UINTMAX_MAX) return NULL;
 
-        BigEnteries.set1(index, 1);
+        BigEnteries.set2(index, 1);
         BitMapDoubleConst<u64, 512>* header = MiddleEntries + index;
         
         u64 middleIndex = header->findFree1();
@@ -187,13 +188,13 @@ void *PhisicalAllocator::Get4KB(){
 }
 
 void *PhisicalAllocator::Get2MB(){
-    size_t index = BigEnteries.findFree1not0();
+    size_t index = BigEnteries.findFirstFreeAndSecondSet();//findFree1not0();
 
     if (index == UINTMAX_MAX){
-        index = BigEnteries.findFree0();
+        index = BigEnteries.findFree1();
         if (index == UINTMAX_MAX) return NULL;
 
-        BigEnteries.set1(index, 1);
+        BigEnteries.set2(index, 1);
         BitMapDoubleConst<u64, 512>* header = MiddleEntries + index;
         
         u64 middleIndex = header->findFree0();
@@ -217,11 +218,11 @@ void *PhisicalAllocator::Get2MB(){
 
 void *PhisicalAllocator::Get1GB(){
 
-    size_t index = BigEnteries.findFree0Is0And1Is0();
+    size_t index = BigEnteries.findFree1And2();//findFree0Is0And1Is0();
     
     if (index == UINTMAX_MAX) return NULL;
 
-    BigEnteries.set0(index, 1);
+    BigEnteries.set1(index, 1);
 
     LockedMemory += (1<<30UL);
     AvailableMemory -= (1<<30UL);
@@ -235,7 +236,7 @@ size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t to
     AvailableMemory = availableMemory;
     LockedMemory = 0;
 
-    BigEnteries = BitMapDouble<u64>((u64*)location, cerb::MAX<size_t>(totalMemory >> 30, 1));
+    BigEnteries = cerb::move(cerb::DoubleBitmapFree<u64>((u64*)location, cerb::MAX<size_t>(totalMemory >> 30, 1)));
     AllocatorHead = (u64)location + cerb::align(cerb::MAX<size_t>(totalMemory >> 30, 63), 6) / bitsizeof(u64) * sizeof(u64) * 2;
     BigEnteries.clear();
 
@@ -276,7 +277,7 @@ size_t PhisicalAllocator::SetUp(){
     AvailableMemory *= 0x1000;
 
     auto initSize = Init(mainMemory, AvailableMemory, TotalMemory);
-    PhisicalAllocator::Get4KB(); // skip first 0x1000
+    PhisicalAllocator::Lock4KB(0x0); // skip first 0x1000
     
     {
         i64 selfSize2MB = initSize >> 21;
@@ -328,5 +329,4 @@ size_t PhisicalAllocator::SetUp(){
     Lock4KB(KS->frameBuffer.base_address, KS->frameBuffer.buffer_size / 0x1000 + 1);
 
     return initSize;
-}
-
+} //38f4

@@ -115,7 +115,7 @@ int cerbPrintINT(uintmax_t value, PrintingParams_t *params, const char printWay)
     extras += lazy_str[0] != '0';
     lazy_ptr -= lazy_str[0] == '\0';
 
-    if (params->hashtag_flag && value != 0 && printWay != 'p'){
+    if (params->hashtag_flag && !(value == 0 && printWay == 'p')){
 
         switch (printWay){
             case 'b':

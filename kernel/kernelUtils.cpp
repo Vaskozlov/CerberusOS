@@ -126,4 +126,6 @@ void KernelInfo::Init(){
         CERBERUS_MINOR_VERSION,
         COMPILER_NAME
     );
+    cerbPrintf("%p\n", PhisicalAllocator::Get2MB());
+    cerbPrintf("Tests\nHello world!");
 }

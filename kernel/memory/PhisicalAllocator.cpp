@@ -189,6 +189,7 @@ void *PhisicalAllocator::Get4KB(){
 
 void *PhisicalAllocator::Get2MB(){
     size_t index = BigEnteries.findFirstFreeAndSecondSet();//findFree1not0();
+    cerbPrintf("index = %u\n", index);
 
     if (index == UINTMAX_MAX){
         index = BigEnteries.findFree1();
@@ -208,6 +209,7 @@ void *PhisicalAllocator::Get2MB(){
 
     BitMapDoubleConst<u64, 512>* header = MiddleEntries + index;
     u64 middleIndex = header->findFree0not1();
+    cerbPrintf("middleIndex = %u\n", middleIndex);
     header->set0(middleIndex, 1);
 
     AvailableMemory -= (1<<21UL);

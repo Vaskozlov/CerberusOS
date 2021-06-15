@@ -5,7 +5,7 @@ OVMFDIR = ovmf
 QEMU_FLAGS := \
 			-d int \
 			-M q35 \
-			-m 2G \
+			-m 4G \
 			-drive file=$(OSNAME).img \
 			-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF.fd",readonly=on \
 			-drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" \

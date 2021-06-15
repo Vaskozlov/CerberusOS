@@ -23,7 +23,7 @@ void BasicRender::ClearScreen(){
 
 int BasicRender::PutChar(int c){
     u16 value;
-    u8  *font_ptr = (u8 *) KS->psf2.glyph_buffer + (c * Psf2Glyph.charsize);
+    u8  *font_ptr = (u8 *) KS->psf2.glyph_buffer + ((unsigned)c * Psf2Glyph.charsize);
 
     if (CursorPosition.x >= PrintingSize.x){
         CursorPosition.x = 0;
@@ -37,6 +37,7 @@ int BasicRender::PutChar(int c){
         CursorPosition.y++;
         return c;
     }
+    const u32 pixels[] = {ClearColor.value, FontColor.value};
 
     for (u32 y = 0; y < Psf2Glyph.height; y++){
         
@@ -46,7 +47,7 @@ int BasicRender::PutChar(int c){
         font_ptr += sizeof(value);
 
         for (u32 x = Psf2Glyph.width; x > 0; x--){
-            *lineAddress = (value & 0b1) > 0 ? FontColor.value : ClearColor.value;
+            *lineAddress = pixels[(value & 0b1)];
             lineAddress--;
             value >>= 1;
         }

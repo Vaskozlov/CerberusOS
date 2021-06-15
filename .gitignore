@@ -2,7 +2,6 @@ musl/*
 gnu-efi/*
 build/*
 cerberusOS.img
-.vscode/*
 ovmf/*
 blank.img
 disasm.asm

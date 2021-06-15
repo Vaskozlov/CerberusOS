@@ -7,10 +7,11 @@ CFLAGS := \
 		-Wall \
 		-Wextra \
 		-std=c11 \
-		-O0 \
+		-O3 \
 		-fno-stack-protector \
 		-fno-exceptions \
 		-ffreestanding \
+		-nostdlib \
 		-Wall -Wextra \
 		-I ./include
 
@@ -20,10 +21,11 @@ CXXFLAGS := \
 		-Wall \
 		-Wextra \
 		-std=c++20 \
-		-O2 \
+		-O3 \
 		-fno-stack-protector \
 		-fno-exceptions \
 		-ffreestanding \
+		-nostdlib \
 		-Wall -Wextra \
 		-I ./include \
 		-mno-avx

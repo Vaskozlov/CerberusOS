@@ -26,7 +26,7 @@ LDSCRIPT := linkers/elf_$(ARCH)_efi.lds
 endif
 
 CFLAGS :=  \
-			-O0 \
+			-O1 \
 			-g \
 			-c \
 			-Wall\
@@ -44,7 +44,7 @@ CFLAGS :=  \
 			-D MINORE_VERSION=$(MINORE_VERSION)
 
 CXXFLAGS :=  \
-			-O0 \
+			-O1 \
 			-g \
 			-c \
 			-Wall\

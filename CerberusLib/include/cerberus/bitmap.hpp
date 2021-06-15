@@ -1,6 +1,7 @@
 #ifndef bitmap_hpp
 #define bitmap_hpp
 
+#include <cerberus/move.hpp>
 #include <cerberus/cerberusc++.hpp>
 
 #ifndef offsetof
@@ -57,7 +58,7 @@ namespace cerb{
         }
 
         static void CLEAR(_Tp *buffer, size_t limit){
-            for (size_t i = 0; i < limit / cerb::sizeofbits<_Tp>(); i++)
+            for (size_t i = 0; i < cerb::MAX<size_t>(limit / cerb::sizeofbits<_Tp>(), 1); i++)
                 buffer[i] = static_cast<_Tp>(0);
         }
 

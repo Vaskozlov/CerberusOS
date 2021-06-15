@@ -2,7 +2,6 @@
 #define doubleBitmap_hpp
 
 #include <cerberus/bitmap.hpp>
-#include <iostream>
 
 namespace cerb{
 
@@ -150,11 +149,11 @@ namespace cerb{
             return this->FIRST_IS_0_AND_SECOND_IS_0((_Tp*)data1(), (_Tp*)data2(), _size);
         }
 
-        always_inline size_t findFirstFreeAndSecindSet() const {
+        always_inline size_t findFirstFreeAndSecondSet() const {
             return this->FIRST_IS_0_AND_SECOND_IS_1((_Tp*)data1(), (_Tp*)data2(), _size);
         }
 
-        always_inline size_t findFirstSetAndSecindFree() const {
+        always_inline size_t findFirstSetAndSecondFree() const {
             return this->FIRST_IS_1_AND_SECOND_IS_0((_Tp*)data1(), (_Tp*)data2(), _size);
         }
 
@@ -238,11 +237,11 @@ namespace cerb{
             return this->FIRST_IS_0_AND_SECOND_IS_0((_Tp*)data1(), (_Tp*)data2(), _size);
         }
 
-        always_inline size_t findFirstFreeAndSecindSet() const {
+        always_inline size_t findFirstFreeAndSecondSet() const {
             return this->FIRST_IS_0_AND_SECOND_IS_1((_Tp*)data1(), (_Tp*)data2(), _size);
         }
 
-        always_inline size_t findFirstSetAndSecindFree() const {
+        always_inline size_t findFirstSetAndSecondFree() const {
             return this->FIRST_IS_1_AND_SECOND_IS_0((_Tp*)data1(), (_Tp*)data2(), _size);
         }
 
@@ -271,7 +270,6 @@ namespace cerb{
             this->clear2();
         }
 
-    DoubleBitmapFree &operator=(DoubleBitmapFree other) = delete;
     DoubleBitmapFree &operator=(DoubleBitmapFree &other) = delete;
 
     DoubleBitmapFree &operator=(DoubleBitmapFree &&other){
@@ -301,6 +299,7 @@ namespace cerb{
     public:
         DoubleBitmapFree() = default;
         ~DoubleBitmapFree() = default;
+        DoubleBitmapFree(_Tp *buffer1, size_t elems) : _data1(buffer1), _data2(buffer1 + cerb::MAX<size_t>(elems / cerb::sizeofbits<_Tp>(), 1)), _size(elems) {}
         DoubleBitmapFree(_Tp *buffer1, _Tp *buffer2, size_t elems) : _data1(buffer1), _data2(buffer2), _size(elems) {}
     };
 }

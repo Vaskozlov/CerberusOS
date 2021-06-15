@@ -107,14 +107,16 @@ int cerbPrintINT(uintmax_t value, PrintingParams_t *params, const char printWay)
     unsigned int extras = 0, lazy_ptr = 0;
     int numLength       = change;
     char lazy_str[4]    = {0};
-    const char cher2put = params->zero_flag ? '0' : ' ';
+    const char char2put = params->zero_flag ? '0' : ' ';
 
     lazy_str[lazy_ptr++] =  '-' * (params->negative) +
                             '+' * (!params->negative && params->plus_flag) +
                             ' ' * (params->whitespace && !params->negative);
     extras += lazy_str[0] != '0';
+    lazy_ptr -= lazy_str[0] == '\0';
 
-    if (params->hashtag_flag || printWay == 'p'){
+    if (params->hashtag_flag && value != 0 && printWay != 'p'){
+
         switch (printWay){
             case 'b':
                 lazy_str[lazy_ptr++] = '0'; lazy_str[lazy_ptr++] = 'b'; extras += 2; break;
@@ -138,14 +140,14 @@ int cerbPrintINT(uintmax_t value, PrintingParams_t *params, const char printWay)
     change += __tmp + MAX(0, ((int)params->precision - (int)numLength));
     
     if (params->minus_flag == 0)
-        for (int i = 0; i < __tmp; i++) CPutchar(cher2put);
+        for (int i = 0; i < __tmp; i++) CPutchar(char2put);
     
     for (int i = 0; lazy_str[i] != '\0'; i++) CPutchar(lazy_str[i]);
     for (int i = 0; i < ((int)params->precision - (int)numLength); i++) CPutchar('0');
     for (; *__str != '\0'; __str++) CPutchar(*__str);
 
     if (params->minus_flag)
-        for (int i = 0; i < __tmp; i++) CPutchar(cher2put);
+        for (int i = 0; i < __tmp; i++) CPutchar(char2put);
 
     return change;
 }
@@ -354,6 +356,7 @@ int cerbPrintf(const char *__restrict __fmt, ...){
 
                     case 'p':
                         size = SIZE_j;
+                        params.hashtag_flag = 1;
                     case 'b':
                     case 'o':
                     case 'x':
@@ -368,7 +371,7 @@ int cerbPrintf(const char *__restrict __fmt, ...){
                                 case SIZE_ll:   value = va_arg(args, unsigned long long); break;
                                 case SIZE_j:    value = va_arg(args, uintmax_t); break;
                                 case SIZE_z:    value = va_arg(args, size_t); break;
-                                case SIZE_t:    value = va_arg(args,ptrdiff_t); break;
+                                case SIZE_t:    value = va_arg(args, ptrdiff_t); break;
                                 default:        value = va_arg(args, unsigned); break;
                             }
                             printed_chars += cerbPrintINT(value, &params, *__fmt);

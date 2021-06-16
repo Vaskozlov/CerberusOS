@@ -16,8 +16,9 @@ TARGET 			:= kernel.elf
 CERBERUS_DIR 	:= ../CerberusLib
 LINUX_HEADERS 	:= /usr/src/sys/build
 
-MAJOR_VERSION := 1
+MAJOR_VERSION := 0
 MINOR_VERSION := 1
+PATCH_VERSION := 0
 
 ifeq (FreeBSD, $(OS))
 LDSCRIPT := linkers/elf_$(ARCH)_fbsd_efi.lds
@@ -41,7 +42,8 @@ CFLAGS :=  \
 			-I $(LINUX_HEADERS)/include \
 			-I $(CERBERUS_DIR)/include \
 			-D MAJORE_VERSION=$(MAJORE_VERSION) \
-			-D MINORE_VERSION=$(MINORE_VERSION)
+			-D MINORE_VERSION=$(MINORE_VERSION) \
+			-D PATCH_VERSION=$(PATCH_VERSION)
 
 CXXFLAGS :=  \
 			-O0 \
@@ -60,7 +62,8 @@ CXXFLAGS :=  \
 			-I $(CERBERUS_DIR)/include \
 			-I $(LINUX_HEADERS)/include \
 			-D MAJOR_VERSION=$(MAJOR_VERSION) \
-			-D MINOR_VERSION=$(MINOR_VERSION)
+			-D MINOR_VERSION=$(MINOR_VERSION) \
+			-D PATCH_VERSION=$(PATCH_VERSION)
 
 ASMFLAGS := -O3\
 			-Wall -Wextra \

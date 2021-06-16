@@ -104,8 +104,8 @@ namespace cerb{
     template<typename _Tp, size_t _size>
     class DoubleBitmapConst: protected DoubleBitmapBase<_Tp>{
         typedef DoubleBitmapConst<_Tp, _size> CurType;
-        _Tp _data1[_size / cerb::sizeofbits<_Tp>() + 1] = {0};
-        _Tp _data2[_size / cerb::sizeofbits<_Tp>() + 1] = {0};
+        _Tp _data1[_size / cerb::sizeofbits<_Tp>()] = {0};
+        _Tp _data2[_size / cerb::sizeofbits<_Tp>()] = {0};
 
     public:
         const _Tp *data1() const { return (_Tp*)((char*)this + offsetof(CurType, _data1)); }

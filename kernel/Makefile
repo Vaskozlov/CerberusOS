@@ -26,7 +26,7 @@ LDSCRIPT := linkers/elf_$(ARCH)_efi.lds
 endif
 
 CFLAGS :=  \
-			-O1 \
+			-O0 \
 			-g \
 			-c \
 			-Wall\
@@ -44,7 +44,7 @@ CFLAGS :=  \
 			-D MINORE_VERSION=$(MINORE_VERSION)
 
 CXXFLAGS :=  \
-			-O1 \
+			-O0 \
 			-g \
 			-c \
 			-Wall\
@@ -82,7 +82,6 @@ ASM_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.s, %.o, $(notdir $(w
 
 include render/Makefile
 include memory/Makefile
-include structures/Makefile
 include gdt/Makefile
 include interrupts/Makefile
 include hardware/Makefile

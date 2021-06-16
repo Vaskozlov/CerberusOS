@@ -112,7 +112,7 @@ void KernelInfo::Init(){
     InitKMalloc();
     //InitACPI();
 
-    BasicRender::ClearScreen();
+    //BasicRender::ClearScreen();
 
     cerbPrintf( 
         "KernelInfo ready in %lu MS."

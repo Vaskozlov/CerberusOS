@@ -1,18 +1,3 @@
-if [ ! -d musl ] ; then
-    git clone git://git.musl-libc.org/musl musl
-    cd musl
-    CXX="clang++" CXXFLAGS="-O3" CC="clang" CFLAGS="-O3" ./configure 
-    make -j
-    cd ..
-fi
-
-if [ ! -d gnu-efi ] ; then
-    git clone https://git.code.sf.net/p/gnu-efi/code gnu-efi
-    cd gnu-efi
-    make -j
-    cd ..
-fi
-
 mkdir -p build
 sudo mkdir -p /mnt/os
 

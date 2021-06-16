@@ -14,15 +14,20 @@ QEMU_FLAGS := \
 
 all: compile install run
 
-compile:
-	./compile.sh
+compileModules:
+	./scripts/compileModules.sh
 
-setup:
-	./install.sh
+compile:
+	./scripts/compile.sh
+
+createIMG:
+	./scripts/install.sh
+
+setup: createIMG compileModules
 
 clean:
-	@rm -fr build
-	@mkdir -p build
+	rm -fr build
+	mkdir -p build
 
 mount:
 	@mount $(LOOP_DEVICE) /mnt/os

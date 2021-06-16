@@ -1,0 +1,3 @@
+[submodule "CerberusLib"]
+	path = CerberusLib
+	url = https://github.com/Vaskozlov/CerberusLib

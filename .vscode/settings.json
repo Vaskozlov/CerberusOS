@@ -11,6 +11,9 @@
         "*.tcc": "cpp",
         "cstdint": "cpp",
         "climits": "cpp",
-        "cstdbool": "cpp"
+        "cstdbool": "cpp",
+        "bit": "cpp",
+        "ratio": "cpp",
+        "locale": "cpp"
     }
 }

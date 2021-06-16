@@ -1,6 +1,6 @@
 #include <string.h>
 #include "VMManager.hpp"
-#include <printf/Printf.h>
+#include <cerberus/printf.h>
 
 extern kernel_services_t *KS;
 
@@ -271,7 +271,7 @@ void PrintPDE(PageDirectoryFlags flags){
             break;
     }
 
-    kprintf(
+    cerbPrintf(
         "Presented: %u\n"
         "readWrite: %u\n"
         "superuser: %u\n"

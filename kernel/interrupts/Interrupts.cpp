@@ -1,5 +1,5 @@
 #include "Interrupts.h"
-#include <printf/Printf.h>
+#include <cerberus/printf.h>
 #include "scheduling/pit/pit.hpp"
 #include <memory/VMManager.hpp>
 #include <memory/kmalloc.h>
@@ -12,7 +12,7 @@ extern VMManager KernelVMM;
 __attribute__((interrupt))
 void DevideByZero_Handler(struct interrupt_frame *frame){
    
-    kprintf("Zero division error\n");
+    cerbPrintString("Zero division error\n");
     ARCH::Go2Sleep();
 
     return;
@@ -21,64 +21,60 @@ void DevideByZero_Handler(struct interrupt_frame *frame){
 __attribute__((interrupt))
 void Debug_Handler(struct interrupt_frame *frame){
 
-    kprintf("Debug\n");
+    cerbPrintString("Debug\n");
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
 void Breakpoint_Handler(struct interrupt_frame *frame){
     
-    kprintf("Breakpoint\n");
+    cerbPrintString("Breakpoint\n");
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
 void Overflow_Handler(struct interrupt_frame *frame){
     
-    kprintf("Overflow error\n");
+    cerbPrintString("Overflow error\n");
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
 void BoundRange_Handler(struct interrupt_frame *frame){
     
-    kprintf("Bound Range error\n");
+    cerbPrintString("Bound Range error\n");
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
 void InvalidOpcode_Handler(struct interrupt_frame *frame){
     
-    kprintf("InvalidOpcode error\n");
+    cerbPrintString("InvalidOpcode error\n");
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
 void DeviceNotAvailable_Handler(struct interrupt_frame *frame){
     
-    kprintf("Device not available error\n");
+    cerbPrintString("Device not available error\n");
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
-void DoubleFault_Handler(struct interrupt_frame *frame){
-    
-    kprintf("Warning double fault accured! Stop execution!\n");
+void DoubleFault_Handler(struct interrupt_frame *frame){    
+    cerbPrintString("Warning double fault accured! Stop execution!\n");
     ARCH::Go2Sleep();
- 
 }
 
 __attribute__((interrupt)) 
 void GeneralProtection_Handler(struct interrupt_frame *frame){
-
-    kprintf("GP fault at %p\n", frame->ip);
+    cerbPrintf("GP fault at %p\n", frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
 void SegmentNotPresent_Handler(struct interrupt_frame *frame){
-    
-    kprintf("Segment not present error\n");
+    cerbPrintString("Segment not present error\n");
     ARCH::Go2Sleep();
 }
 
@@ -95,7 +91,7 @@ __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame,
         KernelVMM.MapMemory2MB((void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
     }
     else{
-        kprintf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
+        cerbPrintf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
         ARCH::Go2Sleep();
     }
 

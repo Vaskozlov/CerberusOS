@@ -1,5 +1,5 @@
 #include "kmalloc.h"
-#include <printf/Printf.h>
+#include <cerberus/printf.h>
 #include <memory/VMManager.hpp>
 
 MallocHeader_t MallocMainHeder;
@@ -115,7 +115,7 @@ void kfree(void *address){
     kMallocElem_t *elem2Clear = (kMallocElem_t *)((u64) address - sizeof(kMallocElem_t));
 
     if (elem2Clear->free == 1){
-        kprintf("Double free on pointer %p\n", address);
+        cerbPrintf("Double free on pointer %p\n", address);
         return;
     }
 

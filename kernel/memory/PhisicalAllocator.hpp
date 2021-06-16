@@ -183,5 +183,6 @@ public:
     static size_t SetUp();
 };
 
+using PA = PhisicalAllocator;
 
 #endif /* PhisicalAllocator_hpp */

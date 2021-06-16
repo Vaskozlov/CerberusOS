@@ -1,12 +1,11 @@
 #include <arch.hpp>
-#include <printf/Printf.h>
 #include <cerberus/printf.h>
 #include "PhisicalAllocator.hpp"
 
 extern u64 _kernelStart;
 extern u64 _KernelEnd;
 extern kernel_services_t *KS;
-
+    
 u64 PhisicalAllocator::ReservedMemory;
 u64 PhisicalAllocator::LockedMemory;
 u64 PhisicalAllocator::AllocatorHead;
@@ -77,8 +76,8 @@ size_t PhisicalAllocator::UniversalLock2MB(void* address){
     cerb::DoubleBitmapConst<u64, 512>* header = MiddleEntries + bigIndex;
     
     if ((u64)address >= TotalMemory)        return 0;
-    if (BigEnteries.at1(bigIndex) == 1)    return 0;
-    if (header->at1(index) == 1)           return 0;
+    if (BigEnteries.at1(bigIndex) == 1)     return 0;
+    if (header->at1(index) == 1)            return 0;
     header->set1(index, 1);
 
     return (1<<21UL);
@@ -190,7 +189,6 @@ void *PhisicalAllocator::Get4KB(){
 
 void *PhisicalAllocator::Get2MB(){
     size_t index = BigEnteries.findFirstFreeAndSecondSet();//findFree1not0();
-    cerbPrintf("index = %u\n", index);
 
     if (index == UINTMAX_MAX){
         index = BigEnteries.findFree1();
@@ -209,10 +207,8 @@ void *PhisicalAllocator::Get2MB(){
     }
 
     cerb::DoubleBitmapConst<u64, 512>* header = MiddleEntries + index;
-    cerbPrintf("MiddelEnteries (location): %p\n", MiddleEntries);
     
     u64 middleIndex = header->findFirstSetAndSecondFree(); //findFree0not1();
-    cerbPrintf("middleIndex = %u\n", middleIndex);
     header->set1(middleIndex, 1);
 
     AvailableMemory -= (1<<21UL);
@@ -237,18 +233,23 @@ void *PhisicalAllocator::Get1GB(){
 
 
 size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t totalMemory){
+    LockedMemory = 0;
     TotalMemory = totalMemory;
     AvailableMemory = availableMemory;
-    LockedMemory = 0;
+    auto Extra2MBPages = Get2MBIndex(totalMemory);
 
     BigEnteries = cerb::move(
             cerb::DoubleBitmapFree<u64>(
                 (u64*)location,
-                cerb::MAX<size_t>(totalMemory >> 30 + (totalMemory % ((1<<30UL) - 1) > 0), 1)
+                cerb::MAX<size_t>((totalMemory >> 30) + (Extra2MBPages > 0), 1)
             )
         );
+        
     AllocatorHead = (u64)location + cerb::align(BigEnteries.size(), 6) / sizeof(u64) * 2;
     BigEnteries.clear();
+
+    if (Extra2MBPages > 0)
+        BigEnteries.set2(BigEnteries.size() - 1, 1);
 
     MiddleEntries = (cerb::DoubleBitmapConst<u64, 512>*)AllocatorHead;
     AllocatorHead += cerb::MAX<size_t>(
@@ -256,19 +257,26 @@ size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t to
             16
         );
 
-    cerbPrintf("Number of enteries (middle): %u\n", (totalMemory >> 21) + 1);
-    cerbPrintf("Change (middle): %lu\n", BigEnteries.size());
-    
     SmallEntries = (cerb::BitmapConst<u64, 512>*)AllocatorHead;
     AllocatorHead += cerb::MAX<size_t>(
         BigEnteries.size() * 512 * sizeof(cerb::BitmapConst<u64, 512>),
         8
     );
-    cerbPrintf("Number of enteries (small): %lu\n", (totalMemory / 0x1000) + 1);
-    cerbPrintf("Change (small): %lu\n", BigEnteries.size() * 512 * sizeof(cerb::BitmapConst<u64, 512>));
-
-    cerbPrintf("Memset from %p to %p (%lu times)\n", location, AllocatorHead, (AllocatorHead - (u64)location) / sizeof(u64) + 1);
+   
     ARCH::memset64(location, 0UL, (AllocatorHead - (u64)location) / sizeof(u64) + 1);
+    
+    if (Extra2MBPages > 0){
+        auto header = MiddleEntries + BigEnteries.size() - 1;
+        
+        for (; Extra2MBPages < 512 && (Extra2MBPages & 7) != 0; Extra2MBPages++)
+            header->set1(Extra2MBPages, 1);
+        
+        u8 *data = (u8*)header->data1();
+
+        for (; Extra2MBPages < 512; Extra2MBPages += 8)
+            *(data++) = UINT8_MAX;
+    }
+
     return AllocatorHead - (u64)location;
 }
 
@@ -351,4 +359,4 @@ size_t PhisicalAllocator::SetUp(){
     Lock4KB(KS->frameBuffer.base_address, KS->frameBuffer.buffer_size / 0x1000 + 1);
 
     return initSize;
-} //38f4
+}

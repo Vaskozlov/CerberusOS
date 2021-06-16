@@ -1,5 +1,4 @@
 #include "kernelUtils.hpp"
-#include "printf/Printf.h"
 #include "hardware/acpi.hpp"
 #include "hardware/pci.hpp"
 #include "scheduling/pit/pit.hpp"
@@ -15,7 +14,6 @@ VMManager KernelVMM;
 extern kernel_services_t *KS;
 
 __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
-
 
 void KernelInfo::InitVMM(){
     PML4 = (PageTable*) PhisicalAllocator::Get4KB();
@@ -51,7 +49,6 @@ void KernelInfo::InitGDT(){
     gdt.size = sizeof(GDT) - 1;
     gdt.address = (u64) &DefaultGDT;
     LoadGDT(&gdt);
-
     cerbPrintf("GDT ready %p\n", &DefaultGDT);  
 }
 
@@ -112,7 +109,7 @@ void KernelInfo::Init(){
     InitKMalloc();
     //InitACPI();
 
-    //BasicRender::ClearScreen();
+    BasicRender::ClearScreen();
 
     cerbPrintf( 
         "KernelInfo ready in %lu MS."
@@ -126,6 +123,4 @@ void KernelInfo::Init(){
         CERBERUS_MINOR_VERSION,
         COMPILER_NAME
     );
-    cerbPrintf("%p\n", PhisicalAllocator::Get2MB());
-    cerbPrintf("Tests\nHello world!");
 }

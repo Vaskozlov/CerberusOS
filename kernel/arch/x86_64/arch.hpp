@@ -52,6 +52,6 @@ namespace ARCH{
     }
 }
 
-#endif /* __cplusplus */
+#endif /* __cplusplus */ 
 
 #endif /* arch_hpp */

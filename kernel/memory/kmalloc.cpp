@@ -12,7 +12,7 @@ void InitKMalloc(){
 
 static void SplitRegion(kMallocElem_t *region, size_t size){
 
-    if ((i64)region->size - (i64)size - (i64)sizeof(kMallocElem_t) < 1) return;
+    if ((i64)region->size - (i64)size - (i64)sizeof(kMallocElem_t) < 1) [[unlikely]] return;
 
     kMallocElem_t *newRegion = (kMallocElem_t *) ((u64)region + sizeof(kMallocElem_t) + size);
     newRegion->size = region->size - size - sizeof(kMallocElem_t);
@@ -24,10 +24,10 @@ static void SplitRegion(kMallocElem_t *region, size_t size){
 }
 
 always_inline void *FillElem(kMallocElem_t *suitableElem, u64 size){
-    if (suitableElem == NULL){
+    if (suitableElem == NULL) [[unlikely]]{
         suitableElem = (kMallocElem_t*) MallocMainHeder.MallocHead;
         MallocMainHeder.MallocHead += cerb::align(size + sizeof(kMallocElem_t) * 2, 21);
-        suitableElem->size = cerb::align(size + sizeof(kMallocElem_t), 21) - sizeof(kMallocElem_t);
+        suitableElem->size = cerb::align(size + sizeof(kMallocElem_t), 21) - sizeof(kMallocElem_t);  // creating new malloc page with size of 2MB (or more, but it will be aligned to 2MB)
         suitableElem->free = 1;
         suitableElem->next = NULL;
         suitableElem->previous = MallocMainHeder.lastElem;
@@ -39,15 +39,14 @@ always_inline void *FillElem(kMallocElem_t *suitableElem, u64 size){
 
         MallocMainHeder.lastElem = suitableElem->next == NULL ? suitableElem : suitableElem->next;
     }
-    else{
+    else [[likely]] {
         kMallocElem_t *suited = suitableElem->next;
         SplitRegion(suitableElem, size);
         kMallocElem_t *mayNew = suitableElem->next == NULL ? suitableElem : suitableElem->next;
 
-        if (suited == NULL){
+        if (suited == NULL) [[unlikely]]
             MallocMainHeder.lastElem = mayNew;
-        }
-        else{
+        else  [[likely]]{
             suited->previous = mayNew;
             mayNew->next = suited;
         }
@@ -138,6 +137,7 @@ void kfree(void *address){
 
         elem2Clear->size += elemNext->size + sizeof(kMallocElem_t);
         elem2Clear->next = elemNext->next;
+
         if (elemNext->next != NULL) elemNext->next->previous = elem2Clear;
     }
 }

@@ -1,6 +1,7 @@
 #include <elf.h>
 #include <string.h>
 
+#include <arch.h>
 #include "GOP.h"
 #include "efiFiles.h"
 
@@ -121,7 +122,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
                     &segment
                 );
 
-                memset((void*) segment, 0, pages * 0x1000);
+                memset64((void*) segment, 0UL, pages * 0x1000 / sizeof(u64));
 
                 uefi_call_wrapper(
                     KernelFile->SetPosition,

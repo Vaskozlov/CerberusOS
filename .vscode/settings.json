@@ -35,6 +35,7 @@
         "filesystem": "cpp",
         "iterator": "cpp",
         "random": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "arch.h": "c"
     }
 }

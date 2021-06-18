@@ -53,7 +53,7 @@ int InitializeGOP(){
     }
 
     EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *info;
-    UINTN SizeOfInfo, numModes, nativeMode;
+    UINTN SizeOfInfo, numModes;
     UINTN maxWidth = 0, futureMode =  0;
  
     status = uefi_call_wrapper(
@@ -73,7 +73,6 @@ int InitializeGOP(){
         return EXIT_FAILURE;
     }
     else{
-        nativeMode = gop->Mode->Mode;
         numModes = gop->Mode->MaxMode;
     }
 

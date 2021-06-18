@@ -27,7 +27,7 @@ struct interrupt_frame
     uword_t flags;
     uword_t sp;
     uword_t ss;
-} __attribute__((interrupt));
+};
 
 __attribute__((interrupt))
 void Debug_Handler(struct interrupt_frame *frame);

@@ -82,6 +82,7 @@ LOADLIBES := \
 C_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.c, %.o, $(notdir $(wildcard *.c))))
 CPP_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.cpp, %.o, $(notdir $(wildcard *.cpp))))
 ASM_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.s, %.o, $(notdir $(wildcard *.s))))
+ADDITIONAL_FILES := 
 
 include render/Makefile
 include memory/Makefile
@@ -100,5 +101,5 @@ $(BUILD_DIR)/%.o: %.cpp
 $(BUILD_DIR)/%.o: %.s
 	$(CC) $(ASMFLAGS) $< -o $@
 
-all: $(C_OBJECT_FILES) $(CPP_OBJECT_FILES) $(ASM_OBJECT_FILES)
-	$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(TARGET) $^ $(LOADLIBES)
+all: $(ADDITIONAL_FILES) $(C_OBJECT_FILES) $(CPP_OBJECT_FILES) $(ASM_OBJECT_FILES)
+	$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(TARGET) $(C_OBJECT_FILES) $(CPP_OBJECT_FILES) $(ASM_OBJECT_FILES) $(LOADLIBES)

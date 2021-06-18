@@ -1,6 +1,6 @@
 #include "ahci.hpp"
-#include <printf/Printf.h>
 #include <memory/kmalloc.h>
+#include <cerberus/printf.h>
 #include <scheduling/pit/pit.hpp>
 #include <memory/PhisicalAllocator.hpp>
 
@@ -170,7 +170,7 @@ namespace AHCI{
     AHCIDriver::AHCIDriver(PCI::DeviceHeader* pciBaseAddress){
         this->PCIBaseAddress = pciBaseAddress;
         this->portCount = 0;
-        kprintf("AHCI Driver instance initialized\n");
+        cerbPrintString("AHCI Driver instance initialized\n");
 
         ABAR = (HBAMemory*)((PCI::PCIHeader0*)pciBaseAddress)->BAR5;
 
@@ -185,12 +185,7 @@ namespace AHCI{
             memset(port->buffer, 0, 0x1000);
 
             port->Read(0, 4, port->buffer);
-
-            for (int t = 0; t < 2048; t++){
-                PutcharWay[0](port->buffer[t]);
-            }
-
-            kprintf("done\n");
+            cerbPrintf("%.2048s\n", port->buffer);
         }
     }
 

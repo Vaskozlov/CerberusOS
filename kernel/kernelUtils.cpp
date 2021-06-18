@@ -1,5 +1,5 @@
+#include <arch.hpp>
 #include "kernelUtils.hpp"
-#include "printf/Printf.h"
 #include "hardware/acpi.hpp"
 #include "hardware/pci.hpp"
 #include "scheduling/pit/pit.hpp"
@@ -16,16 +16,11 @@ extern kernel_services_t *KS;
 
 __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
 
-
 void KernelInfo::InitVMM(){
     PML4 = (PageTable*) PhisicalAllocator::Get4KB();
-    memset(PML4, 0, sizeof(PageTable));
+    ARCH::memset64(PML4, 0UL, sizeof(PageTable) / sizeof(u64));
 
     KernelVMM = VMManager(PML4);
-    u64 fbBase = (u64)KS->frameBuffer.base_address;
-    u64 fbSize = (u64)KS->frameBuffer.buffer_size + (1 << 21UL);
-    fbBase -= (fbBase & ((1 << 21UL) - 1));
-
     u64 totalMemory = PhisicalAllocator::GetTotalMemory();
 
     for (u64 i = 0x1000; i < 512 * 0x1000; i += 0x1000)
@@ -34,12 +29,9 @@ void KernelInfo::InitVMM(){
     for (u64 i = (1<<21UL); i < (1<<30UL) && i < totalMemory; i += (1<<21UL))
         KernelVMM.MapMemory2MB((void*)i, (void*)i);
 
-    for (size_t i = 1; i < cerb::align(PhisicalAllocator::GetTotalMemory(), 30); i += (1 << 30UL))
+    for (size_t i = (1<<30UL); i < cerb::align(PhisicalAllocator::GetTotalMemory(), 30); i += (1 << 30UL))
         KernelVMM.MapMemory1GB((void*)i, (void*)i);
 
-    for (size_t i = fbBase; i < fbBase + fbSize; i += (1 << 21UL))
-        KernelVMM.MapMemory2MB((void*)i, (void*)i);
-   
     __asm__ __volatile__ (
         "mov %0, %%cr3\n"
         :
@@ -51,7 +43,6 @@ void KernelInfo::InitGDT(){
     gdt.size = sizeof(GDT) - 1;
     gdt.address = (u64) &DefaultGDT;
     LoadGDT(&gdt);
-
     cerbPrintf("GDT ready %p\n", &DefaultGDT);  
 }
 
@@ -110,9 +101,9 @@ void KernelInfo::Init(){
 
     InitVMM();
     InitKMalloc();
-    //InitACPI();
 
     BasicRender::ClearScreen();
+    InitACPI();
 
     cerbPrintf( 
         "KernelInfo ready in %lu MS."

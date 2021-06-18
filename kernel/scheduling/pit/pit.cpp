@@ -1,5 +1,4 @@
 #include "pit.hpp"
-#include <printf/Printf.h>
 
 u64     PIT::Divisor = 65535;
 u64     PIT::TimeSicneBoot = 0;

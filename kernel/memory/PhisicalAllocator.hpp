@@ -2,7 +2,8 @@
 #define PhisicalAllocator_hpp
 
 #include <kernel.h>
-#include <structures/BitMap.hpp>
+#include <cerberus/bitmap.hpp>
+#include <cerberus/doubleBitmap.hpp>
 
 enum EFI_MEMORY_TYPE{
     EfiReservedMemory       = 0,
@@ -34,9 +35,9 @@ class PhisicalAllocator{
     static u64  KernelStart;
     static u64  KernelEnd;
 
-    static BitMapDouble<u64>             BigEnteries;
-    static BitMapDoubleConst<u64, 512>  *MiddleEntries;
-    static BitMapConst<u64, 512>        *SmallEntries;
+    static cerb::DoubleBitmapFree<u64>          BigEnteries;
+    static cerb::DoubleBitmapConst<u64, 512>    *MiddleEntries;
+    static cerb::BitmapConst<u64, 512>          *SmallEntries;
 
     static const char                   *EFI_MEMORY_TYPE_STRING[];
     
@@ -182,5 +183,6 @@ public:
     static size_t SetUp();
 };
 
+using PA = PhisicalAllocator;
 
 #endif /* PhisicalAllocator_hpp */

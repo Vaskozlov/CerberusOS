@@ -11,7 +11,5 @@ $(BUILD_DIR)/%.o: render/%.cpp
 $(BUILD_DIR)/%.o: render/%.s
 	$(CC) $(ASMFLAGS) $< -o $@
 
-include render/printf/Makefile
-
 CFLAGS += -I./render
 CXXFLAGS += -I ./render

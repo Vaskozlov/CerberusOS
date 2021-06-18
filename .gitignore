@@ -8,3 +8,4 @@ disasm.asm
 *.o
 *.a
 CerberusLib/build/*
+.vscode/settings.json

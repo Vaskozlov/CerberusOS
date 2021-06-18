@@ -12,7 +12,19 @@ override TOPDIR := $(GNU_EFI_DIR)
 
 HEADERS := /usr/src/sys/build/include
 
-CFLAGS += -Wall -Wextra -std=c11 -I $(HEADERS) -D__KERNEL__ -I $(KERNEL_DIR) -I ../CerberusLib/include
+CFLAGS += 	-Wall \
+			-Wextra \
+			-std=c11 \
+			-I $(HEADERS) \
+			-D__KERNEL__ \
+			-I $(KERNEL_DIR) \
+			-I ../CerberusLib/include \
+			-I ./arch/$(ARCH)
+
+ASMFLAGS := -O3\
+			-Wall -Wextra \
+			-m64 -c -g
+
 override CPPFLAGS := $(filter-out $(CPPFLAGS), -maccumulate-outgoing-args)
 
 ifeq ($(ARCH), x86_64)
@@ -64,6 +76,8 @@ C_OBJECT_FILES = $(addprefix $(BUILD_DIR)/, $(patsubst %.c, %.o, $(notdir $(wild
 CPP_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.cpp, %.o, $(notdir $(wildcard *.cpp))))
 
 all: $(TARGETS)
+
+include arch/Makefile
 
 $(BUILD_DIR)/$(TARGET).EFI: $(BUILD_DIR)/$(TARGET).so
 	$(OBJCOPY) -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel \

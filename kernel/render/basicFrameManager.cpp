@@ -1,6 +1,6 @@
-#include <basicFrameManager.hpp>
-#include <printf/Printf.h>
+#include <bit>
 #include <arch.hpp>
+#include <basicFrameManager.hpp>
 
 #define Psf2Glyph KS->psf2.header
 #define PixelsPerScalLine FrameBuffer->pixelsPerScanline
@@ -20,7 +20,6 @@ void BasicRender::ClearScreen(){
     CursorPosition.y = 0;
 }
 
-
 int BasicRender::PutChar(int c){
     u16 value;
     u8  *font_ptr = (u8 *) KS->psf2.glyph_buffer + ((unsigned)c * Psf2Glyph.charsize);
@@ -37,13 +36,14 @@ int BasicRender::PutChar(int c){
         CursorPosition.y++;
         return c;
     }
-    const u32 pixels[] = {ClearColor.value, FontColor.value};
+
+    const u32 pixels[2] = {ClearColor.value, FontColor.value};
 
     for (u32 y = 0; y < Psf2Glyph.height; y++){
         
         auto lineAddress = FrameAddress + (y + Psf2Glyph.height * CursorPosition.y) * PixelsPerScalLine + CursorPosition.x * Psf2Glyph.width + Psf2Glyph.width;
     
-        value = ARCH::rotate_left16(*((u16*)font_ptr),1);
+        value = std::rotl(*((u16*)font_ptr), 1);
         font_ptr += sizeof(value);
 
         for (u32 x = Psf2Glyph.width; x > 0; x--){

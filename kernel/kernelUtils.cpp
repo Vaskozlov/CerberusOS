@@ -4,7 +4,7 @@
 #include "hardware/pci.hpp"
 #include "scheduling/pit/pit.hpp"
 #include "render/basicFrameManager.hpp"
-#include "interrupts/Interrupts.h"
+#include "interrupts/Interrupts.hpp"
 #include "memory/kmalloc.h"
 #include <cerberus/printf.h>
 
@@ -12,7 +12,6 @@ IDTR KernelInfo::idtr;
 GDTDescriptor KernelInfo::gdt;
 PageTable *KernelInfo::PML4;
 VMManager KernelVMM;
-extern kernel_services_t *KS;
 
 __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
 
@@ -57,20 +56,26 @@ void KernelInfo::InitIDT(){
     idtr.limit = 0x0FFF;
     idtr.offset = (u64) IDTBuffer;
     
-    SetUpIDTEntry(  (void*) DevideByZero_Handler,       0x00, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) Debug_Handler,              0x01, 0x08, IDT_TA_TrapGate     );
-    SetUpIDTEntry(  (void*) Breakpoint_Handler,         0x03, 0x08, IDT_TA_TrapGate     );
-    SetUpIDTEntry(  (void*) Overflow_Handler,           0x04, 0x08, IDT_TA_TrapGate     );
-    SetUpIDTEntry(  (void*) BoundRange_Handler,         0x05, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) InvalidOpcode_Handler,      0x06, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) DeviceNotAvailable_Handler, 0x07, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) DoubleFault_Handler,        0x08, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) SegmentNotPresent_Handler,  0x0B, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) GeneralProtection_Handler,  0x0D, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) PageFault_Handler,          0x0E, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) Pit_Handler,                0x20, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x21, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x2C, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) DevisionByZeroINT,     0x00, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) DebugINT,              0x01, 0x08, IDT_TA_TrapGate     );
+    SetUpIDTEntry(  (void*) BreakpointINT,         0x03, 0x08, IDT_TA_TrapGate     );
+    SetUpIDTEntry(  (void*) OverflowINT,           0x04, 0x08, IDT_TA_TrapGate     );
+    SetUpIDTEntry(  (void*) BoundRangeINT,         0x05, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) InvalidOpcodeINT,      0x06, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) DeviceNotAvailableINT, 0x07, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) DoubleFaultINT,        0x08, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) InavlidTSSINT,         0x0A, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) SegmentNotPresentINT,  0x0B, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) SegmentNotPresentINT,  0x0C, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) GeneralProtectionINT,  0x0D, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) PageFaultINT,          0x0E, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) AlignmentCheckINT,     0x11, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) MachineCheckINT,       0x12, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) SIMDINT,               0x13, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) VirtualizationINT,     0x14, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) PitINT,                0x20, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) EmptyIqrINT,           0x21, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) EmptyIqrINT,           0x2C, 0x08, IDT_TA_InterruptGate);
 
     __asm__ __volatile__ ("lidt %0" : : "m" (idtr));
 

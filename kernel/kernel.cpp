@@ -1,3 +1,4 @@
+#include <alloca.h>
 #include "kernelUtils.hpp"
 #include "memory/VMManager.hpp"
 #include "render/basicFrameManager.hpp"
@@ -7,15 +8,12 @@
 
 kernel_services_t *KS;
 
-extern "C" int _start(kernel_services_t *services){
+extern "C" void _start(kernel_services_t *services){
     KS = services;
     CPutchar = BasicRender::PutChar;
     CSetColor = BasicRender::SetColor;
    
     BasicRender::SetFrameBuffer(&KS->frameBuffer);
     KernelInfo::Init();
-    cerbPrintf("%f\n", cerb::ABS(10.0));
-
     ARCH::Go2Sleep();
-    return 0;
 }

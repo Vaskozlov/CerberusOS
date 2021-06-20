@@ -5,7 +5,7 @@
 
 extern kernel_services_t *KS;
 
-PageDirectoryFlags VMManager::GetPageFLags(void *virtualMemory){
+PageDirectoryFlags VMManager::GetPageFlags(void *virtualMemory){
     PageTable *PEntry;
     PageDirectoryEntry PDE;
     PageMapIndexer4KBMPL4 indexer((u64)virtualMemory);
@@ -273,11 +273,13 @@ void PrintPDE(PageDirectoryFlags flags){
     }
 
     cerbPrintf(
-        "Presented: %u\n"
+        "flags: %#b\n"
+        "presented: %u\n"
         "readWrite: %u\n"
         "superuser: %u\n"
         "writeThrough: %u\n"
-        "Size: %s\n",
+        "size: %s\n",
+        flags,
         (flags & PageDirectoryFlags::present) > 0,
         (flags & PageDirectoryFlags::readWrite) > 0,
         (flags & PageDirectoryFlags::superuser) > 0,

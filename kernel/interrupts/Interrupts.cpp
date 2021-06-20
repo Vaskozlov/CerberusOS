@@ -1,4 +1,4 @@
-#include "Interrupts.h"
+#include "Interrupts.hpp"
 #include <cerberus/printf.h>
 #include "scheduling/pit/pit.hpp"
 #include <memory/VMManager.hpp>
@@ -9,76 +9,65 @@
 
 extern VMManager KernelVMM;
 
-__attribute__((interrupt))
-void DevideByZero_Handler(struct interrupt_frame *frame){
-   
-    cerbPrintString("Zero division error\n");
-    ARCH::Go2Sleep();
 
+void PitINT_Handler                 (InterruptFrame_t *frame){
+    PIT::Tick();
+    PIC_EndMaster();
+}
+
+void SIMDINT_Handler                (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+void DebugINT_Handler               (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
+}
+
+void OverflowINT_Handler            (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+void EmptyIqrINT_Handler            (InterruptFrame_t *frame){
     return;
 }
 
-__attribute__((interrupt))
-void Debug_Handler(struct interrupt_frame *frame){
+void BreakpointINT_Handler          (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
+}
 
-    cerbPrintString("Debug\n");
+void BoundRangeINT_Handler          (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
-__attribute__((interrupt))
-void Breakpoint_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Breakpoint\n");
+void MachineCheckINT_Handler        (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
-__attribute__((interrupt))
-void Overflow_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Overflow error\n");
+void InvalidOpcodeINT_Handler       (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
-__attribute__((interrupt))
-void BoundRange_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Bound Range error\n");
+void VirtualizationINT_Handler      (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
-__attribute__((interrupt))
-void InvalidOpcode_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("InvalidOpcode error\n");
+void DevisionByZeroINT_Handler      (InterruptFrame_t *frame){
+    frame->rax = UINT64_MAX;
+    frame->rcx = 1UL;
+}
+
+void DeviceNotAvailableINT_Handler  (InterruptFrame_t *frame){
+    cerbPrintf("Interrupt %s, from address %p", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
-__attribute__((interrupt))
-void DeviceNotAvailable_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Device not available error\n");
-    ARCH::Go2Sleep();
-}
-
-__attribute__((interrupt))
-void DoubleFault_Handler(struct interrupt_frame *frame){    
-    cerbPrintString("Warning double fault accured! Stop execution!\n");
-    ARCH::Go2Sleep();
-}
-
-__attribute__((interrupt)) 
-void GeneralProtection_Handler(struct interrupt_frame *frame){
-    cerbPrintf("GP fault at %p\n", frame->ip);
-    ARCH::Go2Sleep();
-}
-
-__attribute__((interrupt))
-void SegmentNotPresent_Handler(struct interrupt_frame *frame){
-    cerbPrintString("Segment not present error\n");
-    ARCH::Go2Sleep();
-}
-
-__attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame, unsigned long error_code){
+void PageFaultINT_Handler           (InterruptFrame_t *frame, int error_code){
     u64 memoryRegion;
 
     __asm__ __volatile__(
@@ -91,25 +80,41 @@ __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame,
         KernelVMM.MapMemory2MB((void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
     }
     else{
-        cerbPrintf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
+        cerbPrintf("Interrupt %s, from address %p, error code %#b, target address was %p", __FUNCTION__, frame->ip, frame->error_code & INT32_MAX, memoryRegion);
         ARCH::Go2Sleep();
     }
-
-    return;
 }
 
-__attribute__((interrupt)) 
-void EmptyIQR_Handler(struct interrupt_frame *frame){
-    PIC_EndMaster();
-    return;
+void InavlidTSSINT_Handler          (InterruptFrame_t *frame, int error_code){
+    cerbPrintf("Interrupt %s, from address %p, error code %u", __FUNCTION__, frame->ip, error_code);
+    ARCH::Go2Sleep();
 }
 
-__attribute__((interrupt)) 
-void Pit_Handler(struct interrupt_frame *frame){
-    PIT::Tick();
-    PIC_EndMaster();
+void DoubleFaultINT_Handler         (InterruptFrame_t *frame, int error_code){
+    cerbPrintf("Interrupt %s, from address %p, error code %u", __FUNCTION__, frame->ip, error_code);
+    ARCH::Go2Sleep();
 }
-   
+
+void StackSegmentINT_Handler        (InterruptFrame_t *frame, int error_code){
+    cerbPrintf("Interrupt %s, from address %p, error code %u", __FUNCTION__, frame->ip, error_code);
+    ARCH::Go2Sleep();
+}
+
+void AlignmentCheckINT_Handler      (InterruptFrame_t *frame, int error_code){
+    cerbPrintf("Interrupt %s, from address %p, error code %u", __FUNCTION__, frame->ip, error_code);
+    ARCH::Go2Sleep();
+}
+
+void GeneralProtectionINT_Handler   (InterruptFrame_t *frame, int error_code){
+    cerbPrintf("Interrupt %s, from address %p, error code %u", __FUNCTION__, frame->ip, error_code);
+    ARCH::Go2Sleep();
+}
+
+void SegmentNotPresentINT_Handler   (InterruptFrame_t *frame, int error_code){
+    cerbPrintf("Interrupt %s, from address %p, error code %u", __FUNCTION__, frame->ip, error_code);
+    ARCH::Go2Sleep();
+}
+
 void RemapPIC(){
     uint8_t a1, a2; 
 

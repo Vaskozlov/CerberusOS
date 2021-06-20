@@ -126,7 +126,7 @@ public:
     always_inline size_t GetMappedPages1GB() { return MappedPages1GB; }
 
 public:
-    PageDirectoryFlags GetPageFLags(void *virtualMemory);
+    PageDirectoryFlags GetPageFlags(void *virtualMemory);
     void MapMemory4KB(void *virtualMemory, void *PhysicalAddress);
     void MapMemory2MB(void *virtualMemory, void *PhysicalAddress);
     void MapMemory1GB(void *virtualMemory, void *PhysicalAddress);

@@ -8,13 +8,17 @@
 #include "memory/kmalloc.h"
 #include <cerberus/printf.h>
 
-IDTR KernelInfo::idtr;
-GDTDescriptor KernelInfo::gdt;
-PageTable *KernelInfo::PML4;
 VMManager KernelVMM;
-extern kernel_services_t *KS;
-
+IDTR KernelInfo::idtr;
+PageTable *KernelInfo::PML4;
+GDTDescriptor KernelInfo::gdt;
 __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
+
+#if OS_DEBUG == 1
+    #include <cerberus/mDebug.hpp>
+    cerb::MemoryDebug cerb::MemoryDebuger;
+#endif /* OS_DEBUG */
+
 
 void KernelInfo::InitVMM(){
     PML4 = (PageTable*) PhisicalAllocator::Get4KB();
@@ -79,8 +83,8 @@ void KernelInfo::InitIDT(){
 }
 
 void KernelInfo::InitACPI(){
-    ACPI::SDTHeader *xsdt = (ACPI::SDTHeader *) (((ACPI::RSDP2*)KS->rsdp)->XSDTAddress);
-    ACPI::MCFGHeader *mcfg = (ACPI::MCFGHeader*) ACPI::FindTable(xsdt, (char*) "MCFG");
+    ACPI::SDTHeader *xsdt   = (ACPI::SDTHeader *) (((ACPI::RSDP2*)KS->rsdp)->XSDTAddress);
+    ACPI::MCFGHeader *mcfg  = (ACPI::MCFGHeader*) ACPI::FindTable(xsdt, cerb::str2u32("MCFG"));
     
     PCI::EnumeratePCI(mcfg);
 }
@@ -101,6 +105,12 @@ void KernelInfo::Init(){
 
     InitVMM();
     InitKMalloc();
+
+    #if OS_DEBUG == 1
+        cerb::MemoryDebuger.Malloc = kmalloc_fast;
+        cerb::MemoryDebuger.Printf = cerbPrintf;
+        cerb::MemoryDebuger.Free = kfree;
+    #endif /* OS_DEBUG */
 
     BasicRender::ClearScreen();
     InitACPI();

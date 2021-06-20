@@ -14,7 +14,6 @@ extern "C" int _start(kernel_services_t *services){
    
     BasicRender::SetFrameBuffer(&KS->frameBuffer);
     KernelInfo::Init();
-    cerbPrintf("%f\n", cerb::ABS(10.0));
 
     ARCH::Go2Sleep();
     return 0;

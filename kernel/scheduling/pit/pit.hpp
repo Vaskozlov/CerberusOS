@@ -16,7 +16,6 @@
 class PIT{
     static u64 Divisor;
     static u64 TimeSicneBoot;
-    static double Frequency1Div;
 
 public:
     static always_inline u64 GetFrequency() { return PIT_SCALE / Divisor; }

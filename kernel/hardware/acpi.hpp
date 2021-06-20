@@ -42,7 +42,7 @@ namespace ACPI{
         u32 reserved;
     } __attribute__((packed));
 
-    void *FindTable(SDTHeader *sdtHeader, char *signature);
+    void *FindTable(SDTHeader *sdtHeader, u32 signature);
 }
 
 #endif /* acpi_hpp */

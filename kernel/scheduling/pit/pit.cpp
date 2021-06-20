@@ -2,7 +2,6 @@
 
 u64     PIT::Divisor = 65535;
 u64     PIT::TimeSicneBoot = 0;
-double  PIT::Frequency1Div = 0.0;
 
 void PIT::SetDivisor(u16 divisor){
     Divisor = divisor;

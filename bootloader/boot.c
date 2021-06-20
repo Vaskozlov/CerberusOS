@@ -27,7 +27,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
 
     for (UINTN index = 0; index < SystemTable->NumberOfTableEntries; index++, configTable++){
         if (uefi_call_wrapper(CompareGuid, 2, &configTable[index].VendorGuid, &Acpi2TableGuid)){
-            if (strncmp("RSD PTR ", configTable->VendorTable, 8) == 0){
+            if (str2u64("RSD PTR ") == *(u64*)configTable->VendorTable){
                 rspd = (void*) configTable->VendorTable;
             }
         }

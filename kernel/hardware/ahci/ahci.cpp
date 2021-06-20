@@ -1,3 +1,4 @@
+#include <arch.hpp>
 #include "ahci.hpp"
 #include <memory/kmalloc.h>
 #include <cerberus/printf.h>
@@ -64,12 +65,12 @@ namespace AHCI{
         void* newBase = PhisicalAllocator::Get4KB();
         hbaPort->commandListBase = (uint32_t)(uint64_t)newBase;
         hbaPort->commandListBaseUpper = (uint32_t)((uint64_t)newBase >> 32);
-        memset((void*)(hbaPort->commandListBase), 0, 1024);
+        ARCH::memset64((void*)((uintmax_t)hbaPort->commandListBase), 0UL, 1024 / sizeof(u64));
 
         void* fisBase = PhisicalAllocator::Get4KB();
         hbaPort->fisBaseAddress = (uint32_t)(uint64_t)fisBase;
         hbaPort->fisBaseAddressUpper = (uint32_t)((uint64_t)fisBase >> 32);
-        memset(fisBase, 0, 256);
+        ARCH::memset64(fisBase, 0UL, 256 / sizeof(u64));
 
         HBACommandHeader* cmdHeader = (HBACommandHeader*)((uint64_t)hbaPort->commandListBase + ((uint64_t)hbaPort->commandListBaseUpper << 32));
 
@@ -112,13 +113,13 @@ namespace AHCI{
 
         hbaPort->interruptStatus = (uint32_t)-1; // Clear pending interrupt bits
 
-        HBACommandHeader* cmdHeader = (HBACommandHeader*)hbaPort->commandListBase;
+        HBACommandHeader* cmdHeader = (HBACommandHeader*)(uintmax_t)hbaPort->commandListBase;
         cmdHeader->commandFISLength = sizeof(FIS_REG_H2D)/ sizeof(uint32_t); //command FIS size;
         cmdHeader->write = 0; //this is a read
         cmdHeader->prdtLength = 1;
 
-        HBACommandTable* commandTable = (HBACommandTable*)(cmdHeader->commandTableBaseAddress);
-        memset(commandTable, 0, sizeof(HBACommandTable) + (cmdHeader->prdtLength-1)*sizeof(HBAPRDTEntry));
+        HBACommandTable* commandTable = (HBACommandTable*)(uintmax_t)(cmdHeader->commandTableBaseAddress);
+        memset(commandTable, 0, sizeof(HBACommandTable) + (cmdHeader->prdtLength-1) * sizeof(HBAPRDTEntry));
 
         commandTable->prdtEntry[0].dataBaseAddress = (uint32_t)(uint64_t)buffer;
         commandTable->prdtEntry[0].dataBaseAddressUpper = (uint32_t)((uint64_t)buffer >> 32);
@@ -156,7 +157,7 @@ namespace AHCI{
 
         while (true){
 
-            if((hbaPort->commandIssue == 0)) break;
+            if(hbaPort->commandIssue == 0) break;
             if(hbaPort->interruptStatus & HBA_PxIS_TFES)
             {
                 return false;
@@ -172,7 +173,7 @@ namespace AHCI{
         this->portCount = 0;
         cerbPrintString("AHCI Driver instance initialized\n");
 
-        ABAR = (HBAMemory*)((PCI::PCIHeader0*)pciBaseAddress)->BAR5;
+        ABAR = (HBAMemory*)(uintmax_t)((PCI::PCIHeader0*)pciBaseAddress)->BAR5;
 
         ProbePorts();
         

@@ -33,6 +33,7 @@ __END_DECLS
 #if (defined(__cplusplus) || defined(c_plusplus))
 
 always_inline void *kmalloc(u64 size) { return kmalloc_smallest(size); }
+
 void *operator new  (size_t size);
 void *operator new[](size_t size);
 void operator delete  (void *p);

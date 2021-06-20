@@ -26,6 +26,8 @@ else
 LDSCRIPT := linkers/elf_$(ARCH)_efi.lds
 endif
 
+OS_DEBGUG := 1
+
 CFLAGS :=  \
 			-O0 \
 			-g \
@@ -43,7 +45,8 @@ CFLAGS :=  \
 			-I $(CERBERUS_DIR)/include \
 			-D MAJORE_VERSION=$(MAJORE_VERSION) \
 			-D MINORE_VERSION=$(MINORE_VERSION) \
-			-D PATCH_VERSION=$(PATCH_VERSION)
+			-D PATCH_VERSION=$(PATCH_VERSION) \
+			-D OS_DEBGUG=$(OS_DEBGUG)
 
 CXXFLAGS :=  \
 			-O0 \
@@ -63,7 +66,8 @@ CXXFLAGS :=  \
 			-I $(LINUX_HEADERS)/include \
 			-D MAJOR_VERSION=$(MAJOR_VERSION) \
 			-D MINOR_VERSION=$(MINOR_VERSION) \
-			-D PATCH_VERSION=$(PATCH_VERSION)
+			-D PATCH_VERSION=$(PATCH_VERSION) \
+			-D OS_DEBUG=$(OS_DEBGUG)
 
 ASMFLAGS := -O3\
 			-Wall -Wextra \

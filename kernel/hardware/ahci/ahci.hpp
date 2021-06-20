@@ -137,7 +137,7 @@ namespace AHCI {
         PortType portType;
         u8* buffer;
         u8 portNumber;
-        __volatile__ HBAPort* hbaPort;
+        HBAPort* hbaPort;
 
         void Configure();
         void StartCMD();
@@ -150,7 +150,7 @@ namespace AHCI {
         AHCIDriver(PCI::DeviceHeader* pciBaseAddress);
         ~AHCIDriver();
         PCI::DeviceHeader* PCIBaseAddress;
-        __volatile__ HBAMemory* ABAR;
+        HBAMemory* ABAR;
         void ProbePorts();
         Port* ports[32];
         u8 portCount;

@@ -53,7 +53,7 @@ int InitializeGOP(){
     }
 
     EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *info;
-    UINTN SizeOfInfo, numModes, nativeMode;
+    UINTN SizeOfInfo, numModes;
     UINTN maxWidth = 0, futureMode =  0;
  
     status = uefi_call_wrapper(
@@ -72,10 +72,8 @@ int InitializeGOP(){
         Print(L"Unable to get native mode\n\r");
         return EXIT_FAILURE;
     }
-    else{
-        nativeMode = gop->Mode->Mode;
+    else
         numModes = gop->Mode->MaxMode;
-    }
 
     for (UINTN i = 0; i < numModes; i++) {
         status = uefi_call_wrapper(

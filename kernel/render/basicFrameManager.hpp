@@ -4,8 +4,6 @@
 #include <render.h>
 #include <kernel.h>
 
-extern kernel_services_t *KS;
-
 template <typename _Tp>
 struct vec2{
     _Tp x, y;

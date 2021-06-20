@@ -84,7 +84,7 @@ $(BUILD_DIR)/$(TARGET).EFI: $(BUILD_DIR)/$(TARGET).so
 		-j .rela -j .rel.* -j .rela.* -j .rel* -j .rela* \
 		-j .reloc $(FORMAT) $< $@
 
-$(BUILD_DIR)/$(TARGET).so: $(C_OBJECT_FILES) $(CXX_OBJECT_FILES)
+$(BUILD_DIR)/$(TARGET).so: $(C_OBJECT_FILES) $(CXX_OBJECT_FILES) $(ASM_OBJECT_FILES)
 	$(LD) $(LDFLAGS) $^ -o $@ $(LOADLIBES)
 	
 $(BUILD_DIR)/%.o: %.c

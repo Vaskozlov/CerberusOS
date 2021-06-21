@@ -1,3 +1,5 @@
+#define KMALLOC_SOURCE 1
+
 #include "kmalloc.h"
 #include <cerberus/printf.h>
 #include <memory/VMManager.hpp>
@@ -6,7 +8,7 @@ MallocHeader_t MallocMainHeder;
 extern VMManager KernelVMM;
 
 void InitKMalloc(){
-    MallocMainHeder.MallocBegin = cerb::align(PhisicalAllocator::GetTotalMemory(), 30);
+    MallocMainHeder.MallocBegin = cerb::align(PA::GetTotalMemory(), 30);
     MallocMainHeder.MallocHead = MallocMainHeder.MallocBegin;
 }
 
@@ -140,6 +142,14 @@ void kfree(void *address){
 
         if (elemNext->next != NULL) elemNext->next->previous = elem2Clear;
     }
+}
+
+extern "C" void *malloc(size_t size){
+    return kmalloc_fast(size);    
+}
+
+extern "C" void free(void *address){
+    kfree(address);
 }
 
 #if OS_DEBUG == 0

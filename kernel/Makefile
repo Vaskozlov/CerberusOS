@@ -55,6 +55,7 @@ CXXFLAGS :=  \
 			-Wall\
 			-Wextra \
 			-nostdlib \
+			-nostdlib++ \
 			-ffreestanding \
 			-fno-exceptions \
 			-fno-stack-protector \
@@ -80,8 +81,7 @@ LDFLAGS :=	-static \
 
 LOADLIBES := \
 			$(CERBERUS_DIR)/build/libcerberus.a \
-			$(MUSL_DIR)/lib/libc.a \
-			$(MUSL_DIR)/lib/libm.a
+			$(BUILD_DIR)/libmath.a
 
 C_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.c, %.o, $(notdir $(wildcard *.c))))
 CPP_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.cpp, %.o, $(notdir $(wildcard *.cpp))))

@@ -39,8 +39,24 @@ void *operator new[](size_t size);
 void operator delete  (void *p);
 void operator delete[](void *p);
 
+#ifndef KMALLOC_SOURCE
+
+always_inline void *malloc(size_t size){
+    return kmalloc_fast(size);
+}
+
+always_inline void free(void *address){
+    kfree(address);
+}
+
+#endif /* KMALLOC_SOURCE */
+
 #else
-#  define kmalloc(size) kmalloc_smallest(size)
+
+void *malloc(size_t size);
+void free(void *address);
+#define kmalloc(size) kmalloc_smallest(size)
+
 #endif
 
 #endif /* kmalloc_hpp */

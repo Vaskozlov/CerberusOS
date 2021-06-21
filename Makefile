@@ -1,6 +1,8 @@
 OSNAME := cerberusOS
 LOOP_DEVICE := /dev/loop24
 OVMFDIR = ovmf
+BUILD_DIR := ./build
+MUSL_DIR := ./musl
 
 QEMU_FLAGS := \
 			-d int \
@@ -14,10 +16,15 @@ QEMU_FLAGS := \
 
 all: compile install run
 
-compileModules:
+MUSL_OBJECT_FILES += $(wildcard $(MUSL_DIR)/obj/src/math/*.lo)
+
+$(BUILD_DIR)/libmath.a: 
+	ar rcs $@ $(MUSL_OBJECT_FILES)
+
+compileModules: $(BUILD_DIR)/libmath.a
 	./scripts/compileModules.sh
 
-compile:
+compile: $(BUILD_DIR)/libmath.a
 	./scripts/compile.sh
 
 createIMG:

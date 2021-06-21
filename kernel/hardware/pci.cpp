@@ -23,7 +23,7 @@ namespace PCI{
                     case 0x06:
                         switch (pciDeviceHeader->ProgIF) {
                             case 0x1: // AHCI 1.0
-                                //new AHCI::AHCIDriver(pciDeviceHeader);
+                                new AHCI::AHCIDriver(pciDeviceHeader);
                                 break;
                         }
                         break;

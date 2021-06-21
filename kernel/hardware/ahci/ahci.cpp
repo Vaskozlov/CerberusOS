@@ -7,23 +7,23 @@
 
 namespace AHCI{
 
-    #define HBA_PORT_DEV_PRESENT 0x3
-    #define HBA_PORT_IPM_ACTIVE 0x1
-    #define SATA_SIG_ATAPI 0xEB140101
-    #define SATA_SIG_ATA 0x00000101
-    #define SATA_SIG_SEMB 0xC33C0101
-    #define SATA_SIG_PM 0x96690101
+    #define HBA_PORT_DEV_PRESENT    0x3
+    #define HBA_PORT_IPM_ACTIVE     0x1
+    #define SATA_SIG_ATAPI          0xEB140101
+    #define SATA_SIG_ATA            0x00000101
+    #define SATA_SIG_SEMB           0xC33C0101
+    #define SATA_SIG_PM             0x96690101
 
-    #define HBA_PxCMD_CR 0x8000
-    #define HBA_PxCMD_FRE 0x0010
-    #define HBA_PxCMD_ST 0x0001
-    #define HBA_PxCMD_FR 0x4000
+    #define HBA_PxCMD_CR            0x8000
+    #define HBA_PxCMD_FRE           0x0010
+    #define HBA_PxCMD_ST            0x0001
+    #define HBA_PxCMD_FR            0x4000
 
     PortType CheckPortType(HBAPort* port){
         uint32_t sataStatus = port->sataStatus;
 
-        uint8_t interfacePowerManagement = (sataStatus >> 8) & 0b111;
-        uint8_t deviceDetection = sataStatus & 0b111;
+        uint8_t interfacePowerManagement = (sataStatus >> 8) & 0x0F;
+        uint8_t deviceDetection = sataStatus & 0x0F;
 
         if (deviceDetection != HBA_PORT_DEV_PRESENT) return PortType::None;
         if (interfacePowerManagement != HBA_PORT_IPM_ACTIVE) return PortType::None;
@@ -81,7 +81,7 @@ namespace AHCI{
             uint64_t address = (uint64_t)cmdTableAddress + (i << 8);
             cmdHeader[i].commandTableBaseAddress = (uint32_t)(uint64_t)address;
             cmdHeader[i].commandTableBaseAddressUpper = (uint32_t)((uint64_t)address >> 32);
-            memset(cmdTableAddress, 0, 256);
+            ARCH::memset64(fisBase, 0UL, 256 / sizeof(u64));
         }
 
         StartCMD();
@@ -119,7 +119,7 @@ namespace AHCI{
         cmdHeader->prdtLength = 1;
 
         HBACommandTable* commandTable = (HBACommandTable*)(uintmax_t)(cmdHeader->commandTableBaseAddress);
-        memset(commandTable, 0, sizeof(HBACommandTable) + (cmdHeader->prdtLength-1) * sizeof(HBAPRDTEntry));
+        ARCH::memset8(commandTable, (u8)0U, sizeof(HBACommandTable) + (cmdHeader->prdtLength-1) * sizeof(HBAPRDTEntry));
 
         commandTable->prdtEntry[0].dataBaseAddress = (uint32_t)(uint64_t)buffer;
         commandTable->prdtEntry[0].dataBaseAddressUpper = (uint32_t)((uint64_t)buffer >> 32);
@@ -135,9 +135,9 @@ namespace AHCI{
         cmdFIS->lba0 = (uint8_t)sectorL;
         cmdFIS->lba1 = (uint8_t)(sectorL >> 8);
         cmdFIS->lba2 = (uint8_t)(sectorL >> 16);
-        cmdFIS->lba3 = (uint8_t)sectorH;
-        cmdFIS->lba4 = (uint8_t)(sectorH >> 8);
-        cmdFIS->lba4 = (uint8_t)(sectorH >> 16);
+        cmdFIS->lba3 = (uint8_t)(sectorL >> 24);
+        cmdFIS->lba4 = (uint8_t)(sectorH);
+        cmdFIS->lba5 = (uint8_t)(sectorH >> 8);
 
         cmdFIS->deviceRegister = 1<<6; //LBA mode
 
@@ -157,7 +157,7 @@ namespace AHCI{
 
         while (true){
 
-            if(hbaPort->commandIssue == 0) break;
+            if((hbaPort->commandIssue & 1) == 0) break;
             if(hbaPort->interruptStatus & HBA_PxIS_TFES)
             {
                 return false;
@@ -183,10 +183,13 @@ namespace AHCI{
             port->Configure();
 
             port->buffer = (uint8_t*)PhisicalAllocator::Get4KB();
-            memset(port->buffer, 0, 0x1000);
+            ARCH::memset64(port->buffer, 0UL, 0x1000 / sizeof(u64));
 
             port->Read(0, 4, port->buffer);
-            cerbPrintf("%.2048s\n", port->buffer);
+            for (int i = 0; i < 2048; i++)
+                CPutchar(port->buffer[i]);
+
+            CPutchar('\n');
         }
     }
 

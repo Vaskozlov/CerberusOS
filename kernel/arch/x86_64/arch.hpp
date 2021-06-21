@@ -31,6 +31,14 @@ namespace ARCH{
         __asm__ __volatile__ ("hlt");
     }
 
+    always_inline static void enableINT(){
+        __asm__ __volatile__ ("sti");
+    }
+
+    always_inline static void disableINT(){
+        __asm__ __volatile__ ("cli");
+    }
+
     always_inline static void Go2Sleep() {
         while (1) { hlt();}
     }

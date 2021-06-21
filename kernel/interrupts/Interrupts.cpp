@@ -9,77 +9,80 @@
 
 extern VMManager KernelVMM;
 
-__attribute__((interrupt))
-void DevideByZero_Handler(struct interrupt_frame *frame){
-   
-    cerbPrintString("Zero division error\n");
-    ARCH::Go2Sleep();
-
-    return;
-}
 
 __attribute__((interrupt))
-void Debug_Handler(struct interrupt_frame *frame){
-
-    cerbPrintString("Debug\n");
+void DevideByZero_Handler       /* 0x00 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
-void Breakpoint_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Breakpoint\n");
+void Debug_Handler              /* 0x01 */  (struct interrupt_frame *frame){
+    cerbPrintString("Debug interrupt!\n");
+}
+
+__attribute__((interrupt))
+void Breakpoint_Handler         /* 0x03 */  (struct interrupt_frame *frame){
+    cerbPrintString("Breakpoint interrupt!\n");
+}
+
+__attribute__((interrupt))
+void Overflow_Handler           /* 0x05 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
-void Overflow_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Overflow error\n");
+void BoundRange_Handler         /* 0x04 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
-void BoundRange_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Bound Range error\n");
+void InvalidOpcode_Handler      /* 0x06 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
-void InvalidOpcode_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("InvalidOpcode error\n");
+void DeviceNotAvailable_Handler /* 0x07 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
-void DeviceNotAvailable_Handler(struct interrupt_frame *frame){
-    
-    cerbPrintString("Device not available error\n");
+void DoubleFault_Handler        /* 0x08 */  (struct interrupt_frame *frame, uword_t error_code){
+    cerbPrintf("Interrupt %s with error %#b (%x) at line %p\n", __FUNCTION__, error_code, error_code, frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt))
-void DoubleFault_Handler(struct interrupt_frame *frame){    
-    cerbPrintString("Warning double fault accured! Stop execution!\n");
+void InvalidTSS_Handler         /* 0x0A */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+__attribute__((interrupt))
+void SegmentNotPresent_Handler  /* 0x0B */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+__attribute__((interrupt))
+void StackSegment_Handler       /* 0x0C */  (struct interrupt_frame *frame, uword_t error_code){
+    cerbPrintf("Interrupt %s with error %#b (%x) at line %p\n", __FUNCTION__, error_code, error_code, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+__attribute__((interrupt))
+void GeneralProtection_Handler  /* 0x0D */  (struct interrupt_frame *frame, uword_t error_code){
+    cerbPrintf("Interrupt %s with error %#b (%x) at line %p\n", __FUNCTION__, error_code, error_code, frame->ip);
     ARCH::Go2Sleep();
 }
 
 __attribute__((interrupt)) 
-void GeneralProtection_Handler(struct interrupt_frame *frame){
-    cerbPrintf("GP fault at %p\n", frame->ip);
-    ARCH::Go2Sleep();
-}
-
-__attribute__((interrupt))
-void SegmentNotPresent_Handler(struct interrupt_frame *frame){
-    cerbPrintString("Segment not present error\n");
-    ARCH::Go2Sleep();
-}
-
-__attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame, unsigned long error_code){
-    u64 memoryRegion;
+void PageFault_Handler          /* 0x0E */  (struct interrupt_frame *frame, uword_t error_code){
+    uintmax_t memoryRegion;
 
     __asm__ __volatile__(
         "movq %%cr2, %0\n"
@@ -87,29 +90,53 @@ __attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame *frame,
     );
    
     if (memoryRegion != 0x0 && memoryRegion >= MallocMainHeder.MallocBegin && memoryRegion < MallocMainHeder.MallocHead){
-        auto page = PhisicalAllocator::Get2MB();
+        auto page = PA::Get2MB();
         KernelVMM.MapMemory2MB((void*)(memoryRegion - (memoryRegion & ((1<<21UL) - 1))), page);
     }
     else{
-        cerbPrintf("PANIC!!! Page fault with error %u. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
+        cerbPrintf("PANIC!!! Page fault with error %zu. Target address was %p. At line %p\n", error_code, memoryRegion, frame->ip);
         ARCH::Go2Sleep();
     }
 
     return;
 }
 
+__attribute__((interrupt))
+void AlignmentCheck_Handler     /* 0x11 */  (struct interrupt_frame *frame, uword_t error_code){
+    cerbPrintf("Interrupt %s with error %#b (%x) at line %p\n", __FUNCTION__, error_code, error_code, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+__attribute__((interrupt))
+void MachineCheck_Handler       /* 0x12 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+__attribute__((interrupt))
+void SIMD_Handler               /* 0x13 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
+    ARCH::Go2Sleep();
+}
+
+__attribute__((interrupt))
+void Virtualization_Handler     /* 0x14 */  (struct interrupt_frame *frame){
+    cerbPrintf("Interrupt %s at line %p\n", __FUNCTION__, frame->ip);
+    ARCH::Go2Sleep();
+}
+
 __attribute__((interrupt)) 
-void EmptyIQR_Handler(struct interrupt_frame *frame){
+void Pit_Handler                /* 0x20 */  (struct interrupt_frame *frame){
+    PIT::Tick();
+    PIC_EndMaster();
+}
+
+__attribute__((interrupt)) 
+void EmptyIQR_Handler           /* ANY IRQ */ (struct interrupt_frame *frame){
     PIC_EndMaster();
     return;
 }
 
-__attribute__((interrupt)) 
-void Pit_Handler(struct interrupt_frame *frame){
-    PIT::Tick();
-    PIC_EndMaster();
-}
-   
 void RemapPIC(){
     uint8_t a1, a2; 
 

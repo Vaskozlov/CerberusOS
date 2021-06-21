@@ -1,5 +1,6 @@
 .text
 
+.global memset
 .global memset8
 .global memset16
 .global memset32
@@ -10,6 +11,7 @@
 .global memcpy32
 .global memcpy64
 
+.type memset,@function
 .type memset8,@function
 .type memset16,@function
 .type memset32,@function
@@ -42,6 +44,23 @@ memset64:
     movq %rsi, %rax
     movq %rdx, %rcx
     rep stosq
+    retq
+
+memset:
+    cmp $2, %rdx
+    jz .memset2
+    
+    movb %sil, %al
+    movq %rdx, %rcx
+    rep stosb
+    retq
+    
+.memset2:
+    shr $2, %rdx
+
+    movl %esi, %eax
+    movq %rdx, %rcx
+    rep stosl
     retq
 
 memcpy8:

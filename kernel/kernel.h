@@ -34,7 +34,6 @@ typedef struct {
 } kernel_services_t;
 
 extern kernel_services_t *KS;
-void *memset (void *__s, int __c, size_t __n) __THROW __nonnull ((1));
 
 __END_DECLS
 

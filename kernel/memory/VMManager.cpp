@@ -41,7 +41,7 @@ void VMManager::MapMemory4KB(void *virtualMemory, void *PhysicalAddress){
     PDE = PML4->entries[indexer.PDP_i];
     
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
-        PDP = (PageTable *) PhisicalAllocator::Get4KB();
+        PDP = (PageTable *) PA::Get4KB();
         ARCH::memset64(PDP, 0UL, 0x1000 / sizeof(u64));
         
         PDE.SetAddress(PDP);
@@ -56,7 +56,7 @@ void VMManager::MapMemory4KB(void *virtualMemory, void *PhysicalAddress){
     PDE = PDP->entries[indexer.PD_i];
 
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
-        PD = (PageTable*) PhisicalAllocator::Get4KB();
+        PD = (PageTable*) PA::Get4KB();
         ARCH::memset64(PD, 0UL, 0x1000 / sizeof(u64));
 
         PDE.SetAddress(PD);
@@ -69,7 +69,7 @@ void VMManager::MapMemory4KB(void *virtualMemory, void *PhysicalAddress){
 
     PDE = PD->entries[indexer.PT_i];
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
-        PT = (PageTable*) PhisicalAllocator::Get4KB();
+        PT = (PageTable*) PA::Get4KB();
         ARCH::memset64(PT, 0UL, 0x1000 / sizeof(u64));
 
         PDE.SetAddress(PT);
@@ -99,7 +99,7 @@ void VMManager::MapMemory2MB(void *virtualMemory, void *PhysicalAddress){
     PDE = PML4->entries[indexer.PDP_i];
     
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
-        PDP = (PageTable *) PhisicalAllocator::Get4KB();
+        PDP = (PageTable *) PA::Get4KB();
         ARCH::memset64(PDP, 0UL, 0x1000 / sizeof(u64));
         
         PDE.SetAddress(PDP);
@@ -114,7 +114,7 @@ void VMManager::MapMemory2MB(void *virtualMemory, void *PhysicalAddress){
     PDE = PDP->entries[indexer.PD_i];
 
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
-        PD = (PageTable*) PhisicalAllocator::Get4KB();
+        PD = (PageTable*) PA::Get4KB();
         ARCH::memset64(PD, 0UL, 0x1000 / sizeof(u64));
 
         PDE.SetAddress(PD);
@@ -144,7 +144,7 @@ void VMManager::MapMemory1GB(void *virtualMemory, void *PhysicalAddress){
     PDE = PML4->entries[indexer.PDP_i];
     
     if (PDE.IsFlagSet(PageDirectoryFlags::present) == false){
-        PDP = (PageTable *) PhisicalAllocator::Get4KB();
+        PDP = (PageTable *) PA::Get4KB();
         ARCH::memset64(PDP, 0UL, 0x1000 / sizeof(u64));
         
         PDE.SetAddress(PDP);

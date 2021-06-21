@@ -21,11 +21,11 @@ __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
 
 
 void KernelInfo::InitVMM(){
-    PML4 = (PageTable*) PhisicalAllocator::Get4KB();
+    PML4 = (PageTable*) PA::Get4KB();
     ARCH::memset64(PML4, 0UL, sizeof(PageTable) / sizeof(u64));
 
     KernelVMM = VMManager(PML4);
-    u64 totalMemory = PhisicalAllocator::GetTotalMemory();
+    u64 totalMemory = PA::GetTotalMemory();
 
     for (u64 i = 0x1000; i < 512 * 0x1000; i += 0x1000)
         KernelVMM.MapMemory4KB((void*)i, (void*)i);
@@ -33,7 +33,7 @@ void KernelInfo::InitVMM(){
     for (u64 i = (1<<21UL); i < (1<<30UL) && i < totalMemory; i += (1<<21UL))
         KernelVMM.MapMemory2MB((void*)i, (void*)i);
 
-    for (size_t i = (1<<30UL); i < cerb::align(PhisicalAllocator::GetTotalMemory(), 30); i += (1 << 30UL))
+    for (size_t i = (1<<30UL); i < cerb::align(PA::GetTotalMemory(), 30); i += (1 << 30UL))
         KernelVMM.MapMemory1GB((void*)i, (void*)i);
 
     __asm__ __volatile__ (
@@ -69,9 +69,15 @@ void KernelInfo::InitIDT(){
     SetUpIDTEntry(  (void*) InvalidOpcode_Handler,      0x06, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) DeviceNotAvailable_Handler, 0x07, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) DoubleFault_Handler,        0x08, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) InvalidTSS_Handler,         0x0A, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) SegmentNotPresent_Handler,  0x0B, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) StackSegment_Handler,       0x0C, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) GeneralProtection_Handler,  0x0D, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) PageFault_Handler,          0x0E, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) AlignmentCheck_Handler,     0x11, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) MachineCheck_Handler,       0x12, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) SIMD_Handler,               0x13, 0x08, IDT_TA_InterruptGate);
+    SetUpIDTEntry(  (void*) Virtualization_Handler,     0x14, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) Pit_Handler,                0x20, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x21, 0x08, IDT_TA_InterruptGate);
     SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x2C, 0x08, IDT_TA_InterruptGate);
@@ -83,8 +89,8 @@ void KernelInfo::InitIDT(){
 }
 
 void KernelInfo::InitACPI(){
-    ACPI::SDTHeader *xsdt   = (ACPI::SDTHeader *) (((ACPI::RSDP2*)KS->rsdp)->XSDTAddress);
-    ACPI::MCFGHeader *mcfg  = (ACPI::MCFGHeader*) ACPI::FindTable(xsdt, cerb::str2u32("MCFG"));
+    ACPI::SDTHeader     *xsdt   = (ACPI::SDTHeader *) (((ACPI::RSDP2*)KS->rsdp)->XSDTAddress);
+    ACPI::MCFGHeader    *mcfg  = (ACPI::MCFGHeader*) ACPI::FindTable(xsdt, cerb::str2u32("MCFG"));
     
     PCI::EnumeratePCI(mcfg);
 }
@@ -96,12 +102,11 @@ void KernelInfo::Init(){
     ARCH::outb(0x08, PIC1_DATA);
     ARCH::outb(0x70, PIC2_DATA);
 
-    __asm__ __volatile__ ("sti");
-
+    ARCH::enableINT();
     PIT::SetFrequency(1000);
     
     cerbPrintString("Wait for VMM initialization\n");
-    PhisicalAllocator::SetUp();
+    PA::SetUp();
 
     InitVMM();
     InitKMalloc();
@@ -122,7 +127,7 @@ void KernelInfo::Init(){
         "Cerberus minor version \xff\xff\0\xff%u\xff\xff\xff\xff, "
         "compiled with \xff\xff\0\xff%s\xff\xff\xff\xff\n",
         PIT::GetTimeSicneBoot(),
-        PhisicalAllocator::GetAvailableMemory() / 1024 / 1024,
+        PA::GetAvailableMemory() / 1024 / 1024,
         CERBERUS_MAJOR_VERSION,
         CERBERUS_MINOR_VERSION,
         COMPILER_NAME

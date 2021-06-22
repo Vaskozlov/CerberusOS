@@ -138,7 +138,7 @@ void EmptyIQR_Handler           /* ANY IRQ */ (struct interrupt_frame *frame){
 }
 
 void RemapPIC(){
-    uint8_t a1, a2; 
+    u8 a1, a2; 
 
     a1 = ARCH::inb(PIC1_DATA);
     ARCH::io_wait();

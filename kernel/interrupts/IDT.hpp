@@ -19,16 +19,16 @@ struct IDTDescriptorEntry {
 public:
 
     inline void setOffset(u64 offset){
-        this->offset0 = (u16)(offset & 0x000000000000ffff);
-        this->offset1 = (u16)((offset & 0x00000000ffff0000) >> 16);
-        this->offset2 = (u32)((offset & 0xffffffff00000000) >> 32);
+        this->offset0 = (u16)(offset  & 0x000000000000ffffU);
+        this->offset1 = (u16)((offset & 0x00000000ffff0000U) >> 16U);
+        this->offset2 = (u32)((offset & 0xffffffff00000000U) >> 32U);
     }
 
     u64 GetOffset(){
          u64 offset = this->offset0;
         
-        offset |= (u64) this->offset1 << 16;
-        offset |= (u64) this->offset2 << 32;
+        offset |= (u64) this->offset1 << 16U;
+        offset |= (u64) this->offset2 << 32U;
         
         return offset;
     }

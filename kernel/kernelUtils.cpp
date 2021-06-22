@@ -1,4 +1,5 @@
 #include <arch.hpp>
+#include <optlib.h>
 #include "kernelUtils.hpp"
 #include "hardware/acpi.hpp"
 #include "hardware/pci.hpp"
@@ -7,6 +8,7 @@
 #include "interrupts/Interrupts.h"
 #include "memory/kmalloc.h"
 #include <cerberus/printf.h>
+#include <hardware/sse.hpp>
 
 VMManager KernelVMM;
 IDTR KernelInfo::idtr;
@@ -22,7 +24,7 @@ __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
 
 void KernelInfo::InitVMM(){
     PML4 = (PageTable*) PA::Get4KB();
-    ARCH::memset64(PML4, 0UL, sizeof(PageTable) / sizeof(u64));
+    memclr_sse2(PML4, sizeof(PageTable));
 
     KernelVMM = VMManager(PML4);
     u64 totalMemory = PA::GetTotalMemory();
@@ -96,6 +98,15 @@ void KernelInfo::InitACPI(){
 }
 
 void KernelInfo::Init(){
+    SSE::Scan();
+    SSE::enableSSE();
+
+    if (SSE::FlagPresent(SSE_FLAGS::SSE4_2) == 0){
+        cerbPrintString("Cerberus OS requires SSE4.2 instruction set\n");
+        ARCH::Go2Sleep();
+    }
+    // ENABLE SSE/AVX later
+
     InitGDT();
     InitIDT();
     

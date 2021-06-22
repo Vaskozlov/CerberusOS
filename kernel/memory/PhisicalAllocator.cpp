@@ -1,4 +1,5 @@
 #include <arch.hpp>
+#include <optlib.h>
 #include <cerberus/printf.h>
 #include "PhisicalAllocator.hpp"
 
@@ -263,7 +264,7 @@ size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t to
         8
     );
    
-    ARCH::memset64(location, 0UL, (AllocatorHead - (u64)location) / sizeof(u64) + 1);
+    memclr_sse2(location, AllocatorHead - (u64)location);
     
     if (Extra2MBPages > 0){
         auto header = MiddleEntries + BigEnteries.size() - 1;

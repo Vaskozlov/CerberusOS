@@ -34,12 +34,14 @@ CFLAGS :=  \
 			-c \
 			-Wall\
 			-Wextra \
+			-fpic \
 			-nostdlib \
 			-ffreestanding \
 			-fno-exceptions \
 			-fno-stack-protector \
 			-std=c11 \
 			-I . \
+			-I ./arch/$(ARCH) \
 			-I $(MUSL_DIR)/arch \
 			-I $(LINUX_HEADERS)/include \
 			-I $(CERBERUS_DIR)/include \
@@ -56,12 +58,13 @@ CXXFLAGS :=  \
 			-Wextra \
 			-nostdlib \
 			-nostdlib++ \
+			-fpic \
 			-ffreestanding \
 			-fno-exceptions \
 			-fno-stack-protector \
 			-std=c++20 \
 			-I . \
-			-I ./arch/$(ARCH)\
+			-I ./arch/$(ARCH) \
 			-I $(MUSL_DIR)/arch \
 			-I $(CERBERUS_DIR)/include \
 			-I $(LINUX_HEADERS)/include \

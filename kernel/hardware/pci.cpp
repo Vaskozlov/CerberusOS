@@ -2,6 +2,9 @@
 #include "memory/VMManager.hpp"
 #include "ahci/ahci.hpp"
 #include <memory/kmalloc.h>
+#include <cerberus/printf.h>
+#include <array>
+#include <cerberus/vector.hpp>
 
 extern VMManager KernelVMM;
 
@@ -11,19 +14,22 @@ namespace PCI{
         u64 offset = function << 12;
         u64 functionAddress = deviceAddress + offset;
 
-        DeviceHeader *pciDeviceHeader = (DeviceHeader*)functionAddress;
+        PCIDevice *pciDeviceHeader = (PCIDevice*)functionAddress;
         
-        if (pciDeviceHeader->DeviceID == 0) return;
-        if (pciDeviceHeader->DeviceID  == 0xFFFF) return;
+        if (pciDeviceHeader->deviceID() == 0x0000) return;
+        if (pciDeviceHeader->deviceID() == 0xFFFF) return;
         
-        switch (pciDeviceHeader->Class) {
+        if (pciDeviceHeader->getClass() == 0x0C)
+            cerbPrintf("%s %p\n", pciDeviceHeader->getSubclassName(), pciDeviceHeader->progIF());
+
+        switch (pciDeviceHeader->getClass()) {
 
             case 0x01:
-                switch (pciDeviceHeader->Subclass) {
+                switch (pciDeviceHeader->subclass()) {
                     case 0x06:
-                        switch (pciDeviceHeader->ProgIF) {
+                        switch (pciDeviceHeader->progIF()) {
                             case 0x1: // AHCI 1.0
-                                new AHCI::AHCIDriver(pciDeviceHeader);
+                                //new AHCI::AHCIDriver(pciDeviceHeader);
                                 break;
                         }
                         break;
@@ -36,10 +42,10 @@ namespace PCI{
         u64 offset = device << 15;
         u64 deviceAddress = busAddress + offset;
 
-        DeviceHeader *pciDeviceHeader = (DeviceHeader*)deviceAddress;
+        PCIDevice *pciDeviceHeader = (PCIDevice*)deviceAddress;
         
-        if (pciDeviceHeader->DeviceID == 0)         return;
-        if (pciDeviceHeader->DeviceID  == 0xFFFF)   return;
+        if (pciDeviceHeader->deviceID() == 0x0000) return;
+        if (pciDeviceHeader->deviceID() == 0xFFFF) return;
 
         for (u64 function = 0; function < 8; function++)
             EnumerateFunction(deviceAddress, function);
@@ -49,10 +55,10 @@ namespace PCI{
         u64 offset = bus << 20;
         u64 busAddress = baseAddress + offset;
 
-        DeviceHeader *pciDeviceHeader = (DeviceHeader*)busAddress;
+        PCIDevice *pciDeviceHeader = (PCIDevice*)busAddress;
         
-        if (pciDeviceHeader->DeviceID == 0)         return;
-        if (pciDeviceHeader->DeviceID  == 0xFFFF)   return;
+        if (pciDeviceHeader->deviceID() == 0x0000) return;
+        if (pciDeviceHeader->deviceID() == 0xFFFF) return;
 
         for (u64 device = 0; device < 32; device++)
             EnumerateDevice(busAddress, device);

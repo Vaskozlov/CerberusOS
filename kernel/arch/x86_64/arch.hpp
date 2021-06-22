@@ -5,6 +5,12 @@
 
 __BEGIN_DECLS
 
+typedef struct{
+    u64 rax;
+    u64 rcx;
+    u64 rdx;
+} __attribute__((packed)) CPUID_RESULT_t;
+
 void memset8 (void *__address, u8  __value, size_t __times);
 void memset16(void *__address, u16 __value, size_t __times);
 void memset32(void *__address, u32 __value, size_t __times);
@@ -15,6 +21,9 @@ void memcpy16 (void *__dest, const void *__src, size_t __times);
 void memcpy32 (void *__dest, const void *__src, size_t __times);
 void memcpy64 (void *__dest, const void *__src, size_t __times);
 
+void EnableSSEIN();
+CPUID_RESULT_t CPU_ID(u64 page, u64 subpage);
+
 __END_DECLS
 
 #if defined(__cplusplus)
@@ -22,6 +31,10 @@ __END_DECLS
 namespace ARCH{
 
     #include <x86_64/bits/io.h>
+
+    always_inline CPUID_RESULT_t cpuid(u64 page, u64 subpage = 0){
+        return CPU_ID(page, subpage);
+    }
 
     always_inline static void io_wait(){
         __asm__ __volatile__ ("outb %%al, $0x80" : : "a"(0));

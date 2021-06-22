@@ -214,14 +214,15 @@ namespace AHCI {
         bool Read(u64 sector, u32 sectorCount, void* buffer);
     };
 
-    class AHCIDriver{
-        public:
-        AHCIDriver(PCI::DeviceHeader* pciBaseAddress);
-        ~AHCIDriver();
-        PCI::DeviceHeader* PCIBaseAddress;
+    class AHCIDriver : public PCI::PCIDevice{
         HBAMemory* ABAR;
-        void ProbePorts();
-        Port* ports[32];
         u8 portCount;
+        Port* ports[32];
+        PCI::PCIDevice* PCIBaseAddress;
+
+    public:
+        void ProbePorts();
+        AHCIDriver(PCI::PCIDevice* pciBaseAddress);
+        ~AHCIDriver();
     };
 }

@@ -1,5 +1,7 @@
 .text
 
+.global EnableSSEIN
+.global CPU_ID
 .global memset
 .global memset8
 .global memset16
@@ -11,6 +13,8 @@
 .global memcpy32
 .global memcpy64
 
+.type EnableSSEIN,@function
+.type CPU_ID,@function
 .type memset,@function
 .type memset8,@function
 .type memset16,@function
@@ -21,6 +25,30 @@
 .type memcpy16,@function
 .type memcpy32,@function
 .type memcpy64,@function
+
+EnableSSEIN:
+    movq %cr0, %rax
+    andw $0xFFFB, %ax
+    orw $2, %ax
+    movq %rax, %cr0
+
+    movq %cr4, %rax
+    orw $0x600, %ax
+    movq %rax, %cr4
+    retq
+CPU_ID:
+    movq %rsi, %rax
+    movq %rdx, %rcx
+
+    cpuid
+
+    movq %rax, 0(%rdi)
+    movq %rcx, 8(%rdi)
+    movq %rdx, 16(%rdi)
+
+    movq %rdi, %rax
+    
+    retq
 
 memset8:
     movb %sil, %al

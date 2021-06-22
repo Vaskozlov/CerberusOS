@@ -5,6 +5,7 @@ BUILD_DIR := ./build
 MUSL_DIR := ./musl
 
 QEMU_FLAGS := \
+			-usb -device usb-kbd -device usb-mouse \
 			-d int \
 			-M q35 \
 			-m 4G \

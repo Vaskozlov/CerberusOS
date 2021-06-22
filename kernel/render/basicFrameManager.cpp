@@ -1,5 +1,6 @@
 #include <bit>
 #include <arch.hpp>
+#include <optlib.h>
 #include <basicFrameManager.hpp>
 
 #define Psf2Glyph KS->psf2.header
@@ -13,9 +14,11 @@ Color_t         BasicRender::ClearColor      = {PixelColor::COLOR_BLACK};
 Color_t         BasicRender::FontColor       = {PixelColor::COLOR_WHITE};
 
 void BasicRender::ClearScreen(){    
-    u64 times = FrameBuffer->buffer_size / sizeof(u32) / 2;
+    if (ClearColor.value == COLOR_BLACK)
+        ARCH::memset64(FrameAddress, (u64)ClearColor.value | ((u64)ClearColor.value << 32UL), FrameBuffer->buffer_size / sizeof(u64));
+    else
+        memclr_sse2(FrameAddress, FrameBuffer->buffer_size);
 
-    ARCH::memset64(FrameAddress, (u64)ClearColor.value | ((u64)ClearColor.value << 32UL), times);
     CursorPosition.x = 0;
     CursorPosition.y = 0;
 }

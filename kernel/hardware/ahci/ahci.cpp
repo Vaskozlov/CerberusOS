@@ -139,7 +139,7 @@ namespace AHCI{
         cmdFIS->lba4 = (uint8_t)(sectorH);
         cmdFIS->lba5 = (uint8_t)(sectorH >> 8);
 
-        cmdFIS->deviceRegister = 1<<6; //LBA mode
+        cmdFIS->deviceRegister = 1<<6U; //LBA mode
 
         cmdFIS->countLow = sectorCount & 0xFF;
         cmdFIS->countHigh = (sectorCount >> 8) & 0xFF;
@@ -158,19 +158,15 @@ namespace AHCI{
         while (true){
 
             if((hbaPort->commandIssue & 1) == 0) break;
-            if(hbaPort->interruptStatus & HBA_PxIS_TFES)
-            {
-                return false;
-            }
+            if(hbaPort->interruptStatus & HBA_PxIS_TFES) return false;
         }
-        
 
         return true;
     }
 
-    AHCIDriver::AHCIDriver(PCI::DeviceHeader* pciBaseAddress){
-        this->PCIBaseAddress = pciBaseAddress;
+    AHCIDriver::AHCIDriver(PCI::PCIDevice* pciBaseAddress) : PCI::PCIDevice::PCIDevice(*pciBaseAddress) {
         this->portCount = 0;
+        this->PCIBaseAddress = pciBaseAddress;
         cerbPrintString("AHCI Driver instance initialized\n");
 
         ABAR = (HBAMemory*)(uintmax_t)((PCI::PCIHeader0*)pciBaseAddress)->BAR5;
@@ -182,7 +178,7 @@ namespace AHCI{
 
             port->Configure();
 
-            port->buffer = (uint8_t*)PhisicalAllocator::Get4KB();
+            port->buffer = (uint8_t*)PA::Get4KB();
             ARCH::memset64(port->buffer, 0UL, 0x1000 / sizeof(u64));
 
             port->Read(0, 4, port->buffer);

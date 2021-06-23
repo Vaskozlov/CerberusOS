@@ -22,6 +22,7 @@ void memcpy32 (void *__dest, const void *__src, size_t __times);
 void memcpy64 (void *__dest, const void *__src, size_t __times);
 
 void EnableSSEIN();
+void EnableAVXIN();
 CPUID_RESULT_t CPU_ID(u64 page, u64 subpage);
 
 __END_DECLS

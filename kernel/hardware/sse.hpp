@@ -33,6 +33,7 @@ public:
 
 public:
     static always_inline void enableSSE() { EnableSSEIN(); }
+    static always_inline void enableAVX() { EnableAVXIN(); }
     static void Scan();
 };
 

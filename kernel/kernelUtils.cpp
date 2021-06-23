@@ -63,26 +63,50 @@ void KernelInfo::InitIDT(){
     idtr.limit = 0x0FFF;
     idtr.offset = (u64) IDTBuffer;
     
-    SetUpIDTEntry(  (void*) DevideByZero_Handler,       0x00, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) Debug_Handler,              0x01, 0x08, IDT_TA_TrapGate     );
-    SetUpIDTEntry(  (void*) Breakpoint_Handler,         0x03, 0x08, IDT_TA_TrapGate     );
-    SetUpIDTEntry(  (void*) Overflow_Handler,           0x04, 0x08, IDT_TA_TrapGate     );
-    SetUpIDTEntry(  (void*) BoundRange_Handler,         0x05, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) InvalidOpcode_Handler,      0x06, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) DeviceNotAvailable_Handler, 0x07, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) DoubleFault_Handler,        0x08, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) InvalidTSS_Handler,         0x0A, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) SegmentNotPresent_Handler,  0x0B, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) StackSegment_Handler,       0x0C, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) GeneralProtection_Handler,  0x0D, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) PageFault_Handler,          0x0E, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) AlignmentCheck_Handler,     0x11, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) MachineCheck_Handler,       0x12, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) SIMD_Handler,               0x13, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) Virtualization_Handler,     0x14, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) Pit_Handler,                0x20, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x21, 0x08, IDT_TA_InterruptGate);
-    SetUpIDTEntry(  (void*) EmptyIQR_Handler,           0x2C, 0x08, IDT_TA_InterruptGate);
+    if (SSE::FlagPresent(SSE_FLAGS::AVX)){
+        SetUpIDTEntry(  (void*) DevideByZero_Handler_SSE,       0x00, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) Debug_Handler_SSE,              0x01, 0x08, IDT_TA_TrapGate     );
+        SetUpIDTEntry(  (void*) Breakpoint_Handler_SSE,         0x03, 0x08, IDT_TA_TrapGate     );
+        SetUpIDTEntry(  (void*) Overflow_Handler_SSE,           0x04, 0x08, IDT_TA_TrapGate     );
+        SetUpIDTEntry(  (void*) BoundRange_Handler_SSE,         0x05, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) InvalidOpcode_Handler_SSE,      0x06, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) DeviceNotAvailable_Handler_SSE, 0x07, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) DoubleFault_Handler_SSE,        0x08, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) InvalidTSS_Handler_SSE,         0x0A, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) SegmentNotPresent_Handler_SSE,  0x0B, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) StackSegment_Handler_SSE,       0x0C, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) GeneralProtection_Handler_SSE,  0x0D, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) PageFault_Handler_SSE,          0x0E, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) AlignmentCheck_Handler_SSE,     0x11, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) MachineCheck_Handler_SSE,       0x12, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) SIMD_Handler_SSE,               0x13, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) Virtualization_Handler_SSE,     0x14, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) Pit_Handler_SSE,                0x20, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) EmptyIQR_Handler_SSE,           0x21, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) EmptyIQR_Handler_SSE,           0x2C, 0x08, IDT_TA_InterruptGate);
+    }
+    else{
+        SetUpIDTEntry(  (void*) DevideByZero_Handler_AVX,       0x00, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) Debug_Handler_AVX,              0x01, 0x08, IDT_TA_TrapGate     );
+        SetUpIDTEntry(  (void*) Breakpoint_Handler_AVX,         0x03, 0x08, IDT_TA_TrapGate     );
+        SetUpIDTEntry(  (void*) Overflow_Handler_AVX,           0x04, 0x08, IDT_TA_TrapGate     );
+        SetUpIDTEntry(  (void*) BoundRange_Handler_AVX,         0x05, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) InvalidOpcode_Handler_AVX,      0x06, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) DeviceNotAvailable_Handler_AVX, 0x07, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) DoubleFault_Handler_AVX,        0x08, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) InvalidTSS_Handler_AVX,         0x0A, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) SegmentNotPresent_Handler_AVX,  0x0B, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) StackSegment_Handler_AVX,       0x0C, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) GeneralProtection_Handler_AVX,  0x0D, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) PageFault_Handler_AVX,          0x0E, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) AlignmentCheck_Handler_AVX,     0x11, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) MachineCheck_Handler_AVX,       0x12, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) SIMD_Handler_AVX,               0x13, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) Virtualization_Handler_AVX,     0x14, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) Pit_Handler_AVX,                0x20, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) EmptyIQR_Handler_AVX,           0x21, 0x08, IDT_TA_InterruptGate);
+        SetUpIDTEntry(  (void*) EmptyIQR_Handler_AVX,           0x2C, 0x08, IDT_TA_InterruptGate);
+    }
 
     __asm__ __volatile__ ("lidt %0" : : "m" (idtr));
 
@@ -101,11 +125,14 @@ void KernelInfo::Init(){
     SSE::Scan();
     SSE::enableSSE();
 
+    if (SSE::FlagPresent(SSE_FLAGS::AVX)){
+        SSE::enableAVX();
+    }
+
     if (SSE::FlagPresent(SSE_FLAGS::SSE4_2) == 0){
         cerbPrintString("Cerberus OS requires SSE4.2 instruction set\n");
         ARCH::Go2Sleep();
     }
-    // ENABLE SSE/AVX later
 
     InitGDT();
     InitIDT();

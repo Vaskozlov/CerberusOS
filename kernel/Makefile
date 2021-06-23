@@ -32,9 +32,10 @@ CFLAGS :=  \
 			-O0 \
 			-g \
 			-c \
+			-msse4.1 \
+			-msse4.2 \
 			-Wall\
 			-Wextra \
-			-fpic \
 			-nostdlib \
 			-ffreestanding \
 			-fno-exceptions \
@@ -54,11 +55,12 @@ CXXFLAGS :=  \
 			-O0 \
 			-g \
 			-c \
+			-msse4.1 \
+			-msse4.2 \
 			-Wall\
 			-Wextra \
 			-nostdlib \
 			-nostdlib++ \
-			-fpic \
 			-ffreestanding \
 			-fno-exceptions \
 			-fno-stack-protector \

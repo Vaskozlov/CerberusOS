@@ -3,6 +3,7 @@
 #include "ahci/ahci.hpp"
 #include <memory/kmalloc.h>
 #include <cerberus/printf.h>
+#include <interrupts/Interrupts.h>
 #include <array>
 #include <cerberus/vector.hpp>
 
@@ -18,13 +19,10 @@ namespace PCI{
         
         if (pciDeviceHeader->deviceID() == 0x0000) return;
         if (pciDeviceHeader->deviceID() == 0xFFFF) return;
-        
-        if (pciDeviceHeader->getClass() == 0x0C)
-            cerbPrintf("%s %p\n", pciDeviceHeader->getSubclassName(), pciDeviceHeader->progIF());
-
+       
         switch (pciDeviceHeader->getClass()) {
 
-            case 0x01:
+            case 0x01: // Mass Storage Controller
                 switch (pciDeviceHeader->subclass()) {
                     case 0x06:
                         switch (pciDeviceHeader->progIF()) {
@@ -33,6 +31,81 @@ namespace PCI{
                                 break;
                         }
                         break;
+                }
+                break;
+            
+            case 0x0C: // Serial Bus Controller
+                switch (pciDeviceHeader->subclass()){
+                    case 0x03: // USB Controller
+                        switch (pciDeviceHeader->progIF()){
+
+                            /*
+
+                                if it's memory mapped I/O we have to align it to 16 and save 4 last bits
+                                see location 1044
+
+                            */
+
+                            case 0x00: // UHCI Controller 
+                            {
+                                PCIHeader0 *header = (PCIHeader0 *)pciDeviceHeader;
+                                u32 *IO_ADDR = (u32*)(u64)header->BAR4;
+                                
+                                u32 value = *IO_ADDR;
+                                *IO_ADDR = 0xFFFFFFFF;
+                                u32 result = *IO_ADDR;
+                                *IO_ADDR = value;
+                                header->_command = 0x06;
+                                header->InterruptLine = 0x30;
+
+                                *(u16*)((u8*)header + 0xC0) = 0x8f00;
+                                cerbPrintf("%p\n", (u16)((~(result & ~0b1)) + 1));
+                                cerbPrintf("UHCI Controller found!\n");
+                            } break;
+
+                            case 0x10: // OHCI Controller
+                            {
+                                PCIHeader0 *header = (PCIHeader0 *)pciDeviceHeader;
+                                u32 *IO_ADDR = (u32*)(u64)header->BAR0;
+                                
+                                u32 value = *IO_ADDR;
+                                *IO_ADDR = 0xFFFFFFFF;
+                                u32 result = *IO_ADDR;
+                                *IO_ADDR = value;
+                                header->_command = 0x06;
+                                header->InterruptLine = 0x30;
+
+                                cerbPrintf("%p\n", (u16)((~(result & ~0b1)) + 1));
+                                cerbPrintf("OHCI Controller found!\n");
+                            } break;
+
+                            case 0x20: // EHCI (USB2) Controller 
+                            {
+                                PCIHeader0 *header = (PCIHeader0 *)pciDeviceHeader;
+                                u32 *IO_ADDR = (u32*)(u64)header->BAR0;
+                                
+                                u32 value = *IO_ADDR;
+                                *IO_ADDR = 0xFFFFFFFF;
+                                u32 result = *IO_ADDR;
+                                *IO_ADDR = value;
+                                header->_command = 0x06;
+                                header->InterruptLine = 0x30;
+
+                                cerbPrintf("%p\n", (u16)((~(result & ~0b1)) + 1));
+                                cerbPrintf("EHCI (USB2) Controlle found!\n");
+                            } break;
+
+                            case 0x30: // XHCI (USB3) Controller 
+                            {
+                                cerbPrintf("XHCI (USB3) Controller  found!\n");
+                            } break;
+
+                            default:
+                                LOG("Unspecified USB device");
+                                break;
+                        } 
+                        break;
+
                 }
                 break;
         }

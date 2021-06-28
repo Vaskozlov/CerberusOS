@@ -274,10 +274,10 @@ void PrintPDE(PageDirectoryFlags flags){
     }
 
     cerbPrintf(
-        "Presented: %u\n"
-        "readWrite: %u\n"
-        "superuser: %u\n"
-        "writeThrough: %u\n"
+        "Presented: %b\n"
+        "readWrite: %b\n"
+        "superuser: %b\n"
+        "writeThrough: %b\n"
         "Size: %s\n",
         (flags & PageDirectoryFlags::present) > 0,
         (flags & PageDirectoryFlags::readWrite) > 0,

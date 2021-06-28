@@ -14,7 +14,11 @@ namespace PCI{
     class PCIDevice{
         u16     _vendorId;
         u16     _deviceID;
+    
+    public:
         u16     _command;
+    
+    private:
         u16     _status;
         u8      _revisionID;
         u8      _progIF;
@@ -23,7 +27,7 @@ namespace PCI{
         u8      _cacheLineSize;
         u8      _latencyTimer;
         u8      _headerType;
-        u8      _BIST;
+        u8      _BIST; // Build in self-test result
 
     public:
         always_inline auto vendorID()       const -> u16 { return _vendorId     ; }
@@ -65,7 +69,7 @@ namespace PCI{
         u8              InterruptPin;
         u8              MinGrant;
         u8              MaxLatency;
-    };
+    } __attribute__((packed));
 
     void EnumeratePCI(ACPI::MCFGHeader *mcfg);
 }

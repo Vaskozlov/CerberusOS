@@ -29,6 +29,9 @@ struct interrupt_frame{
 };
 
 __attribute__((interrupt))
+void TestUSB_Handler_SSE(struct interrupt_frame* frame);
+
+__attribute__((interrupt))
 void DevideByZero_Handler_SSE       /* 0x00 */  (struct interrupt_frame *frame);
 
 __attribute__((interrupt))

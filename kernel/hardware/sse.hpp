@@ -27,9 +27,7 @@ public:
         return _flags;
     }
 
-    static always_inline auto FlagPresent(SSE_FLAGS flag) -> bool{
-        return (_flags & flag) > 0;
-    }
+    static bool FlagPresent(SSE_FLAGS flag);
 
 public:
     static always_inline void enableSSE() { EnableSSEIN(); }

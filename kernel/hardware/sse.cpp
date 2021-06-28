@@ -2,6 +2,10 @@
 
 u64 SSE::_flags;
 
+bool SSE::FlagPresent(SSE_FLAGS flag){
+    return (_flags & flag) > 0;
+}
+
 void SSE::Scan(){
     auto page1 = ARCH::cpuid(1);
 

@@ -4,6 +4,3 @@
 [submodule "gnu-efi"]
 	path = gnu-efi
 	url = https://git.code.sf.net/p/gnu-efi/code
-[submodule "musl"]
-	path = musl
-	url = git://git.musl-libc.org/musl

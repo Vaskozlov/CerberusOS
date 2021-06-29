@@ -1,5 +1,5 @@
-#include <arch.hpp>
-#include <optlib.h>
+#include <cerberus/io.h>
+#include <cerberus/memclear.h>
 #include "kernelUtils.hpp"
 #include "hardware/acpi.hpp"
 #include "hardware/pci.hpp"
@@ -8,7 +8,6 @@
 #include "interrupts/Interrupts.h"
 #include "memory/kmalloc.h"
 #include <cerberus/printf.h>
-#include <hardware/sse.hpp>
 
 VMManager KernelVMM;
 IDTR KernelInfo::idtr;
@@ -24,7 +23,7 @@ __attribute__((aligned(0x1000))) u8 IDTBuffer[0x1000];
 
 void KernelInfo::InitVMM(){
     PML4 = (PageTable*) PA::Get4KB();
-    memclr_sse2(PML4, sizeof(PageTable));
+    cerbMemclear(PML4, sizeof(PageTable));
 
     KernelVMM = VMManager(PML4);
     u64 totalMemory = PA::GetTotalMemory();
@@ -63,7 +62,7 @@ void KernelInfo::InitIDT(){
     idtr.limit = 0x0FFF;
     idtr.offset = (u64) IDTBuffer;
     
-    if (SSE::FlagPresent(SSE_FLAGS::AVX)){
+    if (GetSSEFlag(SSE_FLAGS::AVX) == 0){
         SetUpIDTEntry(  (void*) DevideByZero_Handler_SSE,       0x00, 0x08, IDT_TA_InterruptGate);
         SetUpIDTEntry(  (void*) Debug_Handler_SSE,              0x01, 0x08, IDT_TA_TrapGate     );
         SetUpIDTEntry(  (void*) Breakpoint_Handler_SSE,         0x03, 0x08, IDT_TA_TrapGate     );
@@ -122,32 +121,31 @@ void KernelInfo::InitACPI(){
 }
 
 void KernelInfo::Init(){
-    SSE::Scan();
-    SSE::enableSSE();
-
-    if (SSE::FlagPresent(SSE_FLAGS::AVX)){
-        SSE::enableAVX();
-    }
-
-    if (SSE::FlagPresent(SSE_FLAGS::SSE4_2) == 0){
-        cerbPrintString("Cerberus OS requires SSE4.2 instruction set\n");
-        ARCH::Go2Sleep();
-    }
-
     InitGDT();
     InitIDT();
-    
-    ARCH::outb(0x08, PIC1_DATA);
-    ARCH::outb(0x70, PIC2_DATA);
 
-    ARCH::enableINT();
-    PIT::SetFrequency(1000);
+    scan4SSE();
+    EnableSSEIN();
+    setSSE(*GetFlagsOfSSE & (~AVX));
     
-    cerbPrintString("Wait for VMM initialization\n");
+    if (GetSSEFlag(AVX) == 1 && GetSSEFlag(XSAVE) == 1){
+        EnableXSAVEIN();
+        EnableAVXIN();
+        cerbPrintf("AVX enabled! %u\n", *GetAVXSUPPORT);
+    }
+    
+    cerb::outb(PIC1_DATA, 0x08);
+    cerb::outb(PIC2_DATA, 0x70);
+
+    PIT::SetFrequency(1000);
+    cerb::enableINT();
     PA::SetUp();
 
+    cerbPrintString("Wait for VMM initialization\n");
     InitVMM();
     InitKMalloc();
+
+    cerbPrintString("VMM initialized\n");
 
     #if OS_DEBUG == 1
         cerb::MemoryDebuger.Malloc = kmalloc_fast;
@@ -159,12 +157,13 @@ void KernelInfo::Init(){
     InitACPI();
 
     cerbPrintf( 
-        "KernelInfo ready in %lu MS."
-        "Available memeory: \xff\xff\0\xff%llu MB\xff\xff\xff\xff, " 
+        "KernelInfo ready in %lu MS. Kernel mode %s. "
+        "Available memeory: \xff\xff\0\xff%llu MB\xff\xff\xff\xff, "
         "Cerberus major version \xff\xff\0\xff%u\xff\xff\xff\xff, "
         "Cerberus minor version \xff\xff\0\xff%u\xff\xff\xff\xff, "
         "compiled with \xff\xff\0\xff%s\xff\xff\xff\xff\n",
         PIT::GetTimeSicneBoot(),
+        *GetAVXSUPPORT == 1 ? "AVX" : "SSE",
         PA::GetAvailableMemory() / 1024 / 1024,
         CERBERUS_MAJOR_VERSION,
         CERBERUS_MINOR_VERSION,

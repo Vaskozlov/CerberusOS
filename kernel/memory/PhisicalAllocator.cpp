@@ -1,5 +1,4 @@
-#include <arch.hpp>
-#include <optlib.h>
+#include <cerberus/memclear.h>
 #include <cerberus/printf.h>
 #include "PhisicalAllocator.hpp"
 
@@ -264,7 +263,7 @@ size_t PhisicalAllocator::Init(void *location, size_t availableMemory, size_t to
         8
     );
    
-    memclr_sse2(location, AllocatorHead - (u64)location);
+    cerbMemclear(location, AllocatorHead - (u64)location);
     
     if (Extra2MBPages > 0){
         auto header = MiddleEntries + BigEnteries.size() - 1;

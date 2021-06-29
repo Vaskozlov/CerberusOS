@@ -4,7 +4,6 @@
 #include <memory/kmalloc.h>
 #include <cerberus/printf.h>
 #include <interrupts/Interrupts.h>
-#include <array>
 #include <cerberus/vector.hpp>
 
 extern VMManager KernelVMM;

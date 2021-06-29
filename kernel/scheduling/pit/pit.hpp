@@ -2,7 +2,7 @@
 #define pit_hpp
 
 #include <kernel.h>
-#include <arch.hpp>
+#include <cerberus/io.h>
 
 #define PIT_A 0x40
 #define PIT_B 0x41
@@ -19,7 +19,7 @@ class PIT{
 
 public:
     static always_inline u64 GetFrequency() { return PIT_SCALE / Divisor; }
-    static always_inline void Tick()        { TimeSicneBoot++; }
+    static void Tick();
 
 public:
     static void Sleep(i64 milliseconds);

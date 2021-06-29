@@ -44,13 +44,14 @@ else
 LDSCRIPT := $(GNU_EFI_DIR)/gnuefi/elf_$(ARCH)_efi.lds
 endif
 
-LDFLAGS += 	-L $(MUSL)/lib \
+LDFLAGS += \
 			-L $(GNU_EFI_DIR)/$(ARCH)/gnuefi \
 			-L $(GNU_EFI_DIR)/$(ARCH)/lib \
 			-shared -Bsymbolic $(CRT_OBJS)
 
 LOADLIBES += -lefi
-LOADLIBES += -lgnuefi $(MUSL)/lib/libc.a
+LOADLIBES += -lgnuefi
+LOADLIBES += ../CerberusLib/build/libcerberus.a
 LOADLIBES += -T $(LDSCRIPT)
 
 ifneq ($(HAVE_EFI_OBJCOPY),)
@@ -76,8 +77,6 @@ C_OBJECT_FILES = $(addprefix $(BUILD_DIR)/, $(patsubst %.c, %.o, $(notdir $(wild
 CPP_OBJECT_FILES += $(addprefix $(BUILD_DIR)/, $(patsubst %.cpp, %.o, $(notdir $(wildcard *.cpp))))
 
 all: $(TARGETS)
-
-include arch/Makefile
 
 $(BUILD_DIR)/$(TARGET).EFI: $(BUILD_DIR)/$(TARGET).so
 	$(OBJCOPY) -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel \

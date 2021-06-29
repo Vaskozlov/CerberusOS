@@ -1,5 +1,5 @@
-#include <arch.hpp>
 #include "ahci.hpp"
+#include <cerberus/io.h>
 #include <memory/kmalloc.h>
 #include <cerberus/printf.h>
 #include <scheduling/pit/pit.hpp>
@@ -65,12 +65,12 @@ namespace AHCI{
         void* newBase = PhisicalAllocator::Get4KB();
         hbaPort->commandListBase = (uint32_t)(uint64_t)newBase;
         hbaPort->commandListBaseUpper = (uint32_t)((uint64_t)newBase >> 32);
-        ARCH::memset64((void*)((uintmax_t)hbaPort->commandListBase), 0UL, 1024 / sizeof(u64));
+        cerb::memset64((void*)((uintmax_t)hbaPort->commandListBase), 0UL, 1024 / sizeof(u64));
 
         void* fisBase = PhisicalAllocator::Get4KB();
         hbaPort->fisBaseAddress = (uint32_t)(uint64_t)fisBase;
         hbaPort->fisBaseAddressUpper = (uint32_t)((uint64_t)fisBase >> 32);
-        ARCH::memset64(fisBase, 0UL, 256 / sizeof(u64));
+        cerb::memset64(fisBase, 0UL, 256 / sizeof(u64));
 
         HBACommandHeader* cmdHeader = (HBACommandHeader*)((uint64_t)hbaPort->commandListBase + ((uint64_t)hbaPort->commandListBaseUpper << 32));
 
@@ -81,7 +81,7 @@ namespace AHCI{
             uint64_t address = (uint64_t)cmdTableAddress + (i << 8);
             cmdHeader[i].commandTableBaseAddress = (uint32_t)(uint64_t)address;
             cmdHeader[i].commandTableBaseAddressUpper = (uint32_t)((uint64_t)address >> 32);
-            ARCH::memset64(fisBase, 0UL, 256 / sizeof(u64));
+            cerb::memset64(fisBase, 0UL, 256 / sizeof(u64));
         }
 
         StartCMD();
@@ -119,7 +119,7 @@ namespace AHCI{
         cmdHeader->prdtLength = 1;
 
         HBACommandTable* commandTable = (HBACommandTable*)(uintmax_t)(cmdHeader->commandTableBaseAddress);
-        ARCH::memset8(commandTable, (u8)0U, sizeof(HBACommandTable) + (cmdHeader->prdtLength-1) * sizeof(HBAPRDTEntry));
+        cerb::memset8(commandTable, (u8)0U, sizeof(HBACommandTable) + (cmdHeader->prdtLength-1) * sizeof(HBAPRDTEntry));
 
         commandTable->prdtEntry[0].dataBaseAddress = (uint32_t)(uint64_t)buffer;
         commandTable->prdtEntry[0].dataBaseAddressUpper = (uint32_t)((uint64_t)buffer >> 32);
@@ -179,7 +179,7 @@ namespace AHCI{
             port->Configure();
 
             port->buffer = (uint8_t*)PA::Get4KB();
-            ARCH::memset64(port->buffer, 0UL, 0x1000 / sizeof(u64));
+            cerb::memset64(port->buffer, 0UL, 0x1000 / sizeof(u64));
 
             port->Read(0, 4, port->buffer);
             for (int i = 0; i < 2048; i++)

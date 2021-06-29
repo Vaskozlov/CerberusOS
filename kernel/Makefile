@@ -42,7 +42,6 @@ CFLAGS :=  \
 			-fno-stack-protector \
 			-std=c11 \
 			-I . \
-			-I ./arch/$(ARCH) \
 			-I $(MUSL_DIR)/arch \
 			-I $(LINUX_HEADERS)/include \
 			-I $(CERBERUS_DIR)/include \
@@ -66,7 +65,6 @@ CXXFLAGS :=  \
 			-fno-stack-protector \
 			-std=c++20 \
 			-I . \
-			-I ./arch/$(ARCH) \
 			-I $(MUSL_DIR)/arch \
 			-I $(CERBERUS_DIR)/include \
 			-I $(LINUX_HEADERS)/include \
@@ -80,7 +78,6 @@ ASMFLAGS := -O3\
 			-m64 -c -g
 
 LDFLAGS :=	-static \
-			-Bsymbolic \
 			-nostdlib \
 			-T $(LDSCRIPT) 
 
@@ -98,7 +95,6 @@ include gdt/Makefile
 include interrupts/Makefile
 include hardware/Makefile
 include scheduling/Makefile
-include arch/Makefile
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

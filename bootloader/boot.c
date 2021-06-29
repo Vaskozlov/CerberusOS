@@ -1,9 +1,10 @@
 #include <elf.h>
 #include <string.h>
 
-#include <arch.h>
 #include "GOP.h"
 #include "efiFiles.h"
+#include <cerberus/io.h>
+#include <cerberus/memclear.h>
 
 EFI_FILE_HANDLE RootVolume;
 EFI_FILE_HANDLE FontVolume;
@@ -11,6 +12,22 @@ kernel_services_t KernelServices;
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     InitializeLib(ImageHandle, SystemTable);
+
+    if (InitializeGOP() != EXIT_SUCCESS){
+        Print(L"Error in GOP initialization\n\r");
+        return EFI_LOAD_ERROR;
+    }
+
+    scan4SSE();
+
+    if (GetSSEFlag(SSE4_1) == 0 && GetSSEFlag(SSE4_2) == 0){
+        Print(L"Cerberus OS need SSE4.1 and SSE4.2\n\r");
+        return EFI_LOAD_ERROR;
+    }
+
+    EnableSSEIN();
+
+    KernelServices.AVX_FLAGS = *GetFlagsOfSSE;
 
     RootVolume = GetVolume(ImageHandle);
     FontVolume = OpenFile(RootVolume, L"font");
@@ -121,9 +138,9 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
                     pages,
                     &segment
                 );
-
-                memset64((void*) segment, 0UL, pages * 0x1000 / sizeof(u64));
-
+               
+                memclear_sse((void*) segment, pages * 0x1000);
+               
                 uefi_call_wrapper(
                     KernelFile->SetPosition,
                     2,
@@ -144,11 +161,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
 
             break;
         }
-    }
-    
-    if (InitializeGOP() != EXIT_SUCCESS){
-        Print(L"Error in GOP initialization\n\r");
-        return EFI_LOAD_ERROR;
     }
 
     if (LoadPSF(FontVolume, L"zap-light24.psf") != EXIT_SUCCESS){
@@ -199,7 +211,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, MapKey);
 
     int (*KernelStart)() = ((__attribute__((sysv_abi)) int (*)(kernel_services_t *services)) eHeader.e_entry);
-    
     Print(L"Success %d\n\r", KernelStart(&KernelServices));
     
     return EFI_SUCCESS;

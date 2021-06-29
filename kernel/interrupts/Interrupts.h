@@ -1,8 +1,8 @@
 #ifndef Interrupts_hpp
 #define Interrupts_hpp
 
-#include <arch.hpp>
 #include <kernel.h>
+#include <cerberus/io.h>
 
 #ifdef __x86_64__
   typedef unsigned long long int uword_t;
@@ -148,12 +148,12 @@ void EmptyIQR_Handler_AVX           /* ANY IRQ */ (struct interrupt_frame *frame
 void RemapPIC();
 
 always_inline void PIC_EndMaster(){
-    ARCH::outb(PIC_EOI, PIC1_COMMAND);
+    cerb::outb(PIC1_COMMAND, PIC_EOI);
 }
 
 always_inline void PIC_EndSlave(){
-    ARCH::outb(PIC_EOI, PIC2_COMMAND);
-    ARCH::outb(PIC_EOI, PIC1_COMMAND);
+    cerb::outb(PIC2_COMMAND, PIC_EOI);
+    cerb::outb(PIC1_COMMAND, PIC_EOI);
 }
 
 #endif /* Interrupts_hpp */

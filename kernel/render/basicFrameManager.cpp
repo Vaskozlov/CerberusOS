@@ -1,6 +1,6 @@
 #include <bit>
-#include <arch.hpp>
-#include <optlib.h>
+#include <cerberus/io.h>
+#include <cerberus/memclear.h>
 #include <basicFrameManager.hpp>
 
 #define Psf2Glyph KS->psf2.header
@@ -9,15 +9,15 @@
 
 FrameBuffer_t   *BasicRender::FrameBuffer;
 vec2<u32>       BasicRender::PrintingSize;
-vec2<u32>       BasicRender::CursorPosition  = {0, 0};
+vec2<u32>       BasicRender::CursorPosition;
 Color_t         BasicRender::ClearColor      = {PixelColor::COLOR_BLACK};
 Color_t         BasicRender::FontColor       = {PixelColor::COLOR_WHITE};
 
 void BasicRender::ClearScreen(){    
     if (ClearColor.value == COLOR_BLACK)
-        ARCH::memset64(FrameAddress, (u64)ClearColor.value | ((u64)ClearColor.value << 32UL), FrameBuffer->buffer_size / sizeof(u64));
+        cerb::memset64(FrameAddress, (u64)ClearColor.value | ((u64)ClearColor.value << 32UL), FrameBuffer->buffer_size / sizeof(u64));
     else
-        memclr_sse2(FrameAddress, FrameBuffer->buffer_size);
+        cerbMemclear(FrameAddress, FrameBuffer->buffer_size);
 
     CursorPosition.x = 0;
     CursorPosition.y = 0;

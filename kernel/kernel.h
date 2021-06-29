@@ -24,6 +24,7 @@ typedef struct{
  * 
  */
 typedef struct {
+    u64                 AVX_FLAGS;
     u64                 mMapSize;
     u64                 mMapDescriptorSize;
     MemoryDescriptor_t  *mMap;

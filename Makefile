@@ -5,7 +5,7 @@ BUILD_DIR := ./build
 MUSL_DIR := ./musl
 
 QEMU_FLAGS := \
-			-usb -device usb-kbd -device usb-mouse \
+			-usb -device usb-kbd -device usb-mouse -device qemu-xhci \
 			-d int \
 			-M q35 \
 			-m 4G \
@@ -58,6 +58,7 @@ install: mount
 run:
 	@qemu-system-x86_64 \
 	-cpu EPYC-v2 \
+	-d int \
  	$(QEMU_FLAGS)
 
 run-kvm:
@@ -66,4 +67,4 @@ run-kvm:
 	$(QEMU_FLAGS)
 	
 run-debug:
-	screen -dmS qemu-debug-micronet qemu-system-x86_64 -s -S -cpu EPYC-v2 $(QEMU_FLAGS)
+	screen -dmS qemu-debug-micronet qemu-system-x86_64 -s -S -cpu EPYC-v2,+avx,+avx2 $(QEMU_FLAGS)
